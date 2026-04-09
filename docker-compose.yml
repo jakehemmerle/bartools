@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bartools-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bartools
+      POSTGRES_PASSWORD: bartools
+      POSTGRES_DB: bartools
+    ports:
+      - "5432:5432"
+    volumes:
+      - bartools_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bartools -d bartools"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  bartools_pgdata:
