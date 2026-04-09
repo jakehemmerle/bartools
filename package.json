@@ -9,5 +9,8 @@
     "dev:backend": "bun --filter @bartools/backend dev",
     "dev:dashboard": "bun --filter @bartools/dashboard dev",
     "dev:mobile": "bun --filter @bartools/mobile start"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.11"
   }
 }

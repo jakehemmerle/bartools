@@ -1,9 +1,8 @@
 import { Hono } from "hono";
-import { greet } from "@bartools/ui";
 
 const app = new Hono();
 
-app.get("/", (c) => c.text(greet("bartools")));
+app.get("/", (c) => c.text("Hello from bartools backend"));
 app.get("/health", (c) => c.json({ ok: true }));
 
 export default {

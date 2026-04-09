@@ -3,7 +3,7 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext"],
     "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
@@ -12,6 +12,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["bun-types"]
+    "types": ["bun"]
   }
 }

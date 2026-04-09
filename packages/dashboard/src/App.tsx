@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Button, greet } from '@bartools/ui'
-import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
