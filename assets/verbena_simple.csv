@@ -1,0 +1,398 @@
+Size,Name,Type
+,Angostura Bitters,bitters
+,Angostura Bitters orange,bitters
+,Angostura Bitters orange,bitters
+,Fee Brother Rhubarb bitters,bitters
+,Scrappy Lemon Bitters,bitters
+,Fee Brother Black Walnut Bitters,bitters
+,Angostura Bitters,bitters
+,Bittermans Hopped Grapefruit Bitters,bitters
+,Bittermans Xocolatl Mole Bitters,bitters
+,Peychaud Bitters,bitters
+,Fee Brother chocolate Aztec bitters,bitters
+,Fee Brother Bitter Orange,bitters
+,Fee Brother Mint Bitters,bitters
+,Fee Brother Celery Bitters,bitters
+,Fee Brother Cherry Bitters,bitters
+,Greenbar Apple Bitters,bitters
+,Scrappy's Lavender Bitters,bitters
+,Scrappy's Cardamon Bitters,bitters
+,El Guapo Chicory Pecan Bitters,bitters
+Quart,Lime Juice (1qrt),Juice
+Quart,Lemon Juice (1qrt),juice
+Gallon,Orange Juice (1gal),juice
+,Pineapple Juice (48oz),juice
+,Cranberry Juice,juice
+,Grapefruit Juice,juice
+,Blood Orange Juice,juice
+1 Liter,Coco Loco,batch
+1 Liter,Boiron Frozen Blood Orange Puree,puree 
+1 Liter,Boiron Guava Puree,puree
+1 Liter,Finest Call Strawberry Puree,puree
+1 Liter,Rose's Grenadine,mixer
+,Filthy Olive Juice,mixer
+1.75 Liter,Zing Zang Bloody Mary Mix,mixer
+,Zing Zang Bloody Mary Mix,syrup
+750ml,Liber Fig Syrup,syrup
+750ml,Liber Raspberry Gum Syrup,syrup
+1 Liter,Monin Agave,syrup
+750ml,Giffard Orgeat,syrup
+750ml,Seedlip 108,n/a
+750ml,Kentucky 74 whiskey,n/a
+750ml,Jalisco 55,n/a
+750ml,Brez ,n/a
+,Brez Flow,n/a
+,Brez THC,n/a thc
+750ml,Giffard Ginger Liqueur NA,n/a
+,Crodino NA Spritz,n/a
+,Dehy Orange,garnish
+,Dehy Lemon,garnish
+,Dehy Lime,garnish
+,Olives,garnish
+,Cocktail Onions,garnish
+,Filthy Blue Cheese Olives,garnish
+,Luxardo Cherries 3kg,garnish
+,Fat Ice 2x2,ice
+,Fat Ice Collins,ice
+750ml,Abasolo whiskey,whiskey
+1 Liter,Angel's Envy Bourbon,bourbon
+750ml,Balcones Texas Single Malt,bourbon
+1 Liter,Basil Hayden Bourbon,bourbon
+750ml,Basil Hayden Bourbon,bourbon
+750ml,Basil Hayden Dark Rye,rye
+750ml,Blanton's Bourbon,bourbon
+750ml,Buffalo Trace Bourbon,bourbon
+1 Liter,Buffalo Trace Bourbon,bourbon
+750ml,Bulleit Bourbon,bourbon
+1 Liter,Bulleit Bourbon,bourbon
+1 Liter,Bulleit Rye,rye
+750ml,Bespoken Twice Toasted Bourbon Whiskey,whiskey
+750ml,Bespoken Twice Toasted American Whiskey,whiskey
+1 Liter,Crown Royal,whisky
+750ml,Eagle Rare 10Y,bourbon
+750ml,E.H. Taylor Barrel Proof,bourbon
+750ml,E.H. Taylor Single Barrel,bourbon
+1 Liter,Four Roses Bourbon,bourbon
+750ml,Frey Ranch Bourbon,bourbon
+750ml,Garrison Brothers Bourbon,bourbon
+750ml,Garrison Brothers Single Barrel,bourbon
+750ml,Hibiki Japanese Harmony,whisky
+750ml,Hakushu 12Y,whisky
+750ml,Jack Daniels Old No. 7 Whiskey,whiskey
+1 Liter,Jack Daniels Old No. 7 Whiskey,whiskey
+750ml,Jameson Irish,whisky
+1 Liter,Jameson Irish,whisky
+750ml,Jefferson's Bourbon,bourbon
+1 Liter,Knob Creek Rye,rye
+750ml,Maker's Mark Bourbon,bourbon
+1 Liter,Maker's Mark Bourbon,bourbon
+750ml,Milam & Greene Single Barrel,bourbon
+750ml,Mitcher's Rye,rye
+750ml,Nikka Coffey Grain,whisky
+700mL,Old Fitzgerald 7yr,bourbon
+750ml,Old Forrester King Ranch,bourbon
+1 Liter,Old Forrester Rye,rye
+1 Liter,Old Forester Classic 86 Proof,bourbon
+750ml,Orphan Barrel Fanged Pursuit,bourbon
+1 Liter,Powers Gold Label Irish Whiskey,whisky
+750ml,Rittenhouse Rye,rye
+1 Liter,Rittenhouse Rye,rye
+750ml,Redbreast 12Y,whisky
+750ml,Rebecca Creek ,whiskey
+750ml,Sazerac Rye,rye
+750ml,Standard Proof Pecan Bourbon,bourbon
+750ml,Suntory Toki,whisky
+750ml,Shibui Grain Select,whisky
+1 Liter,Slane Irish Whisky,whisky
+750ml,Standard Proof Rye,rye
+750ml,"Still Austin ""The Musician"" Bourbon",bourbon
+1 Liter,"Still Austin ""The Musician"" Bourbon",bourbon
+750ml,Still Austin Rye,rye
+750ml,Still Austin Cask Strength,bourbon
+750ml,Templeton Rye 4Y,rye
+750ml,Tullamore D.E.W The Legendary Irish Whiskey,whisky
+1 Liter,Tullamore D.E.W The Legendary Irish Whiskey,whisky
+750ml,TX bourbon,whiskey
+750ml,Uncle Neaerest 1856,whiskey
+750ml,Uncle Nearest 1884,whiskey
+750ml,Woodford Reserve Bourbon,bourbon
+1 Liter,Woodford Reserve Bourbon,bourbon
+750ml,Woodford Reserve Rye,rye
+750ml,WhistlePig Rye 10yr,rye
+750ml,Wild Turkey 101 Straight Rye,rye
+1 Liter,Wild Turkey 101 Straight Rye,rye
+750ml,Weller 12Y,bourbon
+1 Liter,Weller 12Y,bourbon
+1 Liter,Laird's Applejack,brandy
+750ml,Pierre Ferrand Cognac Ambré,cognac
+750ml,Macchu Pisco Brandy,brandy
+750ml,Fidelitas Williams Birne,brandy
+750ml,D'Usse,cognac
+1 Liter,Hennessy VS,cognac
+750ml,Hine H VSOP,cognac
+750ml,Agave Gin Gracias a Dios,gin
+1 Liter,Aviation Gin,gin
+750ml,Bombay Sapphire,gin
+1 Liter,Bombay Sapphire,gin
+750ml,Botanist Islay Dry Gin,gin
+1 Liter,Botanist Islay Dry Gin,gin
+750ml,Brooklyn Gin,gin
+750ml,Condesa Gin,gin
+750ml,Empress 1908 Gin,gin
+750ml,Empress Elderflower and Rose,gin
+750ml,Fords Gin,gin
+1 Liter,Fords Gin,gin
+750ml,Gin Mare,gin
+750ml,Grey Whale,gin
+750ml,Hendrick's Gin,gin
+1 Liter,Hendricks Gin,gin
+1 Liter,Monkey 47 Gin,gin
+750ml,Ransom Old Tom Gin,gin
+750ml,Roku Gin,gin
+1 Liter,Plymouth Gin,gin
+750ml,Sipsmith London Dry Gin,gin
+750ml,Still Austin Gin,gin
+1 Liter,Still Austin Gin,gin
+750ml,Tanquery London Dry Gin,gin
+1 Liter,Tanquery London Dry Gin,gin
+750ml,Waterloo Antique,gin
+750ml,WildJune,gin
+750ml,WildBark,gin
+750ml,Iichiko Saiten,shochu
+750ml,Mizu Saga Barley,shochu
+750ml,Ancho Reyes Chile,liq
+750ml,Ancho Reyes Verde,liq
+750ml,Aperol,liq
+1 Liter,Aperol,liq
+750ml,Schonauer Apfel ,liq
+750ml,Averna Amaro,liq
+1 Liter,Averna Amaro,liq
+1 Liter,Alma Finca,liq
+750ml,Amaro Sfumato,liq
+750ml,Amaro Nonino,liq
+750ml,Amaro Di Angostura,liq
+750ml,Giffard Banane du Bresil,liq
+1 Liter,Bailey's,liq
+750ml,Beespoke Pistachio Cream,liq
+1 Liter,Benedictine,liq
+1 Liter,Bols Creme de Banana,liq
+1 Liter,Bols Butterscotch ,liq
+1 Liter,Braulio,liq
+750ml,Campari Aperitivo,liq
+1 Liter,Campari Aperitivo,liq
+750ml,Chareau Aloe Liqueur,liq
+750ml,Chartreuse Green,liq
+750ml,Chartreuse Yellow,liq
+750ml,Cherry Heering,liq
+750ml,Cocchi Americano Aperitivo,liq
+750ml,Amaro CioCiaro,liq
+1 Liter,Cointreau,liq
+750ml,Combier Rose Liqueur,liq
+750ml,Combier Cassis Liqueur ,liq
+750ml,Damiana,liq
+750ml,Daytrip Strawberry Amaro,liq
+750ml,DeKuyper Apple,liq
+1 Liter,DeKuyper Creme Cassis,liq
+750ml,DeKuyper Curacao Blue,liq
+750ml,DeKuyper Schnapps Peppermint ,liq
+1 Liter,Cynar Ricetta,liq
+1 Liter,Cynar 70,liq
+750ml,Disaronno,liq
+1 Liter,Disaronno,liq
+1 Liter,Domaine de Canton,liq
+750ml,Fernet Branca,liq
+750ml,Fernet Branca Menta,liq
+1 Liter,Frangelico,liq
+750ml,Fairbanks Sherry,liq
+750ml,John D. Taylor's Velvet Falernum,liq
+750ml,Galliano,liq
+750ml,Giffard Crème De Cacao,liq
+750ml,Giffard Crème De Violet,liq
+750ml,Giffard Rhubarbe,liq
+750ml,Giffard Passionfruit,liq
+750ml,Gran Malo Tamarind,liq
+1 Liter,Grand Marnier,liq
+750ml,Hamilton Pimento Dram,liq
+750ml,Heirloom Genepy,liq
+750ml,Tempus Fugit Gran Classico,liq
+750ml,Hoodoo Chicory,liq
+750ml,Italicus,liq
+1 Liter,Kahlua,liq
+750ml,Licor 43,liq
+1 Liter,Liqor 43,liq
+750ml,Lillet Blanc,liq
+750ml,Luxardo Apertivo,liq
+750ml,Luxardo Maraschino,liq
+750ml,Luxardo Bitter Bianco,liq
+750ml,Martini and Rosso Fiero,liq
+1 Liter,Mr. Boston Peach Schnapps,liq
+750ml,Montenegro,liq
+750ml,Nixta Licor de Elote,liq
+750ml,Nonino Amaro Grappa,liq
+750ml,Ouzo,liq
+750ml,Paladin Agricanto,liq
+750ml,Paula's Texas Orange,liq
+1 Liter,Paula's Texas Orange LITER,liq
+750ml,Paula's Texas Lemon,liq
+750ml,Pernod,liq
+750ml,Pimm's No. 1 Liqueur,liq
+750ml,Pierre Ferrand Dry Curacao,liq
+750ml,Romana Sambuca Liqueur Classico,liq
+750ml,Rothman & Winter Apricot,liq
+750ml,Rothman & Winter Cherry,liq
+750ml,Rothman & Winter Creme de Violette,liq
+1 Liter,Select Aperif,liq
+750ml,Singani 63,liq
+750ml,St Elizabeth Allspice Dram,liq
+750ml,St George Raspberry Liquor,liq
+750ml,St George Spiced Pear,liq
+750ml,St Germain Elderflower,liq
+750ml,St. George Green Chile,liq
+750ml,Suze Liqueur,liq
+750ml,Tempus Fugit Crème De Banana,liq
+750ml,Tempus Fugit Crème De Menthe,liq
+750ml,Tempus Fugit Crème De Noyaux,liq
+1 Liter,Tuaca,liq
+750ml,Tuaca,liq
+750ml,Vecchio Amaro ,liq
+750ml,Violet Crown Jasmine Liqueur,liq
+750ml,Zucca Rabarbaro Amaro,liq
+750ml,Akul Cirial Joven,mezcal
+750ml,Akul Madre,mezcal
+1 Liter,Akul Espadin,mezcal
+750ml,Agave de Cortez Joven,mezcal
+750ml,Del Maguey Vida Mezcal,mezcal
+750ml,Desert Door Sotol,mezcal
+1 Liter,Desert Door Sotol,mezcal
+750ml,Dos Hombres Joven,mezcal
+750ml,Granja Nomada Espadin,mezcal
+750ml,Illegal Mezcal,mezcal
+1 Liter,Illegal Mezcal,mezcal
+750ml,Marca Negra San Martin,mezcal
+750ml,Marca Negra Tobala,mezcal
+1 Liter,The Marfa Spirit Co. Chihuahuan Desert Sotol,mezcal
+1 Liter,The Producer,mezcal
+750ml,Union Mezcal,mezcal
+750ml,Vago El Manantiel,mezcal
+750ml,Appleton Estate Signature Blend,rum
+1 Liter,Appleton Estate Signature Blend,rum
+1 Liter,Bacardi,rum
+750ml,Botran 8 Year Rum,rum
+1 Liter,Captain Morgan,rum
+750ml,Chairman's Reserve Original Spiced,rum
+750ml,Diplomatico Reserva Exclusiva,rum
+750ml,Flor De Cana 4Y White,rum
+1 Liter,Flor De Cana 4Y White,rum
+750ml,Flor De Cana 7Y Reserve,rum
+1 Liter,Flor De Cana 7Y Reserve,rum
+750ml,Flor De Cana 12Y Reserve,rum
+750ml,Flor de Cana 18y ,rum
+750ml,Flor De Cana Spresso Coffee Liquor,rum
+750ml,Kuleana Hawaiian Agrigole,rum
+750ml,Novo Fogo Silver Cacha,rum
+1 Liter,Planteray OFTD,rum
+1 Liter,Planteray Dark,rum
+1 Liter,Rum Haven,rum
+1 Liter,Sailor Jerry,rum
+750ml,Santa Teresa 1796 Solera,rum
+750ml,Aberfeldy 12Y Single Malt,scotch
+750ml,Benriach 10Y,scotch
+750ml,Bruichladdich Classic Laddie,scotch
+750ml,Bruichladdich 18yr,scotch
+1 Liter,Dewars White Label,scotch
+1 Liter,The Famous Grouse,scotch
+750ml,Glendronach 12Y,scotch
+750ml,Glenfiddich 14Y,scotch
+750ml,Glenfiddich 16yr,scotch
+750ml,Glenglassaugh 12Y,scotch
+750ml,The Glenlivet 12Y,scotch
+1 Liter,The Glenlivet 12Y,scotch
+750ml,Highland Park 12Y,scotch
+750ml,Johnny Walker Black,scotch
+1 Liter,Johnnie Walker Black,scotch
+750ml,Johnnie Walker Blue ,scotch
+750ml,Lagavulin 16Y,scotch
+750ml,Laphroaig 10Y,scotch
+750ml,The Macallan 12Y,scotch
+750ml,Monkey Shoulder,scotch
+750ml,Old Pulteney 12yr,scotch
+750ml,Oban 14Y Single Malt,scotch
+750ml,Talisker 10Y ,scotch
+750ml,Aguamiel Bacanora,tequila
+1 Liter,Arette Blanco - 1LT,tequila
+1 Liter,Casa Lujo,tequila
+750ml,Casamigos Blanco,tequila
+1 Liter,Casamigos Blanco,tequila
+750ml,Casamigos Reposado,tequila
+1 Liter,Casamigos Reposado,tequila
+1 Liter,Cazadores Blanco ,tequila
+750ml,Centinela Blanco,tequila
+750ml,Centinela Reposado,tequila
+750ml,Centinela Anejo,tequila
+750ml,Clase Azul Reposado,tequila
+750ml,Codigo 1530 Anejo,tequila
+700mL,De Nada Blanco,tequila
+700mL,De Nada Reposado,tequila
+750ml,Don Julio 1942,tequila
+750ml,Don Julio Blanco,tequila
+1 Liter,Don Julio Blanco,tequila
+750ml,Don Julio Reposado,tequila
+750ml,Don Julio Anejo,tequila
+750ml,Don Fulano Blanco,tequila
+750ml,Don Fulano Reposado,tequila
+750ml,El Tesoro Blanco,tequila
+750ml,El Tesoro Reposado,tequila
+750ml,El Tesoro Anejo,tequila
+750ml,Espolon Blanco Tequila,tequila
+1 Liter,Espolon Blanco Tequila,tequila
+750ml,Espolon Reposado Tequila,tequila
+1 Liter,Espolon Reposado Tequila,tequila
+750ml,Fortaleza Blanco,tequila
+750ml,Fortaleza Reposado,tequila
+750ml,Fortaleza Anejo,tequila
+750ml,G4 Blanco,tequila
+750ml,G4 Reposado,tequila
+750ml,G4 Anejo,tequila
+750ml,Komos Reposado,tequila
+750ml,La Caza Blanco,tequila
+750ml,La Caza Reposado,tequila
+750ml,La Caza Anejo,tequila
+1 Liter,Lalo Blanco,tequila
+750ml,Raicilla de Una Maximiliana,tequila
+750ml,Socorro Blanco,tequila
+1 Liter,Socorro Blanco,tequila
+750ml,Socorro Reposado,tequila
+1 Liter,Socorro Reposado,tequila
+750ml,Socorro Anejo,tequila
+750ml,Soledad Joven,tequila
+750ml,Soledad Anejo 8 Years,tequila
+750ml,Soledad Dos Barricos,tequila
+750ml,Soledad Dia de los Muertos,tequila
+750ml,Tanteo Jalapeno ,tequila
+750ml,Tequila Ocho Plata,tequila
+750ml,Tequila Ocho Reposado,tequila
+1 Liter,Tequila Ocho Reposado,tequila
+750ml,Dolin de Chambrey Dry,vermouth
+750ml,Cocchi Sweet Vermouth,vermouth
+750ml,Belverdere Vodka,vodka
+1 Liter,Belverdere Vodka,vodka
+1 Liter,Chopin Vodka,vodka
+750ml,Deep Eddy Ruby Red,vodka
+1 Liter,Deep Eddy Ruby Red,vodka
+750ml,Deep Eddy Lime,vodka
+1 Liter,Deep Eddy Lime,vodka
+750ml,Deep Eddy Lemon,vodka
+1 Liter,Deep Eddy Lemon,vodka
+1 Liter,Deep Eddy Peach,vodka
+750ml,Dripping Springs,vodka
+1 Liter,Dripping Springs,vodka
+1 Liter,Everclear,vodka
+750ml,FIX,vodka
+1 Liter,Grey Goose,vodka
+750ml,Kastra Elion,vodka
+1 Liter,Ketel One,vodka
+1 Liter,Pink Whitney (New Amsterdam),vodka
+750ml,Reyka,vodka
+1 Liter,Reyka,vodka
+750ml,Tito's Texas,vodka
+1 Liter,Tito's Texas,vodka
