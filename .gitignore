@@ -30,3 +30,14 @@ yarn-error.log*
 
 # test coverage
 coverage
+
+# Claude Code (ephemeral)
+.claude/worktrees/
+.claude/mcp.json
+thoughts/scratchpad/
+
+# Session state (ephemeral)
+Docs/context.md
+
+# SkillShed (subfolder tooling)
+SkillShed/
