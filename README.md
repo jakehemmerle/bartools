@@ -58,9 +58,9 @@ bun test
 Expected output:
 
 ```
- 2 pass
+ 1 pass
  0 fail
- 2 expect() calls
+ 1 expect() calls
 ```
 
 The test lives at `packages/ui/src/greet.test.ts` and exercises the shared `greet()` helper that the backend, dashboard, and mobile app all import.

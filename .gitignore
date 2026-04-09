@@ -12,9 +12,6 @@ out
 .expo-shared
 web-build
 
-# bun
-bun.lockb
-
 # env
 .env
 .env.local
