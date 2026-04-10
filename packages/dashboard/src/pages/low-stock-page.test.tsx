@@ -23,9 +23,12 @@ describe('LowStockPage export', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Export CSV' }))
 
-    const exportedRows = (csvMocks.buildLowStockExportCsv as any).mock.calls[0]?.[0] as
-      | Array<{ productName: string }>
-      | undefined
+    const exportCalls = (
+      csvMocks.buildLowStockExportCsv as unknown as {
+        mock: { calls: [Array<{ productName: string }>, string][] }
+      }
+    ).mock.calls
+    const exportedRows = exportCalls[0]?.[0]
 
     expect(csvMocks.buildLowStockExportCsv).toHaveBeenCalledTimes(1)
     expect(exportedRows).toHaveLength(1)
