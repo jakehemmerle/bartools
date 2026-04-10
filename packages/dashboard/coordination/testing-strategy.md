@@ -95,6 +95,7 @@ It is the main way to inspect:
 - visual hierarchy
 - responsive behavior
 - state tone
+- whether user-facing copy sounds like product copy rather than implementation notes
 - manager versus non-manager differences
 - onboarding create versus join flows
 - session media states
@@ -118,6 +119,7 @@ Minimum requirement:
 
 - run a repeatable browser verification pass against fixture-backed routes on localhost
 - record pass/fail results in a written checklist attached to the implementation checkpoint, PR, or handoff
+- explicitly check that no user-facing route contains dev-process, implementation, or planning language
 - do not mark the final polish phase complete without that artifact
 
 Recommended tooling:
