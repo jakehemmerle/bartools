@@ -448,7 +448,8 @@ Give the implementation process a repeatable way to inspect real UI output and c
 2. Run the dashboard locally
 3. Inspect key routes and states in the browser
 4. Compare actual UI against the approved specs
-5. Tighten the slice before moving to the next phase
+5. Remove any user-facing copy that sounds like specs, fixtures, implementation notes, or internal process language
+6. Tighten the slice before moving to the next phase
 
 This loop should be used throughout the build rather than saved for the end.
 
