@@ -1,6 +1,17 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+/* eslint-disable react-refresh/only-export-components */
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  useLocation,
+  type RouteObject,
+} from 'react-router-dom'
 import { PublicShell } from '../components/layout/public-shell'
 import { AuthenticatedShell } from '../components/layout/authenticated-shell'
+import {
+  resolvePersonaOverride,
+  useFixtureSession,
+} from '../lib/fixture-session'
 import {
   LandingPage,
   PasswordResetPage,
@@ -16,9 +27,9 @@ import {
 import { SessionDetailPage, SessionsPage } from '../pages/sessions-page'
 import { SettingsPage } from '../pages/settings-page'
 
-export const appRouter = createBrowserRouter([
+export const appRoutes: RouteObject[] = [
   {
-    element: <PublicShell />,
+    element: <PublicRouteGate />,
     children: [
       { path: '/', element: <LandingPage /> },
       { path: '/sign-in', element: <SignInPage /> },
@@ -29,7 +40,7 @@ export const appRouter = createBrowserRouter([
     ],
   },
   {
-    element: <AuthenticatedShell />,
+    element: <AuthenticatedRouteGate />,
     children: [
       { path: '/inventory', element: <InventoryPage /> },
       { path: '/low-stock', element: <LowStockPage /> },
@@ -39,4 +50,42 @@ export const appRouter = createBrowserRouter([
     ],
   },
   { path: '*', element: <Navigate replace to="/" /> },
-])
+]
+
+export const appRouter = createBrowserRouter(appRoutes)
+
+function PublicRouteGate() {
+  const { persona } = useFixtureSession()
+  const location = useLocation()
+  const effectivePersona = resolvePersonaOverride(location.search, persona)
+  const isAuthEntryRoute =
+    location.pathname === '/sign-in' ||
+    location.pathname === '/sign-up' ||
+    location.pathname === '/reset-password'
+
+  if (effectivePersona !== 'signed_out' && isAuthEntryRoute) {
+    return <Navigate replace to="/inventory" />
+  }
+
+  return (
+    <PublicShell>
+      <Outlet />
+    </PublicShell>
+  )
+}
+
+function AuthenticatedRouteGate() {
+  const { persona } = useFixtureSession()
+  const location = useLocation()
+  const effectivePersona = resolvePersonaOverride(location.search, persona)
+
+  if (effectivePersona === 'signed_out') {
+    return <Navigate replace to="/sign-in" />
+  }
+
+  return (
+    <AuthenticatedShell>
+      <Outlet />
+    </AuthenticatedShell>
+  )
+}
