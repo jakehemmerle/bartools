@@ -9,9 +9,10 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { PublicPageHeader } from '../components/layout/public-shell'
 import { StatePanel } from '../components/states/state-panel'
+import { useFixtureSession } from '../lib/fixture-session'
 
 export function LandingPage() {
   return (
@@ -92,6 +93,9 @@ function BoxHeading({
 }
 
 export function SignInPage() {
+  const navigate = useNavigate()
+  const { signInAs } = useFixtureSession()
+
   return (
     <AuthFormShell
       description="Sign in to check stock, review recent counts, and keep the bar moving."
@@ -112,7 +116,14 @@ export function SignInPage() {
         <Anchor component={Link} size="sm" to="/reset-password">
           Forgot password?
         </Anchor>
-        <Button color="ink" radius="sm">
+        <Button
+          color="ink"
+          onClick={() => {
+            signInAs('manager')
+            navigate('/inventory')
+          }}
+          radius="sm"
+        >
           Sign in
         </Button>
       </Group>
@@ -121,6 +132,8 @@ export function SignInPage() {
 }
 
 export function SignUpPage() {
+  const navigate = useNavigate()
+
   return (
     <AuthFormShell
       description="Create your account, set up your bar, or join the one your team already uses."
@@ -137,7 +150,11 @@ export function SignUpPage() {
     >
       <TextInput label="Work email" placeholder="avery@thechallenger.example" />
       <PasswordInput label="Password" placeholder="Choose a password" />
-      <Button color="ink" component={Link} radius="sm" to="/onboarding/create">
+      <Button
+        color="ink"
+        onClick={() => navigate('/onboarding/create')}
+        radius="sm"
+      >
         Continue to setup
       </Button>
     </AuthFormShell>

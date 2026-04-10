@@ -12,12 +12,18 @@ import {
 } from '@mantine/core'
 import { useSearchParams } from 'react-router-dom'
 import { StatePanel } from '../components/states/state-panel'
+import { resolvePersonaOverride, useFixtureSession } from '../lib/fixture-session'
 import { settingsScenarios } from '../lib/fixtures/scenarios'
 
 export function SettingsPage() {
   const [searchParams] = useSearchParams()
+  const { persona } = useFixtureSession()
+  const effectivePersona = resolvePersonaOverride(
+    `?${searchParams.toString()}`,
+    persona,
+  )
   const scenario =
-    searchParams.get('scenario') === 'restricted'
+    searchParams.get('scenario') === 'restricted' || effectivePersona === 'staff'
       ? settingsScenarios.restricted
       : settingsScenarios.manager
   const canManage = scenario.user.canManageBar

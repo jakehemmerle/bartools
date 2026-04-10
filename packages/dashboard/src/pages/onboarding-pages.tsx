@@ -9,10 +9,14 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { StatePanel } from '../components/states/state-panel'
+import { useFixtureSession } from '../lib/fixture-session'
 
 export function OnboardingCreatePage() {
+  const navigate = useNavigate()
+  const { signInAs } = useFixtureSession()
+
   return (
     <Stack gap="lg" maw={560}>
       <Title order={2}>Create your bar</Title>
@@ -36,7 +40,14 @@ export function OnboardingCreatePage() {
         <Anchor component={Link} to="/onboarding/join">
           Joining an existing bar?
         </Anchor>
-        <Button color="ink" component={Link} radius="sm" to="/inventory">
+        <Button
+          color="ink"
+          onClick={() => {
+            signInAs('manager')
+            navigate('/inventory')
+          }}
+          radius="sm"
+        >
           Finish setup
         </Button>
       </Group>
@@ -46,6 +57,8 @@ export function OnboardingCreatePage() {
 
 export function OnboardingJoinPage() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { signInAs } = useFixtureSession()
   const state = searchParams.get('state') ?? 'default'
 
   return (
@@ -77,7 +90,14 @@ export function OnboardingJoinPage() {
             <Radio label="Create new bar" value="create" />
           </Group>
         </Radio.Group>
-        <Button color="ink" component={Link} radius="sm" to="/inventory">
+        <Button
+          color="ink"
+          onClick={() => {
+            signInAs('staff')
+            navigate('/inventory?persona=staff')
+          }}
+          radius="sm"
+        >
           Join bar
         </Button>
       </Group>

@@ -1,7 +1,12 @@
 import type { PropsWithChildren, ReactNode } from 'react'
 import { render } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import {
+  createMemoryRouter,
+  MemoryRouter,
+  RouterProvider,
+} from 'react-router-dom'
 import { AppProviders } from '../app/providers'
+import { appRoutes } from '../app/router'
 
 export function renderWithProviders(
   ui: ReactNode,
@@ -16,4 +21,18 @@ export function renderWithProviders(
   }
 
   return render(ui, { wrapper: Wrapper })
+}
+
+export function renderAppRoutes({
+  initialEntries = ['/'],
+}: {
+  initialEntries?: string[]
+} = {}) {
+  const router = createMemoryRouter(appRoutes, { initialEntries })
+
+  return render(
+    <AppProviders>
+      <RouterProvider router={router} />
+    </AppProviders>,
+  )
 }

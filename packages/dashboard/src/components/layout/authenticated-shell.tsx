@@ -10,7 +10,9 @@ import {
   Text,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import type { PropsWithChildren } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { useFixtureSession } from '../../lib/fixture-session'
 
 const appLinks = [
   { to: '/inventory', label: 'Inventory' },
@@ -19,9 +21,10 @@ const appLinks = [
   { to: '/settings', label: 'Settings' },
 ]
 
-export function AuthenticatedShell() {
+export function AuthenticatedShell({ children }: PropsWithChildren) {
   const [opened, { toggle }] = useDisclosure(false)
   const location = useLocation()
+  const { persona, signOut } = useFixtureSession()
 
   return (
     <AppShell
@@ -57,9 +60,20 @@ export function AuthenticatedShell() {
               </Text>
             </Box>
           </Group>
-          <Badge color="olive" radius="sm" variant="light">
-            Latest confirmed inventory
-          </Badge>
+          <Group gap="sm">
+            <Badge color="olive" radius="sm" variant="light">
+              {persona === 'manager' ? 'Manager account' : 'Staff account'}
+            </Badge>
+            <Badge
+              color="ink"
+              onClick={signOut}
+              radius="sm"
+              style={{ cursor: 'pointer' }}
+              variant="outline"
+            >
+              Sign out
+            </Badge>
+          </Group>
         </Group>
       </AppShell.Header>
 
@@ -106,7 +120,7 @@ export function AuthenticatedShell() {
           minHeight: '100vh',
         }}
       >
-        <Outlet />
+        {children}
       </AppShell.Main>
     </AppShell>
   )

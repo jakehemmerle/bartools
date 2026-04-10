@@ -8,9 +8,10 @@ import {
   Text,
   Title,
 } from '@mantine/core'
-import { Outlet, Link } from 'react-router-dom'
+import type { PropsWithChildren } from 'react'
+import { Link } from 'react-router-dom'
 
-export function PublicShell() {
+export function PublicShell({ children }: PropsWithChildren) {
   return (
     <Box
       style={{
@@ -49,7 +50,7 @@ export function PublicShell() {
             backdropFilter: 'blur(10px)',
           }}
         >
-          <Outlet />
+          {children}
         </Paper>
       </Container>
     </Box>
