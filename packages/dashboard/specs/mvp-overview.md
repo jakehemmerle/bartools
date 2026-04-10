@@ -2,20 +2,20 @@
 
 ## Purpose
 
-The dashboard exists to support bar managers and staff after mobile capture is complete. It is not a second capture workflow. Its job is to make current inventory easy to inspect, act on, and export.
+The dashboard exists to support bar managers and staff after mobile capture is complete. It is not a second capture workflow. Its job is to make the latest confirmed inventory picture easy to inspect, act on, and export.
 
 The dashboard is part of the product MVP.
 
 ## Primary Users
 
-- Bar manager reviewing current stock and reorder risk
+- Bar manager reviewing the latest confirmed stock picture and reorder risk
 - Staff member checking the latest inventory counts
 - Founder/demo user showing the product to prospects
 
 ## MVP Goals
 
 - Provide a clear public landing page with sign in and sign up
-- Show the current inventory in a usable table immediately after sign in
+- Show the latest confirmed inventory in a usable table immediately after sign in
 - Surface low-stock items that need attention
 - Preserve a reviewable history of inventory sessions
 - Allow export of operational data to CSV
@@ -42,7 +42,7 @@ The dashboard is part of the product MVP.
 
 MVP assumes self-serve sign up so early customers can adopt the product without a manual invite flow.
 
-### 2. Manager checking current inventory
+### 2. Manager checking latest confirmed inventory
 
 1. User signs in
 2. User lands on the inventory table
@@ -81,7 +81,7 @@ This is a speed and consistency decision, not a decision to accept Mantine defau
 ## Success Criteria
 
 - A new user can reach sign up from the landing page without confusion
-- A signed-in user can understand current inventory status from the default screen
+- A signed-in user can understand the latest confirmed inventory status from the default screen
 - A signed-in user can identify low-stock items within one click from the main nav
 - A signed-in user can inspect past sessions and understand what was saved
 - A signed-in user can export useful CSV data without manual data cleanup
@@ -97,5 +97,6 @@ This is a speed and consistency decision, not a decision to accept Mantine defau
 ## Risks
 
 - If inventory data is incomplete, the table may not support useful operations
+- If users mistake the latest-confirmed aggregate for a live or single-session stock view, they may over-trust the dashboard
 - If low-stock logic is unclear, the reorder queue will feel arbitrary
 - If session detail lacks thumbnails or correction metadata, audit value drops

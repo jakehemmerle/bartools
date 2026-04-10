@@ -44,14 +44,16 @@ type BarMember = {
 type BarSettings = {
   barId: string
   timezone: string
-  defaultParLevel: number
+  defaultParComparableAmount: number
+  defaultParComparableUnit: 'ml' | 'bottle_equivalent'
 }
 
 type ProductParOverride = {
   productId: string
   productName: string
   upc: string
-  parLevel: number
+  parComparableAmount: number
+  parComparableUnit: 'ml' | 'bottle_equivalent'
 }
 ```
 
@@ -71,23 +73,31 @@ type InventoryProductRow = {
   category?: string
   upc: string
   volumeMl?: number
-  onHandQuantity: number
-  onHandUnit?: string
+  onHandComparableAmount: number
+  comparableUnit: 'ml' | 'bottle_equivalent'
+  displayQuantityLabel?: string
   belowPar: boolean
   belowParReason?: string
-  parLevel?: number
-  barDefaultParLevel?: number
+  parComparableAmount?: number
+  barDefaultParComparableAmount?: number
   asOf: string
   latestSessionId?: string
+  sourceSessionStatus: 'confirmed'
 }
 ```
 
 MVP inventory assumptions:
 
 - UPC is the practical canonical product identifier
-- Inventory is shown as current on-hand stock by product
+- Inventory is shown as the latest confirmed on-hand stock by product
 - `below par` is derived from total on-hand stock versus PAR level
+- The dashboard must not invent comparison math locally
+- Backend must provide inventory and PAR values in the same comparable unit for a given product
+- The preferred comparable unit is milliliters when the pipeline can support it reliably
+- If milliliter-accurate normalization is not trustworthy for a product, backend may provide `bottle_equivalent` instead as long as inventory and PAR use the same unit
+- Human-readable quantity labels may be derived from that canonical comparable value for display
 - PAR is set per product, with a bar-level default available as a fallback
+- Only confirmed session data may influence product-level inventory rows
 
 Example query capabilities:
 
@@ -107,6 +117,8 @@ Example resource options:
 Low stock in MVP means:
 
 - Product-level `below par` status based on total on-hand stock
+- Comparison against PAR uses the backend-provided comparable unit for that product
+- Only confirmed session data may influence low-stock status
 
 ## Sessions
 
@@ -175,9 +187,10 @@ Example export capabilities:
 
 - inventory export
 - low-stock export
-- session export
 
 An acceptable MVP alternative is client-side CSV generation from fetched JSON if backend export endpoints are not needed yet.
+
+Session export is deferred from MVP unless the team explicitly re-promotes it later.
 
 ## Notes
 

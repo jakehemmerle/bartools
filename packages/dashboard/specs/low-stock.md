@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provide an operational queue of inventory items that may require reorder attention.
+Provide an operational queue of inventory items that may require reorder attention based on the latest confirmed product-level counts.
 
 ## In Scope
 
@@ -19,7 +19,7 @@ Provide an operational queue of inventory items that may require reorder attenti
 
 ## User Stories
 
-- As a manager, I want a concise list of bottles that need attention
+- As a manager, I want a concise list of products that need attention
 - As a manager, I want to understand why an item is flagged
 - As a manager, I want to export the flagged list if I am reordering elsewhere
 
@@ -43,14 +43,16 @@ Minimum row fields:
 
 MVP decision:
 
-- Mark a product as `below par` when its current total on-hand stock is below its PAR level
+- Mark a product as `below par` when its latest confirmed total on-hand stock is below its PAR level
 - Partial bottles and full bottles both contribute to total on-hand stock
+- MVP compares on-hand stock and PAR using the backend-provided comparable unit for that product
 - PAR is defined per product
 - A bar-level default PAR may be used as the starting point when a product-specific PAR has not been set
 
 This keeps the view aligned with product-level inventory management rather than single-bottle alerts.
 
 The values that drive `below par` are configured in the dashboard `Settings` surface.
+Low-stock rows inherit the same row-level `as of` dates as inventory and should not imply a single-session snapshot or live stock guarantee.
 
 ## Page Actions
 
@@ -61,10 +63,11 @@ The values that drive `below par` are configured in the dashboard `Settings` sur
 
 ## Empty State
 
-- Explain that no low-stock items are currently flagged
+- Explain that no low-stock items are flagged in the latest confirmed inventory view
 
 ## Acceptance Criteria
 
 - Users can open a focused low-stock list from the main nav
 - Every flagged item shows enough context to explain why it appears
 - The page reflects product-level `below par` status based on total on-hand stock
+- The page communicates that low-stock status is derived from the latest confirmed per-product counts rather than a single unified count session
