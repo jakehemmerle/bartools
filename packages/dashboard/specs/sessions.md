@@ -57,12 +57,11 @@ Dates and times in session history and session detail should use the bar's local
 - Final saved identity fields such as bottle name and type
 - Relevant `as of` or session timestamps where needed, without a separate page-level freshness indicator
 
-### Nice To Have If Available
+### Correction Comparison Behavior
 
-- Original model output versus corrected values
-- Notes about user corrections
-
-For MVP, session detail should be able to show original model output alongside final corrected values when that comparison data is available.
+- Session detail does not require correction-history data to be considered MVP-complete
+- If original model output and corrected values are available, session detail should show that comparison
+- Notes about user corrections are optional and do not block MVP completeness
 
 ## Visual Direction
 
@@ -85,5 +84,6 @@ For MVP, session detail should be able to show original model output alongside f
 - Users can open a session and understand the final saved results
 - Session detail supports thumbnail display for confirmed records, with graceful placeholders when images are missing or expired
 - Session detail is useful even if correction history is not yet available
+- If original-versus-corrected comparison data is exposed, the page displays it without making it a hard MVP dependency
 - Session history and detail remain usable on desktop, tablet, and phone-sized web layouts
 - Session history and detail support keyboard navigation and accessible labels for primary actions and media

@@ -8,10 +8,10 @@ Allow users to move inventory data into spreadsheets or external systems with mi
 
 - Export from inventory
 - Export from low-stock view
-- Optional export from session detail if useful
 
 ## Out Of Scope
 
+- Session export
 - Scheduled exports
 - Native integrations with spreadsheet tools
 - Custom export builders
@@ -35,15 +35,10 @@ Allow users to move inventory data into spreadsheets or external systems with mi
 - Exports only flagged low-stock items
 - Preserves the current filters and sort order for the low-stock view
 
-### Session Export
-
-- Optional for MVP
-- If included, exports the final records from the selected session
-
 ## Schema Strategy
 
 - CSV schemas may differ by export surface
-- Inventory export, low-stock export, and session export should each include the columns most useful for that context
+- Inventory export and low-stock export should each include the columns most useful for that context
 - Column naming should still remain stable and human-readable within each export type
 
 ## Filename Guidance
@@ -52,7 +47,6 @@ Suggested patterns:
 
 - `inventory-YYYY-MM-DD.csv`
 - `low-stock-YYYY-MM-DD.csv`
-- `session-<session-id>.csv`
 
 ## Timestamp Behavior
 
@@ -91,25 +85,6 @@ Optional columns:
 
 - Volume
 - Latest session id
-
-## Session Export Columns
-
-Required columns:
-
-- Session id
-- Session timestamp
-- User id or display name
-- Bottle name
-- Category or type
-- UPC
-- Fill percent
-- Corrected
-
-Optional columns:
-
-- Volume
-- Original model output fields
-- Corrected value fields
 
 ## Acceptance Criteria
 

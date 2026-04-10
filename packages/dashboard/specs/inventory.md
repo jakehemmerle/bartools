@@ -2,9 +2,11 @@
 
 ## Purpose
 
-Make current inventory easy to inspect and export. This is the default signed-in screen.
+Make the latest confirmed inventory by product easy to inspect and export. This is the default signed-in screen.
 
-For MVP, inventory is the current on-hand stock by product, with each row showing the most recently confirmed state for that product and an `as of` date.
+For MVP, inventory is the latest confirmed on-hand stock by product, using the most recent confirmed product-level value available for each product and an `as of` date.
+
+This means the table is an aggregate latest-confirmed view, not a single-session snapshot or a guarantee of live stock. Different products may reflect different source sessions and different count dates.
 
 Dates and times in the dashboard should use the bar's local timezone.
 
@@ -25,10 +27,10 @@ Dates and times in the dashboard should use the bar's local timezone.
 
 ## User Stories
 
-- As a manager, I want to see current stock in one place
+- As a manager, I want to see the latest confirmed stock picture in one place
 - As a manager, I want to find specific bottles quickly
 - As a manager, I want low-stock status visible in the main inventory view
-- As a manager, I want to export the current dataset
+- As a manager, I want to export the displayed dataset
 
 ## Table Columns
 
@@ -46,7 +48,6 @@ Minimum recommended columns:
 Optional MVP columns if data is readily available:
 
 - Product size / volume
-- Fill percent
 
 ## Visual Direction
 
@@ -89,9 +90,11 @@ Optional MVP columns if data is readily available:
 ## Freshness Behavior
 
 - Every row shows an `as of` date
+- The page should make it clear that rows may reflect different count dates across products
 - Inventory older than 14 days should receive a subtle stale warning treatment
 - Stale treatment is informational only and does not block actions
 - MVP does not include a separate page-level `last updated` indicator
+- A calm page-level note should explain that inventory reflects the latest confirmed count per product, dates may vary by item, and the table is not a single-session snapshot
 
 ## Row Behavior
 
@@ -100,11 +103,12 @@ Inventory remains table-only in MVP. If a row click action exists, it should rou
 ## Acceptance Criteria
 
 - Signed-in users land here by default
-- Users can search inventory by bottle name
+- Users can search inventory by product name
 - Users can identify low-stock items without changing pages
 - Users can export the currently viewed dataset to CSV
 - Users can understand when inventory is empty, loading, or unavailable
-- Each row represents current on-hand stock for a product and includes an `as of` date
+- Each row represents the latest confirmed on-hand stock for a product and includes an `as of` date
+- The page communicates that inventory is a latest-by-product aggregate rather than a single unified count session or a live stock guarantee
 - Inventory older than 14 days is subtly marked as stale without forcing user action
 - The page remains usable on desktop, tablet, and phone-sized web layouts
 - Core inventory interactions are keyboard navigable and use accessible table and control semantics
