@@ -1,0 +1,16 @@
+{
+  "name": "@bartools/eval",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "bun --env-file=../../.env run src/seed.ts",
+    "eval": "bun --env-file=../../.env run src/run.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.98",
+    "langsmith": "^0.5.18",
+    "zod": "^4.3.6"
+  }
+}
