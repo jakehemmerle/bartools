@@ -26,9 +26,12 @@ describe('InventoryPage export', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Export CSV' }))
 
-    const exportedRows = (csvMocks.buildInventoryExportCsv as any).mock.calls[0]?.[0] as
-      | Array<{ productName: string }>
-      | undefined
+    const exportCalls = (
+      csvMocks.buildInventoryExportCsv as unknown as {
+        mock: { calls: [Array<{ productName: string }>, string][] }
+      }
+    ).mock.calls
+    const exportedRows = exportCalls[0]?.[0]
 
     expect(csvMocks.buildInventoryExportCsv).toHaveBeenCalledTimes(1)
     expect(exportedRows).toHaveLength(1)
