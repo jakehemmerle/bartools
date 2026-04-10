@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import {
   Badge,
   Button,
@@ -14,6 +15,12 @@ import {
 import { Link, useSearchParams } from 'react-router-dom'
 import { StatePanel } from '../components/states/state-panel'
 import { inventoryScenarios } from '../lib/fixtures/scenarios'
+import {
+  filterInventoryRows,
+  sortInventoryRows,
+  type InventoryFilter,
+  type InventorySort,
+} from '../lib/inventory-view'
 
 function getInventoryScenario(name: string | null) {
   switch (name) {
@@ -31,6 +38,13 @@ function getInventoryScenario(name: string | null) {
 export function InventoryPage() {
   const [searchParams] = useSearchParams()
   const scenario = getInventoryScenario(searchParams.get('scenario'))
+  const [query, setQuery] = useState('')
+  const [filter, setFilter] = useState<InventoryFilter>('all')
+  const [sort, setSort] = useState<InventorySort>('name')
+  const displayedRows = useMemo(
+    () => sortInventoryRows(filterInventoryRows(scenario.rows, query, filter), sort),
+    [filter, query, scenario.rows, sort],
+  )
 
   return (
     <Stack gap="lg">
@@ -50,17 +64,19 @@ export function InventoryPage() {
       <Paper p="md" radius="md" withBorder>
         <Group align="end" grow>
           <TextInput
-            defaultValue=""
+            onChange={(event) => setQuery(event.currentTarget.value)}
             label="Search by product name"
             placeholder="Search inventory"
+            value={query}
           />
           <Select
             data={[
               { label: 'All products', value: 'all' },
               { label: 'Below par only', value: 'below-par' },
             ]}
-            defaultValue="all"
             label="Filter"
+            onChange={(value) => setFilter((value as InventoryFilter | null) ?? 'all')}
+            value={filter}
           />
           <Select
             data={[
@@ -68,8 +84,9 @@ export function InventoryPage() {
               { label: 'On-hand quantity', value: 'quantity' },
               { label: 'As of date', value: 'as-of' },
             ]}
-            defaultValue="name"
             label="Sort"
+            onChange={(value) => setSort((value as InventorySort | null) ?? 'name')}
+            value={sort}
           />
         </Group>
       </Paper>
@@ -84,6 +101,11 @@ export function InventoryPage() {
         <StatePanel
           description="There is no inventory to show yet. Once the first count is confirmed, it will appear here."
           title="No inventory yet"
+        />
+      ) : displayedRows.length === 0 ? (
+        <StatePanel
+          description="No products match the current search and filter combination."
+          title="No matching products"
         />
       ) : (
         <ScrollArea>
@@ -100,7 +122,7 @@ export function InventoryPage() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {scenario.rows.map((row) => (
+              {displayedRows.map((row) => (
                 <Table.Tr key={row.productId}>
                   <Table.Td>
                     <Stack gap={0}>

@@ -1,9 +1,11 @@
+import { useMemo, useState } from 'react'
 import {
   Badge,
   Button,
   Group,
   Paper,
   ScrollArea,
+  Select,
   Stack,
   Table,
   Text,
@@ -12,6 +14,7 @@ import {
 import { useSearchParams } from 'react-router-dom'
 import { StatePanel } from '../components/states/state-panel'
 import { inventoryScenarios } from '../lib/fixtures/scenarios'
+import { sortLowStockRows, type LowStockSort } from '../lib/inventory-view'
 
 export function LowStockPage() {
   const [searchParams] = useSearchParams()
@@ -19,7 +22,11 @@ export function LowStockPage() {
     searchParams.get('scenario') === 'empty'
       ? inventoryScenarios.empty
       : inventoryScenarios.default
-  const rows = source.rows.filter((row) => row.belowPar)
+  const [sort, setSort] = useState<LowStockSort>('urgency')
+  const rows = useMemo(
+    () => sortLowStockRows(source.rows.filter((row) => row.belowPar), sort),
+    [sort, source.rows],
+  )
 
   return (
     <Stack gap="lg">
@@ -34,6 +41,22 @@ export function LowStockPage() {
           Export CSV
         </Button>
       </Group>
+
+      <Paper p="md" radius="md" withBorder>
+        <Group justify="flex-end">
+          <Select
+            data={[
+              { label: 'Biggest gap first', value: 'urgency' },
+              { label: 'Newest counts first', value: 'as-of' },
+              { label: 'Product name', value: 'name' },
+            ]}
+            label="Sort"
+            onChange={(value) => setSort((value as LowStockSort | null) ?? 'urgency')}
+            value={sort}
+            w={240}
+          />
+        </Group>
+      </Paper>
 
       {rows.length === 0 ? (
         <StatePanel
