@@ -38,8 +38,8 @@ export function AuthenticatedShell({ children }: PropsWithChildren) {
     >
       <AppShell.Header
         style={{
-          background: '#fffaf2',
-          borderBottom: '1px solid rgba(61, 76, 73, 0.08)',
+          background: '#fbfaf7',
+          borderBottom: '1px solid rgba(49, 78, 94, 0.08)',
         }}
       >
         <Group h="100%" justify="space-between" px="lg">
@@ -61,11 +61,11 @@ export function AuthenticatedShell({ children }: PropsWithChildren) {
             </Box>
           </Group>
           <Group gap="sm">
-            <Badge color="olive" radius="sm" variant="light">
+            <Badge color="slate" radius="sm" variant="light">
               {persona === 'manager' ? 'Manager account' : 'Staff account'}
             </Badge>
             <Badge
-              color="ink"
+              color="slate"
               onClick={signOut}
               radius="sm"
               style={{ cursor: 'pointer' }}
@@ -80,8 +80,8 @@ export function AuthenticatedShell({ children }: PropsWithChildren) {
       <AppShell.Navbar
         p="md"
         style={{
-          background: '#f7f5ef',
-          borderRight: '1px solid rgba(61, 76, 73, 0.08)',
+          background: '#f6f4ef',
+          borderRight: '1px solid rgba(49, 78, 94, 0.08)',
         }}
       >
         <Stack gap="xs">
@@ -116,7 +116,7 @@ export function AuthenticatedShell({ children }: PropsWithChildren) {
       <AppShell.Main
         style={{
           background:
-            'linear-gradient(180deg, rgba(247, 245, 239, 0.88), rgba(255, 252, 247, 0.96))',
+            'linear-gradient(180deg, rgba(246, 244, 239, 0.92), rgba(255, 255, 255, 0.98))',
           minHeight: '100vh',
         }}
       >

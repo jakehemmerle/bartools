@@ -59,7 +59,7 @@ export function SessionsPage() {
                   <Table.Tr key={session.id}>
                     <Table.Td>
                       <Text
-                        c="ink.7"
+                        c="slate.7"
                         component={Link}
                         fw={600}
                         style={{ textDecoration: 'none' }}
@@ -162,7 +162,7 @@ export function SessionDetailPage() {
                   <Title order={3} size="h4">
                     {record.bottleName}
                   </Title>
-                  <Badge color="ink" radius="sm" variant="light">
+                  <Badge color="slate" radius="sm" variant="light">
                     {record.fillPercent}% full
                   </Badge>
                 </Group>
@@ -174,7 +174,7 @@ export function SessionDetailPage() {
                 </Text>
 
                 {record.corrected && record.originalModelOutput && record.correctedValues ? (
-                  <Paper bg="#fff7eb" p="sm" radius="sm" withBorder>
+                  <Paper bg="#f8f0e5" p="sm" radius="sm" withBorder>
                     <Stack gap={6}>
                       <Text fw={600} size="sm">
                         Corrected values
@@ -233,9 +233,9 @@ function getSessionBadgeColor(status: string) {
     case 'failed':
       return 'brass'
     case 'in_progress':
-      return 'ink'
+      return 'slate'
     default:
-      return 'olive'
+      return 'slate'
   }
 }
 

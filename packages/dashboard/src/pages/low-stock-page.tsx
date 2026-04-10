@@ -48,7 +48,7 @@ export function LowStockPage() {
             Products that have fallen below the stock targets set for the bar.
           </Text>
         </Stack>
-        <Button color="ink" onClick={handleExport} radius="sm" variant="light">
+        <Button color="slate" onClick={handleExport} radius="sm" variant="light">
           Export CSV
         </Button>
       </Group>
