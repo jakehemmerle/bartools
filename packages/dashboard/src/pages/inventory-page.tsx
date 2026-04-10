@@ -16,6 +16,11 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { StatePanel } from '../components/states/state-panel'
 import { inventoryScenarios } from '../lib/fixtures/scenarios'
 import {
+  buildInventoryExportCsv,
+  createExportFilename,
+  downloadCsvFile,
+} from '../lib/export/csv'
+import {
   filterInventoryRows,
   sortInventoryRows,
   type InventoryFilter,
@@ -45,6 +50,12 @@ export function InventoryPage() {
     () => sortInventoryRows(filterInventoryRows(scenario.rows, query, filter), sort),
     [filter, query, scenario.rows, sort],
   )
+  const handleExport = () => {
+    downloadCsvFile(
+      createExportFilename('inventory', scenario.barSettings.timezone),
+      buildInventoryExportCsv(displayedRows, scenario.barSettings.timezone),
+    )
+  }
 
   return (
     <Stack gap="lg">
@@ -56,7 +67,7 @@ export function InventoryPage() {
             confirmed sessions and different dates.
           </Text>
         </Stack>
-        <Button color="ink" radius="sm" variant="light">
+        <Button color="ink" onClick={handleExport} radius="sm" variant="light">
           Export CSV
         </Button>
       </Group>

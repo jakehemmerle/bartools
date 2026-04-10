@@ -14,6 +14,11 @@ import {
 import { useSearchParams } from 'react-router-dom'
 import { StatePanel } from '../components/states/state-panel'
 import { inventoryScenarios } from '../lib/fixtures/scenarios'
+import {
+  buildLowStockExportCsv,
+  createExportFilename,
+  downloadCsvFile,
+} from '../lib/export/csv'
 import { sortLowStockRows, type LowStockSort } from '../lib/inventory-view'
 
 export function LowStockPage() {
@@ -27,6 +32,12 @@ export function LowStockPage() {
     () => sortLowStockRows(source.rows.filter((row) => row.belowPar), sort),
     [sort, source.rows],
   )
+  const handleExport = () => {
+    downloadCsvFile(
+      createExportFilename('low-stock', source.barSettings.timezone),
+      buildLowStockExportCsv(rows, source.barSettings.timezone),
+    )
+  }
 
   return (
     <Stack gap="lg">
@@ -37,7 +48,7 @@ export function LowStockPage() {
             Products that have fallen below the stock targets set for the bar.
           </Text>
         </Stack>
-        <Button color="ink" radius="sm" variant="light">
+        <Button color="ink" onClick={handleExport} radius="sm" variant="light">
           Export CSV
         </Button>
       </Group>
