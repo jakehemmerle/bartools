@@ -190,7 +190,7 @@ export function SettingsPage() {
         <Stack gap="md">
           <Group justify="space-between">
             <Title order={3}>Bar settings</Title>
-            <Badge color={canManage ? 'olive' : 'ink'} radius="sm" variant="light">
+            <Badge color={canManage ? 'slate' : 'ink'} radius="sm" variant="light">
               {canManage ? 'Manager view' : 'Restricted view'}
             </Badge>
           </Group>
@@ -210,7 +210,7 @@ export function SettingsPage() {
               }
               value={defaultPar}
             />
-            <Button color="ink" disabled={!canManage} onClick={handleSaveSettings} radius="sm">
+            <Button color="slate" disabled={!canManage} onClick={handleSaveSettings} radius="sm">
               Save settings
             </Button>
           </Group>
@@ -269,7 +269,7 @@ export function SettingsPage() {
                         <Table.Td>{product.upc}</Table.Td>
                         <Table.Td>
                           {override ? (
-                            <Badge color="olive" radius="sm" variant="light">
+                            <Badge color="slate" radius="sm" variant="light">
                               Override
                             </Badge>
                           ) : (
@@ -295,7 +295,7 @@ export function SettingsPage() {
                         <Table.Td>
                           <Group gap="xs" wrap="nowrap">
                             <Button
-                              color="ink"
+                              color="slate"
                               disabled={!canManage}
                               onClick={() =>
                                 handleSaveOverride(
@@ -339,7 +339,7 @@ export function SettingsPage() {
           <Group justify="space-between">
             <Title order={3}>Team access</Title>
             <Button
-              color="ink"
+              color="slate"
               disabled={!canManage}
               onClick={handleGenerateInviteLink}
               radius="sm"
@@ -388,7 +388,7 @@ export function SettingsPage() {
                   </Table.Td>
                   <Table.Td>
                     <Button
-                      color="olive"
+                      color="slate"
                       disabled={!canManage || member.canManageBar}
                       onClick={() =>
                         handleGrantManager(member.userId, member.displayName)

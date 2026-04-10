@@ -24,11 +24,11 @@ export function LandingPage() {
       />
 
       <Group gap="sm">
-        <Button color="ink" component={Link} radius="sm" to="/sign-up">
+        <Button color="slate" component={Link} radius="sm" to="/sign-up">
           Create an account
         </Button>
         <Button
-          color="olive"
+          color="slate"
           component={Link}
           radius="sm"
           to="/sign-in"
@@ -117,7 +117,7 @@ export function SignInPage() {
           Forgot password?
         </Anchor>
         <Button
-          color="ink"
+          color="slate"
           onClick={() => {
             signInAs('manager')
             navigate('/inventory')
@@ -151,7 +151,7 @@ export function SignUpPage() {
       <TextInput label="Work email" placeholder="avery@thechallenger.example" />
       <PasswordInput label="Password" placeholder="Choose a password" />
       <Button
-        color="ink"
+        color="slate"
         onClick={() => navigate('/onboarding/create')}
         radius="sm"
       >
@@ -168,7 +168,7 @@ export function PasswordResetPage() {
       title="Reset your password"
     >
       <TextInput label="Email" placeholder="avery@thechallenger.example" />
-      <Button color="ink" radius="sm">
+      <Button color="slate" radius="sm">
         Email reset link
       </Button>
       <Text c="dimmed" size="sm">

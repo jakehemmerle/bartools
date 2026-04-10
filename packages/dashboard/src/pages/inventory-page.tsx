@@ -67,7 +67,7 @@ export function InventoryPage() {
             confirmed sessions and different dates.
           </Text>
         </Stack>
-        <Button color="ink" onClick={handleExport} radius="sm" variant="light">
+        <Button color="slate" onClick={handleExport} radius="sm" variant="light">
           Export CSV
         </Button>
       </Group>
@@ -156,7 +156,7 @@ export function InventoryPage() {
                         Below par
                       </Badge>
                     ) : (
-                      <Badge color="olive" radius="sm" variant="light">
+                      <Badge color="slate" radius="sm" variant="light">
                         In range
                       </Badge>
                     )}
@@ -174,7 +174,7 @@ export function InventoryPage() {
                   <Table.Td>
                     {row.latestSessionId ? (
                       <Text
-                        c="ink.7"
+                        c="slate.7"
                         component={Link}
                         fw={600}
                         style={{ textDecoration: 'none' }}

@@ -17,7 +17,7 @@ export function PublicShell({ children }: PropsWithChildren) {
       style={{
         minHeight: '100vh',
         background:
-          'radial-gradient(circle at top left, rgba(153, 164, 99, 0.16), transparent 32%), linear-gradient(180deg, #f6f3ea 0%, #eeebe3 100%)',
+          'radial-gradient(circle at top left, rgba(49, 78, 94, 0.14), transparent 34%), linear-gradient(180deg, #f3f1ec 0%, #ebe8e1 100%)',
       }}
     >
       <Container size="lg" px="lg" py="lg">
@@ -34,7 +34,7 @@ export function PublicShell({ children }: PropsWithChildren) {
             <Anchor component={Link} fw={600} to="/sign-in">
               Sign in
             </Anchor>
-            <Button color="ink" component={Link} radius="sm" to="/sign-up">
+            <Button color="slate" component={Link} radius="sm" to="/sign-up">
               Start free
             </Button>
           </Group>
@@ -45,8 +45,8 @@ export function PublicShell({ children }: PropsWithChildren) {
           radius="lg"
           shadow="sm"
           style={{
-            background: 'rgba(255, 252, 247, 0.88)',
-            border: '1px solid rgba(61, 76, 73, 0.08)',
+            background: 'rgba(255, 255, 255, 0.8)',
+            border: '1px solid rgba(49, 78, 94, 0.1)',
             backdropFilter: 'blur(10px)',
           }}
         >
@@ -68,7 +68,7 @@ export function PublicPageHeader({
 }) {
   return (
     <Box mb="xl">
-      <Text c="olive.8" fw={700} size="sm" tt="uppercase">
+      <Text c="brass.7" fw={700} size="sm" tt="uppercase">
         {eyebrow}
       </Text>
       <Title order={1} mt="xs" maw={720}>

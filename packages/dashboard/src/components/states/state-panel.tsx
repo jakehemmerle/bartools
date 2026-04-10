@@ -3,16 +3,16 @@ import { Box, Button, Group, Paper, Text, Title } from '@mantine/core'
 
 const toneStyles = {
   neutral: {
-    background: '#fffdf8',
-    borderColor: 'rgba(61, 76, 73, 0.1)',
+    background: '#fbfaf7',
+    borderColor: 'rgba(49, 78, 94, 0.12)',
   },
   warning: {
-    background: '#fff7eb',
-    borderColor: 'rgba(204, 123, 21, 0.2)',
+    background: '#f8f0e5',
+    borderColor: 'rgba(181, 121, 61, 0.24)',
   },
   danger: {
-    background: '#fff1ee',
-    borderColor: 'rgba(171, 79, 50, 0.2)',
+    background: '#f7ece8',
+    borderColor: 'rgba(159, 75, 67, 0.22)',
   },
 } as const
 
@@ -56,7 +56,7 @@ export function StateAction({
 }) {
   return (
     <Group>
-      <Button color="ink" radius="sm" variant="light">
+      <Button color="slate" radius="sm" variant="light">
         {label}
       </Button>
     </Group>
