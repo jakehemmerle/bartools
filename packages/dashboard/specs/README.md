@@ -24,6 +24,8 @@ When a backend capability matters to the dashboard, the spec should describe the
 - Prefer TanStack Query for dashboard server state once real data fetching is introduced
 - Do not adopt Zustand by default for MVP
 - Use local React state first for simple UI state, and add a client state library only if real cross-page state needs emerge
+- During dashboard MVP, `packages/dashboard` should not import rendered UI components from `@bartools/ui`
+- Treat `packages/ui` as mobile-oriented for rendered components until the team makes a deliberate cross-platform UI decision
 
 ## MVP Surfaces
 
@@ -44,6 +46,17 @@ When a backend capability matters to the dashboard, the spec should describe the
 - `csv-export.md` — export behaviors and constraints
 - `data-contracts.md` — proposed dashboard-facing data shapes and endpoints
 - `open-questions.md` — parking lot for any new decisions that emerge during review
+
+## Coordination Docs
+
+Execution-facing planning now lives in [packages/dashboard/coordination/README.md](/Users/patrick/Code/gauntlet/capstone/bartools/main_repo/bartools/packages/dashboard/coordination/README.md).
+
+That directory contains:
+
+- phased implementation planning
+- fixture and testing strategy
+- execution backlog
+- ticket-sized work slices
 
 ## Review Guidance
 

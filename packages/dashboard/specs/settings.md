@@ -16,7 +16,7 @@ This surface assumes a user already belongs to a bar. Initial bar creation or jo
 ## Out Of Scope
 
 - Multi-bar management
-- Full team management
+- Broad team administration beyond invite links, member visibility, and manager grants
 - Billing
 - Distributor integrations
 - Advanced preferences
@@ -26,7 +26,7 @@ This surface assumes a user already belongs to a bar. Initial bar creation or jo
 - As a bar owner or manager, I want to set my bar timezone so dates and times are shown correctly
 - As a bar owner or manager, I want to set a default PAR level so the product has a sensible baseline
 - As a bar owner or manager, I want to override PAR by product so `Below Par` reflects real operational needs
-- As an existing employee, I want to generate an invite link so another employee can join the same bar
+- As a bar manager, I want to generate an invite link so another employee can join the same bar
 - As a bar manager, I want to grant manager access to another employee so the bar is not dependent on one account
 
 ## Sections
@@ -38,6 +38,8 @@ Required fields:
 - Timezone
 - Default PAR level
 
+For MVP, default PAR must map to the same canonical milliliter-based unit used by inventory and low-stock comparisons, even if the UI later presents friendlier labels.
+
 ### Product PAR Overrides
 
 Required capabilities:
@@ -46,6 +48,7 @@ Required capabilities:
 - View current override value if one exists
 - Add or update a per-product PAR override
 - Remove an override and fall back to the bar default
+- Keep override values aligned to the same canonical milliliter-based unit used by inventory and low-stock comparisons
 
 ### Team Access
 
@@ -73,5 +76,5 @@ Required capabilities:
 - Users can set a bar-level default PAR in MVP
 - Users can add, edit, and remove product-specific PAR overrides in MVP
 - Low-stock behavior can be meaningfully configured without leaving the dashboard
-- Existing employees can generate invite links so additional employees can join the same bar
+- Users with manager capability can generate invite links so additional employees can join the same bar
 - Users with manager capability can grant that capability to other existing members of the same bar
