@@ -125,7 +125,15 @@ export const settingsScenarios = {
     }),
     barSettings: makeBarSettings(),
     overrides: [makeProductParOverride()],
-    members: [makeBarMember(), makeBarMember({ canManageBar: true })],
+    members: [
+      makeBarMember(),
+      makeBarMember({
+        userId: 'user-manager-2',
+        email: 'avery@thechallenger.example',
+        displayName: 'Avery Quinn',
+        canManageBar: true,
+      }),
+    ],
   }),
 } satisfies Record<string, SettingsScenario>
 
