@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
+    "lint": "eslint .",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
@@ -15,7 +16,11 @@
     "pg": "^8.20.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/pg": "^8.20.0",
-    "drizzle-kit": "^0.31.10"
+    "drizzle-kit": "^0.31.10",
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
+    "typescript-eslint": "^8.58.1"
   }
 }
