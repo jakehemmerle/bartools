@@ -12,7 +12,7 @@ type CameraCaptureProps = {
   onPhotoTaken: (uri: string) => void;
 };
 
-function PermissionDenied() {
+export function PermissionDenied() {
   return (
     <View style={styles.centered}>
       <Text style={styles.title}>Camera Access Required</Text>
