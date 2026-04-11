@@ -38,13 +38,15 @@ BarBack is a bar inventory management system that uses phone camera photos + a v
 
 ### M3: Photo Capture Flow
 - **Owner:** Ray
-- **Scope:** Camera integration (expo-camera or expo-image-picker camera mode). Photo library picker. Batch queue UI — take/select multiple photos, see thumbnail grid, remove individual photos, submit batch. Location selector per session (dropdown of venue locations).
+- **Scope:** Camera integration using `react-native-vision-camera` v5 (requires Expo dev build, not Expo Go). Photo library picker via `expo-image-picker` for selecting existing photos. Batch queue UI — take/select multiple photos, see thumbnail grid, remove individual photos, submit batch. Location selector per session (dropdown of venue locations). Vision Camera chosen over expo-camera to set up the Frame Processor pipeline for Tier 2/3 (on-device YOLO detection, best-frame trigger, GPU resizing) without a future rewrite.
 - **Acceptance Criteria:**
-  - [ ] User can take a photo with the device camera and it appears in the batch queue
-  - [ ] User can select photos from the library and they appear in the batch queue
+  - [ ] Expo dev build configured (no Expo Go dependency)
+  - [ ] User can take a photo with `react-native-vision-camera` and it appears in the batch queue
+  - [ ] User can select photos from the library (expo-image-picker) and they appear in the batch queue
   - [ ] Batch queue shows thumbnail grid with count; user can remove individual photos
   - [ ] User can select a location from a list before submitting
   - [ ] Submit button sends batch (disabled when queue is empty)
+  - [ ] Camera permissions handled gracefully (request, denied state, settings link)
 - **Dependencies:** M1
 - **Complexity:** Medium
 
