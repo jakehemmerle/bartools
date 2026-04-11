@@ -34,3 +34,6 @@ Selective Capture: Once the local model "locks on" to a bottle for more than 500
 Cloud Analysis: Send that optimized, cropped image to a model like GPT-5.4-nano or Gemini 3.1 Flash-Lite for the final brand identification and fill-level estimation.
 
 This approach ensures you only hit your paid API for images that are guaranteed to contain a clear, well-framed liquor bottle, maximizing your accuracy while minimizing your "wasteful" spend on blurry or empty frames.
+
+BarBack Tier Mapping
+The "best frame" trigger pattern isn't just a Tier 2/3 feature — it could improve Tier 1 UX as well. Instead of requiring the user to manually tap a shutter button, the camera could auto-capture when it detects a clear, well-framed bottle. This turns single-bottle capture from "take a photo" into "point at the bottle" — faster for the user and more consistent input for the VLM.
