@@ -5,7 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { FillLevelSlider } from '../../../components/FillLevelSlider'
-import { ITEM_CATEGORIES } from '../../../types/enums'
+import { ITEM_CATEGORIES } from '@bartools/types'
 import { MOCK_LOCATIONS } from '../../../data/mockData'
 
 export default function AddManuallyScreen() {
@@ -13,15 +13,14 @@ export default function AddManuallyScreen() {
   const router = useRouter()
   const { photoUri } = useLocalSearchParams<{ photoUri?: string }>()
 
-  const [brand, setBrand] = useState('')
-  const [product, setProduct] = useState('')
+  const [name, setName] = useState('')
   const [category, setCategory] = useState('bourbon')
   const [sizeMl, setSizeMl] = useState('750')
   const [fillLevel, setFillLevel] = useState(100)
   const [location, setLocation] = useState(MOCK_LOCATIONS[0]?.name ?? 'Main Bar')
 
   const handleSubmit = () => {
-    console.log('Add to inventory:', { brand, product, category, sizeMl, fillLevel, location, photoUri })
+    console.log('Add to inventory:', { name, category, sizeMl, fillLevel, location, photoUri })
     router.back()
   }
 
@@ -51,29 +50,18 @@ export default function AddManuallyScreen() {
           </View>
         ) : null}
 
-        {/* Brand + Product fields */}
+        {/* Bottle name */}
         <View style={styles.fieldGroup}>
           <View style={styles.field}>
-            <Text style={[styles.label, { color: theme.primary }]}>Brand</Text>
+            <Text style={[styles.label, { color: theme.primary }]}>Bottle Name</Text>
             <TextInput
               style={[styles.input, { color: theme.onSurface, borderBottomColor: theme.outline }]}
-              placeholder="e.g. Buffalo Trace"
+              placeholder="e.g. Buffalo Trace Kentucky Straight"
               placeholderTextColor={theme.surfaceVariant}
-              value={brand}
-              onChangeText={setBrand}
+              value={name}
+              onChangeText={setName}
             />
-            <Text style={[styles.hint, { color: theme.outline }]}>The house of origin</Text>
-          </View>
-
-          <View style={styles.field}>
-            <Text style={[styles.label, { color: theme.primary }]}>Product Name</Text>
-            <TextInput
-              style={[styles.input, { color: theme.onSurface, borderBottomColor: theme.outline }]}
-              placeholder="e.g. Kentucky Straight Bourbon"
-              placeholderTextColor={theme.surfaceVariant}
-              value={product}
-              onChangeText={setProduct}
-            />
+            <Text style={[styles.hint, { color: theme.outline }]}>Full name as shown on label</Text>
           </View>
         </View>
 

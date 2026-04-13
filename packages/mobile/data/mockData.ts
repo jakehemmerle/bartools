@@ -1,4 +1,4 @@
-import type { Bottle, Location, InventoryItem } from '../types'
+import type { Bottle, Location, InventoryItem } from '@bartools/types'
 
 // Locations
 export const MOCK_LOCATIONS: Location[] = [
@@ -7,45 +7,45 @@ export const MOCK_LOCATIONS: Location[] = [
   { id: 'loc-3', venueId: 'v-1', name: 'Pool Bar', createdAt: '2024-01-01T00:00:00Z' },
 ]
 
-// Bottles (from Stitch screens)
+// Bottles (from Stitch screens) — uses `name` (single field, per @bartools/types)
 export const MOCK_BOTTLES: Bottle[] = [
   {
-    id: 'b-1', brand: 'Old Grand-Dad', product: '114',
+    id: 'b-1', name: 'Old Grand-Dad 114',
     category: 'bourbon', subcategory: 'High Rye',
     sizeMl: 750, abv: 57, createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 'b-2', brand: 'Buffalo Trace', product: 'Kentucky Straight',
+    id: 'b-2', name: 'Buffalo Trace Kentucky Straight',
     category: 'bourbon', subcategory: 'Kentucky Straight',
     sizeMl: 1000, abv: 45, createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 'b-3', brand: 'The Botanist', product: 'Islay Dry Gin',
+    id: 'b-3', name: 'The Botanist Islay Dry Gin',
     category: 'gin', subcategory: 'Dry Gin',
     sizeMl: 700, abv: 46, createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 'b-4', brand: 'Macallan', product: '12 Year',
+    id: 'b-4', name: 'Macallan 12 Year',
     category: 'scotch', subcategory: 'Speyside Single Malt',
     sizeMl: 750, abv: 43, createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 'b-5', brand: "Hendrick's", product: 'Gin',
+    id: 'b-5', name: "Hendrick's Gin",
     category: 'gin', subcategory: 'Small Batch',
     sizeMl: 750, abv: 44, createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 'b-6', brand: 'Aviation', product: 'American Gin',
+    id: 'b-6', name: 'Aviation American Gin',
     category: 'gin', subcategory: 'House Recommended',
     sizeMl: 750, abv: 42, createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 'b-7', brand: 'Carpano', product: 'Antica Formula',
+    id: 'b-7', name: 'Carpano Antica Formula',
     category: 'vermouth', subcategory: 'Sweet Vermouth',
     sizeMl: 1000, abv: 16.5, createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 'b-8', brand: 'Angostura', product: 'Aromatic Bitters',
+    id: 'b-8', name: 'Angostura Aromatic Bitters',
     category: 'bitters', subcategory: 'Aromatic',
     sizeMl: 200, abv: 44.7, createdAt: '2024-01-01T00:00:00Z',
   },
@@ -65,8 +65,8 @@ export const MOCK_INVENTORY: InventoryItem[] = [
 
 // Low stock alert type
 export type LowStockAlert = {
-  bottle: Bottle
-  location: Location
+  bottle: Pick<Bottle, 'id' | 'name'>
+  location: Pick<Location, 'id' | 'name'>
   fillPercent: number
   parThreshold: number
 }
