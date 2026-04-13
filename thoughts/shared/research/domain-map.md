@@ -13,9 +13,9 @@
 ## Core Workflow (Tier 1 MVP)
 1. User opens app, starts an inventory session for a venue
 2. Selects location within venue (Main Bar, Pool Bar, etc.)
-3. Takes photos of individual bottles (camera or photo library)
+3. Takes photos of individual bottles (VisionCamera v4.7.3 — camera or photo library)
 4. Submits batch to backend
-5. Backend processes each image through VLM (model TBD — eval harness testing Claude Sonnet 4.6), returns results progressively (SSE)
+5. Backend processes each image through Claude Sonnet 4.6 VLM, returns results progressively (SSE)
 6. User reviews two-column ScrollView: thumbnail | identified data + fill slider (0-10 tenths)
 7. User corrects any misidentifications, adjusts fill levels (corrections serve as SME-annotated training data)
 8. User confirms → data persisted to inventory per location
@@ -54,4 +54,4 @@
 
 ## System Boundary
 - **In scope (MVP):** Mobile app, backend API, VLM integration, inventory persistence, dashboard (inventory table, low-stock, sessions, settings, CSV export), basic auth
-- **Out of scope (MVP):** Distributor integrations, auto-ordering agent, fixed cameras, multi-venue switching in dashboard, advanced roles/permissions, web-based capture, analytics/forecasting
+- **Out of scope (MVP):** Distributor integrations, auto-ordering agent, fixed cameras, multi-venue switching in dashboard, advanced roles/permissions, web-based capture, analytics/forecasting, on-device detection sentry (Tier 2 — RF-DETR Nano, ADR-008)
