@@ -2,22 +2,22 @@ import { screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { renderAppRoutes } from '../test/test-utils'
 
-describe('Sessions routes', () => {
-  it('shows an empty state for the sessions history when no counts are present', () => {
+describe('Reports routes', () => {
+  it('shows an empty state for the reports history when no counts are present', () => {
     localStorage.setItem('bartools.dashboard.fixture-persona', 'manager')
 
     renderAppRoutes({
-      initialEntries: ['/sessions?scenario=empty'],
+      initialEntries: ['/reports?scenario=empty'],
     })
 
-    expect(screen.getByText('No completed sessions yet')).toBeInTheDocument()
+    expect(screen.getByText('No completed reports yet')).toBeInTheDocument()
   })
 
   it('shows missing-media fallback without hiding the record details', () => {
     localStorage.setItem('bartools.dashboard.fixture-persona', 'manager')
 
     renderAppRoutes({
-      initialEntries: ['/sessions/session-missing-media'],
+      initialEntries: ['/reports/report-missing-media'],
     })
 
     expect(screen.getByText('Image unavailable')).toBeInTheDocument()
@@ -29,7 +29,7 @@ describe('Sessions routes', () => {
     localStorage.setItem('bartools.dashboard.fixture-persona', 'manager')
 
     renderAppRoutes({
-      initialEntries: ['/sessions/session-1001'],
+      initialEntries: ['/reports/report-1001'],
     })
 
     expect(screen.getByText('Corrected values')).toBeInTheDocument()

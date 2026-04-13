@@ -50,21 +50,21 @@ export const inventoryProductRowSchema = z.object({
   parComparableAmount: z.number().optional(),
   barDefaultParComparableAmount: z.number().optional(),
   asOf: z.string(),
-  latestSessionId: z.string().optional(),
-  sourceSessionStatus: z.literal('confirmed'),
+  latestReportId: z.string().optional(),
+  sourceReportStatus: z.literal('reviewed'),
 })
 
-export const sessionListItemSchema = z.object({
+export const reportListItemSchema = z.object({
   id: z.string(),
   startedAt: z.string().optional(),
   completedAt: z.string().optional(),
   userId: z.string().optional(),
   userDisplayName: z.string().optional(),
   bottleCount: z.number().int().nonnegative(),
-  status: z.enum(['in_progress', 'confirmed', 'failed']),
+  status: z.enum(['created', 'processing', 'unreviewed', 'reviewed']),
 })
 
-export const sessionBottleRecordSchema = z.object({
+export const reportBottleRecordSchema = z.object({
   id: z.string(),
   imageUrl: z.string(),
   bottleName: z.string(),
@@ -93,14 +93,14 @@ export const sessionBottleRecordSchema = z.object({
     .optional(),
 })
 
-export const sessionDetailSchema = z.object({
+export const reportDetailSchema = z.object({
   id: z.string(),
   startedAt: z.string().optional(),
   completedAt: z.string().optional(),
   userId: z.string().optional(),
   userDisplayName: z.string().optional(),
-  status: z.enum(['in_progress', 'confirmed', 'failed']),
-  bottleRecords: z.array(sessionBottleRecordSchema),
+  status: z.enum(['created', 'processing', 'unreviewed', 'reviewed']),
+  bottleRecords: z.array(reportBottleRecordSchema),
 })
 
 export const inventoryScenarioSchema = z.object({
@@ -117,10 +117,10 @@ export const settingsScenarioSchema = z.object({
   inviteLink: inviteLinkSchema.optional(),
 })
 
-export const sessionsScenarioSchema = z.object({
+export const reportsScenarioSchema = z.object({
   user: userSchema,
-  sessions: z.array(sessionListItemSchema),
-  details: z.record(z.string(), sessionDetailSchema),
+  reports: z.array(reportListItemSchema),
+  details: z.record(z.string(), reportDetailSchema),
 })
 
 export type User = z.infer<typeof userSchema>
@@ -128,8 +128,8 @@ export type BarMember = z.infer<typeof barMemberSchema>
 export type BarSettings = z.infer<typeof barSettingsSchema>
 export type ProductParOverride = z.infer<typeof productParOverrideSchema>
 export type InventoryProductRow = z.infer<typeof inventoryProductRowSchema>
-export type SessionListItem = z.infer<typeof sessionListItemSchema>
-export type SessionDetail = z.infer<typeof sessionDetailSchema>
+export type ReportListItem = z.infer<typeof reportListItemSchema>
+export type ReportDetail = z.infer<typeof reportDetailSchema>
 export type InventoryScenario = z.infer<typeof inventoryScenarioSchema>
 export type SettingsScenario = z.infer<typeof settingsScenarioSchema>
-export type SessionsScenario = z.infer<typeof sessionsScenarioSchema>
+export type ReportsScenario = z.infer<typeof reportsScenarioSchema>

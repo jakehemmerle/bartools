@@ -17,7 +17,7 @@ import { useFixtureSession } from '../../lib/fixture-session'
 const appLinks = [
   { to: '/inventory', label: 'Inventory' },
   { to: '/low-stock', label: 'Low Stock' },
-  { to: '/sessions', label: 'Sessions' },
+  { to: '/reports', label: 'Reports' },
   { to: '/settings', label: 'Settings' },
 ]
 
@@ -96,8 +96,8 @@ export function AuthenticatedShell({ children }: PropsWithChildren) {
           <Divider />
           {appLinks.map((link) => {
             const active =
-              link.to === '/sessions'
-                ? location.pathname.startsWith('/sessions')
+              link.to === '/reports'
+                ? location.pathname.startsWith('/reports')
                 : location.pathname.startsWith(link.to)
 
             return (
