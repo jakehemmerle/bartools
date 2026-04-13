@@ -11,6 +11,9 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
-config.resolver.disableHierarchicalLookup = true;
+// Let Metro walk up directory trees inside node_modules/.bun/ so each
+// package resolves its own transitive deps from bun's nested store.
+// Without this, bun monorepos fail on any transitive require().
+config.resolver.disableHierarchicalLookup = false;
 
 module.exports = config;
