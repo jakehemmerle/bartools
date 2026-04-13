@@ -55,11 +55,25 @@ export const reportStatusEnum = pgEnum('report_status', [
   'created', // report created, user may still be taking photos
   'processing', // batch submitted, VLM processing in progress
   'unreviewed', // results returned, awaiting user review
-  'reviewed', // user reviewed results, inventory updated
+  'reviewed', // user reviewed all records; report is final
 ]);
 
 // Fill levels are stored as integers in tenths (0..10 → 0%..100% in 10% steps).
 // No PG enum — application-level validation enforces the range.
+
+export const reportRecordStatusEnum = pgEnum('report_record_status', [
+  'pending',
+  'inferred',
+  'failed',
+  'reviewed',
+]);
+
+export const inferenceJobStatusEnum = pgEnum('inference_job_status', [
+  'queued',
+  'running',
+  'succeeded',
+  'failed',
+]);
 
 // ─── Users ───────────────────────────────────────────────────────────
 
@@ -183,6 +197,7 @@ export const scans = pgTable(
     locationId: uuid('location_id').references(() => locations.id), // which sub-area was being counted
     bottleId: uuid('bottle_id').references(() => bottles.id), // null if unrecognized
     photoUrl: text('photo_url').notNull(),
+    sortOrder: integer('sort_order').notNull().default(0),
     vlmFillTenths: integer('vlm_fill_tenths'), // 0..10, the VLM's fill estimate at scan time
     confidenceScore: numeric('confidence_score', { precision: 4, scale: 3 }), // 0.000–1.000
     rawResponse: jsonb('raw_response'), // full LLM response for debugging
@@ -197,6 +212,110 @@ export const scans = pgTable(
     index('scans_location_idx').on(table.locationId),
     index('scans_bottle_idx').on(table.bottleId),
     index('scans_scanned_at_idx').on(table.scannedAt),
+  ]
+);
+
+// ─── Report records (review-layer view over scans) ──────────────────
+// One row per uploaded photo after a report is submitted. This separates:
+// 1. raw capture (`scans`)
+// 2. model output (`original_*`)
+// 3. reviewed final output (`corrected_*`)
+
+export const reportRecords = pgTable(
+  'report_records',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    reportId: uuid('report_id')
+      .notNull()
+      .references(() => reports.id, { onDelete: 'cascade' }),
+    scanId: uuid('scan_id')
+      .notNull()
+      .references(() => scans.id, { onDelete: 'cascade' }),
+    status: reportRecordStatusEnum('status').notNull().default('pending'),
+    originalBottleId: uuid('original_bottle_id').references(() => bottles.id),
+    originalBottleName: text('original_bottle_name'),
+    originalCategory: itemCategoryEnum('original_category'),
+    originalUpc: text('original_upc'),
+    originalVolumeMl: integer('original_volume_ml'),
+    originalFillTenths: integer('original_fill_tenths'),
+    originalConfidenceScore: numeric('original_confidence_score', {
+      precision: 4,
+      scale: 3,
+    }),
+    correctedBottleId: uuid('corrected_bottle_id').references(() => bottles.id),
+    correctedBottleName: text('corrected_bottle_name'),
+    correctedCategory: itemCategoryEnum('corrected_category'),
+    correctedUpc: text('corrected_upc'),
+    correctedVolumeMl: integer('corrected_volume_ml'),
+    correctedFillTenths: integer('corrected_fill_tenths'),
+    correctedByUserId: uuid('corrected_by_user_id').references(() => users.id),
+    errorCode: text('error_code'),
+    errorMessage: text('error_message'),
+    inferredAt: timestamp('inferred_at', { withTimezone: true }),
+    correctedAt: timestamp('corrected_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique('report_records_scan_uniq').on(table.scanId),
+    index('report_records_report_idx').on(table.reportId),
+    index('report_records_status_idx').on(table.status),
+  ]
+);
+
+// ─── Inference queue bookkeeping ────────────────────────────────────
+
+export const inferenceJobs = pgTable(
+  'inference_jobs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    reportId: uuid('report_id')
+      .notNull()
+      .references(() => reports.id, { onDelete: 'cascade' }),
+    scanId: uuid('scan_id')
+      .notNull()
+      .references(() => scans.id, { onDelete: 'cascade' }),
+    status: inferenceJobStatusEnum('status').notNull().default('queued'),
+    provider: text('provider').notNull().default('anthropic'),
+    jobKey: text('job_key').notNull().unique(),
+    queuedAt: timestamp('queued_at', { withTimezone: true }).defaultNow().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    lastErrorCode: text('last_error_code'),
+    lastErrorMessage: text('last_error_message'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique('inference_jobs_scan_uniq').on(table.scanId),
+    index('inference_jobs_report_idx').on(table.reportId),
+    index('inference_jobs_status_idx').on(table.status),
+  ]
+);
+
+export const inferenceAttempts = pgTable(
+  'inference_attempts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    jobId: uuid('job_id')
+      .notNull()
+      .references(() => inferenceJobs.id, { onDelete: 'cascade' }),
+    attemptNumber: integer('attempt_number').notNull(),
+    modelUsed: text('model_used'),
+    promptName: text('prompt_name').notNull(),
+    promptSource: text('prompt_source').notNull().default('langsmith'),
+    promptResolvedVersion: text('prompt_resolved_version'),
+    latencyMs: integer('latency_ms'),
+    confidenceScore: numeric('confidence_score', { precision: 4, scale: 3 }),
+    rawResponse: jsonb('raw_response'),
+    errorCode: text('error_code'),
+    errorMessage: text('error_message'),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+  },
+  (table) => [
+    unique('inference_attempts_job_attempt_uniq').on(table.jobId, table.attemptNumber),
+    index('inference_attempts_job_idx').on(table.jobId),
   ]
 );
 
@@ -233,6 +352,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   venueMemberships: many(venueMembers),
   reports: many(reports),
   scans: many(scans),
+  correctedReportRecords: many(reportRecords),
 }));
 
 export const venuesRelations = relations(venues, ({ many }) => ({
@@ -257,6 +377,12 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
 export const bottlesRelations = relations(bottles, ({ many }) => ({
   scans: many(scans),
   inventoryItems: many(inventory),
+  originalReportRecords: many(reportRecords, {
+    relationName: 'report_record_original_bottle',
+  }),
+  correctedReportRecords: many(reportRecords, {
+    relationName: 'report_record_corrected_bottle',
+  }),
 }));
 
 export const reportsRelations = relations(reports, ({ one, many }) => ({
@@ -264,6 +390,8 @@ export const reportsRelations = relations(reports, ({ one, many }) => ({
   venue: one(venues, { fields: [reports.venueId], references: [venues.id] }),
   location: one(locations, { fields: [reports.locationId], references: [locations.id] }),
   scans: many(scans),
+  records: many(reportRecords),
+  inferenceJobs: many(inferenceJobs),
 }));
 
 export const scansRelations = relations(scans, ({ one }) => ({
@@ -272,6 +400,40 @@ export const scansRelations = relations(scans, ({ one }) => ({
   venue: one(venues, { fields: [scans.venueId], references: [venues.id] }),
   location: one(locations, { fields: [scans.locationId], references: [locations.id] }),
   bottle: one(bottles, { fields: [scans.bottleId], references: [bottles.id] }),
+  record: one(reportRecords, { fields: [scans.id], references: [reportRecords.scanId] }),
+  inferenceJob: one(inferenceJobs, { fields: [scans.id], references: [inferenceJobs.scanId] }),
+}));
+
+export const reportRecordsRelations = relations(reportRecords, ({ one }) => ({
+  report: one(reports, { fields: [reportRecords.reportId], references: [reports.id] }),
+  scan: one(scans, { fields: [reportRecords.scanId], references: [scans.id] }),
+  originalBottle: one(bottles, {
+    relationName: 'report_record_original_bottle',
+    fields: [reportRecords.originalBottleId],
+    references: [bottles.id],
+  }),
+  correctedBottle: one(bottles, {
+    relationName: 'report_record_corrected_bottle',
+    fields: [reportRecords.correctedBottleId],
+    references: [bottles.id],
+  }),
+  correctedByUser: one(users, {
+    fields: [reportRecords.correctedByUserId],
+    references: [users.id],
+  }),
+}));
+
+export const inferenceJobsRelations = relations(inferenceJobs, ({ one, many }) => ({
+  report: one(reports, { fields: [inferenceJobs.reportId], references: [reports.id] }),
+  scan: one(scans, { fields: [inferenceJobs.scanId], references: [scans.id] }),
+  attempts: many(inferenceAttempts),
+}));
+
+export const inferenceAttemptsRelations = relations(inferenceAttempts, ({ one }) => ({
+  job: one(inferenceJobs, {
+    fields: [inferenceAttempts.jobId],
+    references: [inferenceJobs.id],
+  }),
 }));
 
 export const inventoryRelations = relations(inventory, ({ one }) => ({
