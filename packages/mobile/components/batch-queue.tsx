@@ -5,40 +5,52 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
+  Pressable,
+  Dimensions,
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../theme/useTheme';
+import type { ThemeTokens } from '../theme/tokens';
 import type { QueuedPhoto } from '../lib/use-batch-queue';
 
 type BatchQueueProps = {
   photos: QueuedPhoto[];
   onRemove: (id: string) => void;
   onClear: () => void;
+  onDone?: () => void;
 };
 
 function QueueThumbnail({
   photo,
   onRemove,
+  theme,
 }: {
   photo: QueuedPhoto;
   onRemove: (id: string) => void;
+  theme: ThemeTokens;
 }) {
   return (
     <View style={styles.thumbnailContainer}>
-      <Image source={{ uri: photo.uri }} style={styles.thumbnail} />
+      <Image source={{ uri: photo.uri }} style={[styles.thumbnail, { backgroundColor: theme.surfaceContainerHighest }]} />
       <TouchableOpacity
-        style={styles.removeButton}
+        style={[styles.removeButton, { backgroundColor: theme.error }]}
         onPress={() => onRemove(photo.id)}
       >
-        <Text style={styles.removeButtonText}>×</Text>
+        <MaterialCommunityIcons name="close-circle" size={18} color={theme.onError} />
       </TouchableOpacity>
     </View>
   );
 }
 
-export function BatchQueue({ photos, onRemove, onClear }: BatchQueueProps) {
+const DONE_WIDTH = Math.round(Dimensions.get('window').width * 0.1);
+
+export function BatchQueue({ photos, onRemove, onClear, onDone }: BatchQueueProps) {
+  const theme = useTheme();
+
   if (photos.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>No photos queued</Text>
+        <Text style={[styles.emptyText, { color: theme.textMuted }]}>No photos queued</Text>
       </View>
     );
   }
@@ -46,9 +58,9 @@ export function BatchQueue({ photos, onRemove, onClear }: BatchQueueProps) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.count}>{photos.length} photo{photos.length !== 1 ? 's' : ''}</Text>
+        <Text style={[styles.count, { color: theme.text }]}>{photos.length} photo{photos.length !== 1 ? 's' : ''}</Text>
         <TouchableOpacity onPress={onClear}>
-          <Text style={styles.clearText}>Clear All</Text>
+          <Text style={[styles.clearText, { color: theme.error }]}>Clear All</Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -58,8 +70,25 @@ export function BatchQueue({ photos, onRemove, onClear }: BatchQueueProps) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
-          <QueueThumbnail photo={item} onRemove={onRemove} />
+          <QueueThumbnail photo={item} onRemove={onRemove} theme={theme} />
         )}
+        ListFooterComponent={
+          onDone ? (
+            <Pressable
+              onPress={onDone}
+              style={({ pressed }) => [
+                styles.doneButton,
+                { backgroundColor: theme.primary, opacity: pressed ? 0.8 : 1 },
+              ]}
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel="Done — review scanned bottles"
+            >
+              <MaterialCommunityIcons name="check-circle" size={24} color={theme.onPrimary} />
+            </Pressable>
+          ) : null
+        }
+        ListFooterComponentStyle={styles.doneFooter}
       />
     </View>
   );
@@ -80,11 +109,9 @@ const styles = StyleSheet.create({
   count: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#374151',
   },
   clearText: {
     fontSize: 14,
-    color: '#ef4444',
     fontWeight: '500',
   },
   list: {
@@ -98,7 +125,6 @@ const styles = StyleSheet.create({
     width: THUMB_SIZE,
     height: THUMB_SIZE,
     borderRadius: 8,
-    backgroundColor: '#e5e7eb',
   },
   removeButton: {
     position: 'absolute',
@@ -107,15 +133,8 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#ef4444',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  removeButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-    lineHeight: 16,
   },
   empty: {
     padding: 16,
@@ -123,6 +142,16 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: '#9ca3af',
+  },
+  doneFooter: {
+    justifyContent: 'center',
+    marginLeft: 8,
+  },
+  doneButton: {
+    width: DONE_WIDTH,
+    height: THUMB_SIZE,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

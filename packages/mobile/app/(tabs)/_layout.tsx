@@ -1,18 +1,38 @@
-import { Tabs } from 'expo-router';
+import { Platform } from 'react-native'
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { Tabs } from 'expo-router'
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
-        tabBarActiveTintColor: '#2563eb',
+        headerShown: false,
+        tabBarActiveTintColor: '#FFB782',
+        tabBarInactiveTintColor: '#A08D80',
+        tabBarStyle: {
+          backgroundColor: '#1C1B1B',
+          borderTopWidth: 0,
+          elevation: 0,
+          height: Platform.OS === 'ios' ? 85 : 110,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 48,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontFamily: 'SpaceGrotesk',
+          fontSize: 11,
+          fontWeight: '500',
+          letterSpacing: 0.5,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Capture',
-          tabBarLabel: 'Capture',
+          title: 'Scan',
+          tabBarLabel: 'Scan',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="camera" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -20,13 +40,9 @@ export default function TabLayout() {
         options={{
           title: 'Inventory',
           tabBarLabel: 'Inventory',
-        }}
-      />
-      <Tabs.Screen
-        name="alerts"
-        options={{
-          title: 'Alerts',
-          tabBarLabel: 'Alerts',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="liquor" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -34,8 +50,11 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarLabel: 'Settings',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cog" color={color} size={size} />
+          ),
         }}
       />
     </Tabs>
-  );
+  )
 }
