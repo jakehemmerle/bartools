@@ -50,7 +50,7 @@ Bar staff spend ~5 hours/month manually counting liquor bottles and estimating f
 
 ## Capture Tiers (progressive, not all MVP)
 - **Tier 1 (MVP):** Single bottle per photo
-- **Tier 2 (post-MVP):** Shelf photo — multi-bottle identification
+- **Tier 2 (post-MVP):** Shelf photo — multi-bottle identification. On-device sentry via RF-DETR Nano (Apache 2.0) + react-native-executorch. See `references/deep-research-rfdetr-nano-mobile.md`.
 - **Tier 3 (post-MVP):** Video capture — continuous identification
 
 ---
@@ -75,7 +75,8 @@ Bar staff spend ~5 hours/month manually counting liquor bottles and estimating f
 - Advanced roles/permissions beyond basic auth + venue membership
 - Web-based bottle capture or editing
 - Analytics/forecasting dashboards
-- SAM 3 / YOLO integration (revisit for Tier 2/3)
+- SAM 3 / YOLO integration (revisit for Tier 2/3 — YOLO26 excluded due to AGPL-3.0; RF-DETR Nano selected as Apache 2.0 alternative)
+- On-device detection sentry in Tier 1 (deferred to Tier 2)
 - Complex role models (manager vs staff vs owner)
 
 ---
@@ -87,7 +88,7 @@ Bar staff spend ~5 hours/month manually counting liquor bottles and estimating f
 | VLM | Claude Sonnet 4.6 (Gemini fallback) | Eval harness in `packages/eval/` |
 | Backend | Hono + Bun | `packages/backend/` |
 | Database | PostgreSQL 16 + Drizzle ORM | `docker-compose.yml`, `drizzle.config.ts` |
-| Mobile | Expo + Expo Router | Ray's domain |
+| Mobile | Expo + Expo Router + VisionCamera v4.7.3 | Ray's domain |
 | Dashboard | Vite + React + Mantine | `packages/dashboard/` |
 | Eval/observability | LangSmith | `.env.example` |
 | Image storage | TBD (S3/R2 likely) | — |
