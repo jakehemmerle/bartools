@@ -64,7 +64,7 @@ export function InventoryPage() {
           <Title order={1}>Inventory</Title>
           <Text c="dimmed">
             Latest confirmed inventory by product. Rows may come from different
-            confirmed sessions and different dates.
+            reports and different dates.
           </Text>
         </Stack>
         <Button color="slate" onClick={handleExport} radius="sm" variant="light">
@@ -103,7 +103,7 @@ export function InventoryPage() {
       </Paper>
 
       <StatePanel
-        description="This table is a latest-confirmed aggregate, not a live stock feed or single-session snapshot. Use the row-level as-of dates to judge freshness."
+        description="This table is a latest-confirmed aggregate, not a live stock feed or single-report snapshot. Use the row-level as-of dates to judge freshness."
         title="Mixed recency is expected"
         tone={searchParams.get('scenario') === 'stale' ? 'warning' : 'neutral'}
       />
@@ -129,7 +129,7 @@ export function InventoryPage() {
                 <Table.Th>PAR</Table.Th>
                 <Table.Th>Status</Table.Th>
                 <Table.Th>As of</Table.Th>
-                <Table.Th>Session</Table.Th>
+                <Table.Th>Report</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -172,15 +172,15 @@ export function InventoryPage() {
                     </Stack>
                   </Table.Td>
                   <Table.Td>
-                    {row.latestSessionId ? (
+                    {row.latestReportId ? (
                       <Text
                         c="slate.7"
                         component={Link}
                         fw={600}
                         style={{ textDecoration: 'none' }}
-                        to={`/sessions/${row.latestSessionId}`}
+                        to={`/reports/${row.latestReportId}`}
                       >
-                        {row.latestSessionId}
+                        {row.latestReportId}
                       </Text>
                     ) : (
                       <Text c="dimmed">None</Text>

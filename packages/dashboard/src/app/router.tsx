@@ -24,7 +24,7 @@ import {
   OnboardingCreatePage,
   OnboardingJoinPage,
 } from '../pages/onboarding-pages'
-import { SessionDetailPage, SessionsPage } from '../pages/sessions-page'
+import { ReportDetailPage, ReportsPage } from '../pages/reports-page'
 import { SettingsPage } from '../pages/settings-page'
 
 export const appRoutes: RouteObject[] = [
@@ -44,8 +44,8 @@ export const appRoutes: RouteObject[] = [
     children: [
       { path: '/inventory', element: <InventoryPage /> },
       { path: '/low-stock', element: <LowStockPage /> },
-      { path: '/sessions', element: <SessionsPage /> },
-      { path: '/sessions/:sessionId', element: <SessionDetailPage /> },
+      { path: '/reports', element: <ReportsPage /> },
+      { path: '/reports/:reportId', element: <ReportDetailPage /> },
       { path: '/settings', element: <SettingsPage /> },
     ],
   },

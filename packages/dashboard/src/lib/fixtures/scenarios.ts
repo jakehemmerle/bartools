@@ -1,10 +1,10 @@
 import {
   inventoryScenarioSchema,
   settingsScenarioSchema,
-  sessionsScenarioSchema,
+  reportsScenarioSchema,
   type InventoryScenario,
   type SettingsScenario,
-  type SessionsScenario,
+  type ReportsScenario,
 } from './schemas'
 import {
   makeBarMember,
@@ -12,8 +12,8 @@ import {
   makeInviteLink,
   makeInventoryRow,
   makeProductParOverride,
-  makeSessionDetail,
-  makeSessionListItem,
+  makeReportDetail,
+  makeReportListItem,
   makeUser,
 } from './builders'
 
@@ -34,7 +34,7 @@ export const inventoryScenarios = {
         belowParReason: 'Below PAR by 600 ml',
         parComparableAmount: 1500,
         asOf: '2026-04-08T22:09:00-05:00',
-        latestSessionId: 'session-1000',
+        latestReportId: 'report-1000',
       }),
       makeInventoryRow({
         productId: 'product-3',
@@ -48,7 +48,7 @@ export const inventoryScenarios = {
         parComparableAmount: 2,
         barDefaultParComparableAmount: 2,
         asOf: '2026-04-04T20:31:00-05:00',
-        latestSessionId: 'session-0996',
+        latestReportId: 'report-0996',
       }),
     ],
   }),
@@ -71,7 +71,7 @@ export const inventoryScenarios = {
         belowPar: true,
         belowParReason: 'Below PAR by 1,150 ml',
         asOf: '2026-03-18T19:02:00-05:00',
-        latestSessionId: 'session-0980',
+        latestReportId: 'report-0980',
       }),
     ],
   }),
@@ -137,29 +137,29 @@ export const settingsScenarios = {
   }),
 } satisfies Record<string, SettingsScenario>
 
-export const sessionsScenario = sessionsScenarioSchema.parse({
+export const reportsScenario = reportsScenarioSchema.parse({
   user: makeUser(),
-  sessions: [
-    makeSessionListItem(),
-    makeSessionListItem({
-      id: 'session-1000',
+  reports: [
+    makeReportListItem(),
+    makeReportListItem({
+      id: 'report-1000',
       completedAt: '2026-04-08T22:09:00-05:00',
       bottleCount: 22,
     }),
-    makeSessionListItem({
-      id: 'session-0999',
-      status: 'failed',
+    makeReportListItem({
+      id: 'report-0999',
+      status: 'unreviewed',
       completedAt: '2026-04-07T21:17:00-05:00',
       bottleCount: 11,
     }),
   ],
   details: {
-    'session-1001': makeSessionDetail({
+    'report-1001': makeReportDetail({
       bottleRecords: [
         {
           id: 'record-1',
           imageUrl: '/favicon.svg',
-          bottleName: 'Tito’s Handmade Vodka',
+          bottleName: "Tito's Handmade Vodka",
           category: 'Vodka',
           upc: '619947000013',
           volumeMl: 750,
@@ -186,8 +186,8 @@ export const sessionsScenario = sessionsScenarioSchema.parse({
         },
       ],
     }),
-    'session-missing-media': makeSessionDetail({
-      id: 'session-missing-media',
+    'report-missing-media': makeReportDetail({
+      id: 'report-missing-media',
       bottleRecords: [
         {
           id: 'record-missing',
@@ -202,4 +202,4 @@ export const sessionsScenario = sessionsScenarioSchema.parse({
       ],
     }),
   },
-}) satisfies SessionsScenario
+}) satisfies ReportsScenario

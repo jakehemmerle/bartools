@@ -11,7 +11,7 @@ const inventoryHeaders = [
   'Below par status',
   'As of date',
   'Volume (ml)',
-  'Latest session id',
+  'Latest report id',
 ] as const
 
 const lowStockHeaders = [
@@ -23,7 +23,7 @@ const lowStockHeaders = [
   'Below par reason',
   'As of date',
   'Volume (ml)',
-  'Latest session id',
+  'Latest report id',
 ] as const
 
 export function buildInventoryExportCsv(
@@ -41,7 +41,7 @@ export function buildInventoryExportCsv(
       row.belowPar ? 'Below par' : 'In range',
       formatCsvTimestamp(row.asOf, timezone),
       row.volumeMl?.toString() ?? '',
-      row.latestSessionId ?? '',
+      row.latestReportId ?? '',
     ]),
   ])
 }
@@ -61,7 +61,7 @@ export function buildLowStockExportCsv(
       row.belowParReason ?? 'Below stock target',
       formatCsvTimestamp(row.asOf, timezone),
       row.volumeMl?.toString() ?? '',
-      row.latestSessionId ?? '',
+      row.latestReportId ?? '',
     ]),
   ])
 }

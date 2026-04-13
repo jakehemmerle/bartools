@@ -12,17 +12,17 @@ import {
 } from '@mantine/core'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { StatePanel } from '../components/states/state-panel'
-import { inventoryScenarios, sessionsScenario } from '../lib/fixtures/scenarios'
-import { sortSessionsNewestFirst } from '../lib/sessions-view'
+import { inventoryScenarios, reportsScenario } from '../lib/fixtures/scenarios'
+import { sortReportsNewestFirst } from '../lib/reports-view'
 
 const barTimezone = inventoryScenarios.default.barSettings.timezone
 
-export function SessionsPage() {
+export function ReportsPage() {
   const [searchParams] = useSearchParams()
-  const sessions = useMemo(
+  const reports = useMemo(
     () =>
-      sortSessionsNewestFirst(
-        searchParams.get('scenario') === 'empty' ? [] : sessionsScenario.sessions,
+      sortReportsNewestFirst(
+        searchParams.get('scenario') === 'empty' ? [] : reportsScenario.reports,
       ),
     [searchParams],
   )
@@ -30,16 +30,16 @@ export function SessionsPage() {
   return (
     <Stack gap="lg">
       <Stack gap={2}>
-        <Title order={1}>Sessions</Title>
+        <Title order={1}>Reports</Title>
         <Text c="dimmed">
           Review recent inventory counts and inspect what was saved.
         </Text>
       </Stack>
 
-      {sessions.length === 0 ? (
+      {reports.length === 0 ? (
         <StatePanel
-          description="No inventory sessions have been completed yet. Once counts are confirmed, they will appear here."
-          title="No completed sessions yet"
+          description="No inventory reports have been completed yet. Once counts are confirmed, they will appear here."
+          title="No completed reports yet"
         />
       ) : (
         <Paper p="md" radius="md" withBorder>
@@ -47,7 +47,7 @@ export function SessionsPage() {
             <Table striped>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>Session</Table.Th>
+                  <Table.Th>Report</Table.Th>
                   <Table.Th>Completed</Table.Th>
                   <Table.Th>User</Table.Th>
                   <Table.Th>Bottle count</Table.Th>
@@ -55,34 +55,34 @@ export function SessionsPage() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {sessions.map((session) => (
-                  <Table.Tr key={session.id}>
+                {reports.map((report) => (
+                  <Table.Tr key={report.id}>
                     <Table.Td>
                       <Text
                         c="slate.7"
                         component={Link}
                         fw={600}
                         style={{ textDecoration: 'none' }}
-                        to={`/sessions/${session.id}`}
+                        to={`/reports/${report.id}`}
                       >
-                        {session.id}
+                        {report.id}
                       </Text>
                     </Table.Td>
                     <Table.Td>
-                      {formatSessionTimestamp(
-                        session.completedAt ?? session.startedAt,
+                      {formatReportTimestamp(
+                        report.completedAt ?? report.startedAt,
                         barTimezone,
                       ) ?? 'In progress'}
                     </Table.Td>
-                    <Table.Td>{session.userDisplayName ?? 'Unknown user'}</Table.Td>
-                    <Table.Td>{session.bottleCount}</Table.Td>
+                    <Table.Td>{report.userDisplayName ?? 'Unknown user'}</Table.Td>
+                    <Table.Td>{report.bottleCount}</Table.Td>
                     <Table.Td>
                       <Badge
-                        color={getSessionBadgeColor(session.status)}
+                        color={getReportBadgeColor(report.status)}
                         radius="sm"
                         variant="light"
                       >
-                        {formatSessionStatus(session.status)}
+                        {formatReportStatus(report.status)}
                       </Badge>
                     </Table.Td>
                   </Table.Tr>
@@ -96,15 +96,14 @@ export function SessionsPage() {
   )
 }
 
-export function SessionDetailPage() {
-  const { sessionId = 'session-1001' } = useParams()
-  const detail =
-    sessionsScenario.details[sessionId] ?? sessionsScenario.details['session-1001']
+export function ReportDetailPage() {
+  const { reportId = 'report-1001' } = useParams()
+  const detail = reportsScenario.details[reportId]
 
   return (
     <Stack gap="lg">
       <Stack gap={2}>
-        <Title order={1}>Session {detail.id}</Title>
+        <Title order={1}>Report {detail.id}</Title>
         <Text c="dimmed">
           Review the saved bottle records from this count and compare any corrected fields when they are available.
         </Text>
@@ -115,12 +114,12 @@ export function SessionDetailPage() {
           <Text>
             Completed:
             {' '}
-            {formatSessionTimestamp(detail.completedAt, barTimezone) ?? 'Not completed'}
+            {formatReportTimestamp(detail.completedAt, barTimezone) ?? 'Not completed'}
           </Text>
           <Text>User: {detail.userDisplayName ?? 'Unknown user'}</Text>
           <Text>Records: {detail.bottleRecords.length}</Text>
-          <Badge color={getSessionBadgeColor(detail.status)} radius="sm" variant="light">
-            {formatSessionStatus(detail.status)}
+          <Badge color={getReportBadgeColor(detail.status)} radius="sm" variant="light">
+            {formatReportStatus(detail.status)}
           </Badge>
         </Group>
       </Paper>
@@ -213,7 +212,7 @@ export function SessionDetailPage() {
   )
 }
 
-function formatSessionTimestamp(value: string | undefined, timezone: string) {
+function formatReportTimestamp(value: string | undefined, timezone: string) {
   if (!value) {
     return null
   }
@@ -228,17 +227,17 @@ function formatSessionTimestamp(value: string | undefined, timezone: string) {
   }).format(new Date(value))
 }
 
-function getSessionBadgeColor(status: string) {
+function getReportBadgeColor(status: string) {
   switch (status) {
-    case 'failed':
+    case 'unreviewed':
       return 'brass'
-    case 'in_progress':
+    case 'processing':
       return 'slate'
     default:
       return 'slate'
   }
 }
 
-function formatSessionStatus(status: string) {
+function formatReportStatus(status: string) {
   return status.replace('_', ' ')
 }

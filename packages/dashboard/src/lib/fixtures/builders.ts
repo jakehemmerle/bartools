@@ -4,16 +4,16 @@ import {
   inventoryProductRowSchema,
   inviteLinkSchema,
   productParOverrideSchema,
-  sessionBottleRecordSchema,
-  sessionDetailSchema,
-  sessionListItemSchema,
+  reportBottleRecordSchema,
+  reportDetailSchema,
+  reportListItemSchema,
   userSchema,
   type BarMember,
   type BarSettings,
   type InventoryProductRow,
   type ProductParOverride,
-  type SessionDetail,
-  type SessionListItem,
+  type ReportDetail,
+  type ReportListItem,
   type User,
 } from './schemas'
 
@@ -54,8 +54,8 @@ export function makeInventoryRow(
     parComparableAmount: 1500,
     barDefaultParComparableAmount: 1500,
     asOf: '2026-04-09T22:15:00-05:00',
-    latestSessionId: 'session-1001',
-    sourceSessionStatus: 'confirmed',
+    latestReportId: 'report-1001',
+    sourceReportStatus: 'reviewed',
     ...overrides,
   })
 }
@@ -73,33 +73,33 @@ export function makeProductParOverride(
   })
 }
 
-export function makeSessionListItem(
-  overrides: Partial<SessionListItem> = {},
+export function makeReportListItem(
+  overrides: Partial<ReportListItem> = {},
 ) {
-  return sessionListItemSchema.parse({
-    id: 'session-1001',
+  return reportListItemSchema.parse({
+    id: 'report-1001',
     startedAt: '2026-04-09T21:44:00-05:00',
     completedAt: '2026-04-09T22:15:00-05:00',
     userId: 'user-manager-1',
     userDisplayName: 'Avery Quinn',
     bottleCount: 18,
-    status: 'confirmed',
+    status: 'reviewed',
     ...overrides,
   })
 }
 
-export function makeSessionDetail(
-  overrides: Partial<SessionDetail> = {},
+export function makeReportDetail(
+  overrides: Partial<ReportDetail> = {},
 ) {
-  return sessionDetailSchema.parse({
-    id: 'session-1001',
+  return reportDetailSchema.parse({
+    id: 'report-1001',
     startedAt: '2026-04-09T21:44:00-05:00',
     completedAt: '2026-04-09T22:15:00-05:00',
     userId: 'user-manager-1',
     userDisplayName: 'Avery Quinn',
-    status: 'confirmed',
+    status: 'reviewed',
     bottleRecords: [
-      sessionBottleRecordSchema.parse({
+      reportBottleRecordSchema.parse({
         id: 'record-1',
         imageUrl: '/favicon.svg',
         bottleName: 'Tito’s Handmade Vodka',

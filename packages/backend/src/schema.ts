@@ -51,11 +51,11 @@ export const itemCategoryEnum = pgEnum('item_category', [
   'n/a',
 ]);
 
-export const sessionStatusEnum = pgEnum('session_status', [
-  'capturing', // user is still taking photos
+export const reportStatusEnum = pgEnum('report_status', [
+  'created', // report created, user may still be taking photos
   'processing', // batch submitted, VLM processing in progress
-  'reviewing', // results returned, user is reviewing/correcting
-  'confirmed', // user confirmed all results, inventory updated
+  'unreviewed', // results returned, awaiting user review
+  'reviewed', // user reviewed results, inventory updated
 ]);
 
 // Fill levels are stored as integers in tenths (0..10 → 0%..100% in 10% steps).
@@ -126,8 +126,7 @@ export const bottles = pgTable(
   'bottles',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    brand: text('brand').notNull(), // e.g. "Johnnie Walker"
-    product: text('product').notNull(), // e.g. "Black Label"
+    name: text('name').notNull(), // e.g. "Johnnie Walker Black Label"
     category: itemCategoryEnum('category').notNull(),
     subcategory: text('subcategory'), // free text, e.g. "single malt", "reposado", "IPA"
     sizeMl: integer('size_ml'), // e.g. 750
@@ -138,34 +137,37 @@ export const bottles = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    index('bottles_brand_idx').on(table.brand),
+    index('bottles_name_idx').on(table.name),
     index('bottles_category_idx').on(table.category),
   ]
 );
 
-// ─── Sessions ───────────────────────────────────────────────────────
-// A session groups scans from a single inventory count. This serves three purposes:
-// 1. Batch processing — the SSE stream returns results for all scans in a session
-// 2. Review UX — the ScrollView shows all bottles from one session for confirmation
+// ─── Reports ────────────────────────────────────────────────────────
+// A report groups scans from a single inventory count at a specific location.
+// 1. Batch processing — the SSE stream returns results for all scans in a report
+// 2. Review UX — the ScrollView shows all bottles from one report for confirmation
 // 3. Historical tracking — "inventory checks over time" for trend analysis (stretch)
+// Human-readable ID: derive from UUID prefix at the app layer — id.slice(0, 8).toUpperCase()
 
-export const sessions = pgTable(
-  'sessions',
+export const reports = pgTable(
+  'reports',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     userId: uuid('user_id').notNull().references(() => users.id),
     venueId: uuid('venue_id').notNull().references(() => venues.id),
-    status: sessionStatusEnum('status').notNull().default('capturing'),
+    locationId: uuid('location_id').references(() => locations.id),
+    status: reportStatusEnum('status').notNull().default('created'),
     photoCount: integer('photo_count').default(0), // total photos in batch
     processedCount: integer('processed_count').default(0), // how many VLM results returned so far
     startedAt: timestamp('started_at', { withTimezone: true }).defaultNow().notNull(),
-    confirmedAt: timestamp('confirmed_at', { withTimezone: true }), // null until user confirms
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }), // null until user reviews
   },
   (table) => [
-    index('sessions_user_idx').on(table.userId),
-    index('sessions_venue_idx').on(table.venueId),
-    index('sessions_status_idx').on(table.status),
-    index('sessions_started_at_idx').on(table.startedAt),
+    index('reports_user_idx').on(table.userId),
+    index('reports_venue_idx').on(table.venueId),
+    index('reports_location_idx').on(table.locationId),
+    index('reports_status_idx').on(table.status),
+    index('reports_started_at_idx').on(table.startedAt),
   ]
 );
 
@@ -175,7 +177,7 @@ export const scans = pgTable(
   'scans',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    sessionId: uuid('session_id').notNull().references(() => sessions.id),
+    reportId: uuid('report_id').notNull().references(() => reports.id),
     userId: uuid('user_id').notNull().references(() => users.id),
     venueId: uuid('venue_id').notNull().references(() => venues.id),
     locationId: uuid('location_id').references(() => locations.id), // which sub-area was being counted
@@ -184,12 +186,12 @@ export const scans = pgTable(
     vlmFillTenths: integer('vlm_fill_tenths'), // 0..10, the VLM's fill estimate at scan time
     confidenceScore: numeric('confidence_score', { precision: 4, scale: 3 }), // 0.000–1.000
     rawResponse: jsonb('raw_response'), // full LLM response for debugging
-    modelUsed: text('model_used'), // e.g. "gemini-2.5-flash"
+    modelUsed: text('model_used'), // e.g. "claude-sonnet-4-6" or "claude-haiku-4-5"
     latencyMs: integer('latency_ms'), // API round-trip time
     scannedAt: timestamp('scanned_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    index('scans_session_idx').on(table.sessionId),
+    index('scans_report_idx').on(table.reportId),
     index('scans_user_idx').on(table.userId),
     index('scans_venue_idx').on(table.venueId),
     index('scans_location_idx').on(table.locationId),
@@ -229,14 +231,14 @@ export const inventory = pgTable(
 
 export const usersRelations = relations(users, ({ many }) => ({
   venueMemberships: many(venueMembers),
-  sessions: many(sessions),
+  reports: many(reports),
   scans: many(scans),
 }));
 
 export const venuesRelations = relations(venues, ({ many }) => ({
   members: many(venueMembers),
   locations: many(locations),
-  sessions: many(sessions),
+  reports: many(reports),
   scans: many(scans),
 }));
 
@@ -247,6 +249,7 @@ export const venueMembersRelations = relations(venueMembers, ({ one }) => ({
 
 export const locationsRelations = relations(locations, ({ one, many }) => ({
   venue: one(venues, { fields: [locations.venueId], references: [venues.id] }),
+  reports: many(reports),
   inventory: many(inventory),
   scans: many(scans),
 }));
@@ -256,14 +259,15 @@ export const bottlesRelations = relations(bottles, ({ many }) => ({
   inventoryItems: many(inventory),
 }));
 
-export const sessionsRelations = relations(sessions, ({ one, many }) => ({
-  user: one(users, { fields: [sessions.userId], references: [users.id] }),
-  venue: one(venues, { fields: [sessions.venueId], references: [venues.id] }),
+export const reportsRelations = relations(reports, ({ one, many }) => ({
+  user: one(users, { fields: [reports.userId], references: [users.id] }),
+  venue: one(venues, { fields: [reports.venueId], references: [venues.id] }),
+  location: one(locations, { fields: [reports.locationId], references: [locations.id] }),
   scans: many(scans),
 }));
 
 export const scansRelations = relations(scans, ({ one }) => ({
-  session: one(sessions, { fields: [scans.sessionId], references: [sessions.id] }),
+  report: one(reports, { fields: [scans.reportId], references: [reports.id] }),
   user: one(users, { fields: [scans.userId], references: [users.id] }),
   venue: one(venues, { fields: [scans.venueId], references: [venues.id] }),
   location: one(locations, { fields: [scans.locationId], references: [locations.id] }),

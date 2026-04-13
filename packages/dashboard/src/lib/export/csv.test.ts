@@ -18,7 +18,7 @@ describe('csv export helpers', () => {
           parComparableAmount: 1500,
           comparableUnit: 'ml',
           volumeMl: 750,
-          latestSessionId: 'session-1001',
+          latestReportId: 'report-1001',
         }),
         makeInventoryRow({
           productId: 'campari',
@@ -36,13 +36,13 @@ describe('csv export helpers', () => {
     )
 
     expect(csv).toContain(
-      'Product name,Category,UPC,On-hand quantity,PAR level,Below par status,As of date,Volume (ml),Latest session id',
+      'Product name,Category,UPC,On-hand quantity,PAR level,Below par status,As of date,Volume (ml),Latest report id',
     )
     expect(csv).toContain(
-      'Tito’s Handmade Vodka,Vodka,111,2.4 bottles,1500 ml,In range,2026-04-09 22:15,750,session-1001',
+      'Tito’s Handmade Vodka,Vodka,111,2.4 bottles,1500 ml,In range,2026-04-09 22:15,750,report-1001',
     )
     expect(csv).toContain(
-      '"Campari, Apertivo",Aperitif,333,0.4 bottles,1500 ml,Below par,2026-03-18 19:02,750,session-1001',
+      '"Campari, Apertivo",Aperitif,333,0.4 bottles,1500 ml,Below par,2026-03-18 19:02,750,report-1001',
     )
   })
 
@@ -58,17 +58,17 @@ describe('csv export helpers', () => {
           parComparableAmount: 1500,
           belowPar: true,
           belowParReason: 'Below PAR by 600 ml',
-          latestSessionId: 'session-1000',
+          latestReportId: 'report-1000',
         }),
       ],
       'America/Chicago',
     )
 
     expect(csv).toContain(
-      'Product name,Category,UPC,On-hand quantity,PAR level,Below par reason,As of date,Volume (ml),Latest session id',
+      'Product name,Category,UPC,On-hand quantity,PAR level,Below par reason,As of date,Volume (ml),Latest report id',
     )
     expect(csv).toContain(
-      'Espolòn Blanco,Tequila,222,1.2 bottles,1500 ml,Below PAR by 600 ml,2026-04-09 22:15,750,session-1000',
+      'Espolòn Blanco,Tequila,222,1.2 bottles,1500 ml,Below PAR by 600 ml,2026-04-09 22:15,750,report-1000',
     )
   })
 
