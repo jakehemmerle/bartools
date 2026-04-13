@@ -1,3 +1,1 @@
-import { Client } from 'langsmith';
-
-export const client = new Client();
+export { client } from "@bartools/inference";

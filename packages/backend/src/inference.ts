@@ -1,19 +1,13 @@
 import { and, count, eq } from 'drizzle-orm';
 import {
-  createSdkMcpServer,
-  query,
-  tool,
-  type SDKUserMessage,
-} from '@anthropic-ai/claude-agent-sdk';
-import { z } from 'zod';
-import { validateAnswer } from '../../eval/src/ask-model';
-import { client as langsmithClient } from '../../eval/src/client';
-import {
+  client as langsmithClient,
+  DEFAULT_MODEL,
   PROMPT_NAME,
   pullPromptTemplate,
   renderPromptTemplate,
-} from '../../eval/src/prompt';
-import { DEFAULT_MODEL, MAX_ATTEMPTS } from '../../eval/src/types';
+  runBottleInference,
+} from '@bartools/inference';
+import { z } from 'zod';
 import { db } from './db';
 import { syncReportProgress } from './report-service';
 import {
@@ -42,146 +36,6 @@ type PromptCache = {
 
 let promptCache: PromptCache | null = null;
 const promptCacheTtlMs = 30_000;
-
-async function* asyncIter<T>(items: T[]): AsyncIterable<T> {
-  for (const item of items) {
-    yield item;
-  }
-}
-
-async function runVisionInference(input: {
-  imageBytes: Uint8Array;
-  bottleNames: string[];
-  systemPrompt: string;
-  userPrompt: string;
-}): Promise<{ name: string; volume: number; error?: string }> {
-  const base64 = Buffer.from(input.imageBytes).toString('base64');
-  let attempts = 0;
-  let answer: { name: string; volume: number } | null = null;
-  const triedInvalid: string[] = [];
-  const validNames = new Set(input.bottleNames);
-
-  const submitAnswer = tool(
-    'submit_answer',
-    'Submit your final bottle identification and fill-level estimate.',
-    {
-      name: z
-        .string()
-        .describe('Bottle name, copied verbatim from the provided list.'),
-      volume: z
-        .number()
-        .describe('Fill level from 0.0 to 1.0 in 0.1 increments.'),
-    },
-    async (args) => {
-      attempts += 1;
-      const result = validateAnswer(args.name, args.volume, validNames);
-
-      if (result.ok) {
-        answer = {
-          name: args.name,
-          volume: result.volume,
-        };
-        return {
-          content: [
-            { type: 'text', text: 'Answer recorded. End the conversation.' },
-          ],
-        };
-      }
-
-      if (result.reason === 'invalid_name') {
-        triedInvalid.push(args.name);
-        if (attempts >= MAX_ATTEMPTS) {
-          return {
-            content: [
-              { type: 'text', text: 'MAX_ATTEMPTS_EXCEEDED. Stop now.' },
-            ],
-            isError: true,
-          };
-        }
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `"${args.name}" is not in the valid bottle list. Pick a different name verbatim from the list.`,
-            },
-          ],
-          isError: true,
-        };
-      }
-
-      if (attempts >= MAX_ATTEMPTS) {
-        return {
-          content: [{ type: 'text', text: 'MAX_ATTEMPTS_EXCEEDED. Stop now.' }],
-          isError: true,
-        };
-      }
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `volume=${args.volume} is invalid. Use one of 0, 0.1, ..., 1.0.`,
-          },
-        ],
-        isError: true,
-      };
-    }
-  );
-
-  const mcpServer = createSdkMcpServer({
-    name: 'eval',
-    version: '0.1.0',
-    tools: [submitAnswer],
-  });
-
-  const userMessage: SDKUserMessage = {
-    type: 'user',
-    parent_tool_use_id: null,
-    message: {
-      role: 'user',
-      content: [
-        { type: 'text', text: input.userPrompt },
-        {
-          type: 'image',
-          source: {
-            type: 'base64',
-            media_type: 'image/jpeg',
-            data: base64,
-          },
-        },
-      ],
-    },
-  };
-
-  const q = query({
-    prompt: asyncIter([userMessage]),
-    options: {
-      systemPrompt: input.systemPrompt,
-      model: DEFAULT_MODEL,
-      tools: [],
-      mcpServers: { eval: mcpServer },
-      allowedTools: ['mcp__eval__submit_answer'],
-      permissionMode: 'bypassPermissions',
-      allowDangerouslySkipPermissions: true,
-      persistSession: false,
-    },
-  });
-
-  for await (const event of q) {
-    void event;
-    // drain the SDK event stream
-  }
-
-  if (answer) {
-    return answer;
-  }
-
-  return {
-    name: '',
-    volume: 0,
-    error: `agent never produced a valid answer; tried [${triedInvalid.join(', ')}]`,
-  };
-}
 
 async function resolvePrompt() {
   const promptName = process.env.BACKEND_LANGSMITH_PROMPT_NAME ?? PROMPT_NAME;
@@ -368,7 +222,6 @@ export async function processQueuedInferenceJob(
     return;
   }
 
-  const bottleNames = catalog.map((bottle) => bottle.name);
   const filePath = resolveUploadPathFromUrl(scan.photoUrl);
   const imageFile = Bun.file(filePath);
 
@@ -389,11 +242,10 @@ export async function processQueuedInferenceJob(
   }
 
   const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
-  const rendered = await renderPromptTemplate(prompt.prompt, bottleNames);
+  const rendered = await renderPromptTemplate(prompt.prompt);
   const inferenceStartedAt = Date.now();
-  const result = await runVisionInference({
+  const result = await runBottleInference({
     imageBytes,
-    bottleNames,
     systemPrompt: rendered.systemPrompt,
     userPrompt: rendered.userPrompt,
   });

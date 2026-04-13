@@ -3,6 +3,11 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@bartools/inference": ["packages/inference/src/index.ts"]
+    },
     "lib": ["ESNext"],
     "jsx": "react-jsx",
     "strict": true,

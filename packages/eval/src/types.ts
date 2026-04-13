@@ -1,3 +1,6 @@
+import path from "node:path";
+import { DEFAULT_MODEL, MAX_ATTEMPTS, VOLUME_ENUM, type Volume } from "@bartools/inference";
+
 /**
  * Shared contract for the bottle-ID eval harness.
  *
@@ -21,12 +24,8 @@ export type Prediction = {
   error?: string;
 };
 
-export const VOLUME_ENUM = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0] as const;
-export type Volume = (typeof VOLUME_ENUM)[number];
-
-export const DEFAULT_MODEL = "claude-sonnet-4-6";
 export const DATASET_NAME = "verbena-simple";
-export const MAX_ATTEMPTS = 4;
+export { DEFAULT_MODEL, MAX_ATTEMPTS, VOLUME_ENUM, type Volume };
 
 /** Path constants relative to the repo root. */
 export const PATHS = {
@@ -35,3 +34,5 @@ export const PATHS = {
   solutions: "assets/verbena_simple_solutions.jsonl",
   predictions: "assets/verbena_simple_predictions.jsonl",
 } as const;
+
+export const REPO_ROOT = path.resolve(import.meta.dir, "../../..");
