@@ -10,7 +10,7 @@ import { BottleCard } from '../../../components/BottleCard'
 import { AlertBanner } from '../../../components/AlertBanner'
 import { AddToInventorySheet } from '../../../components/AddToInventorySheet'
 import { MOCK_BOTTLES, MOCK_INVENTORY, INVENTORY_FILTERS } from '../../../data/mockData'
-import type { Bottle } from '../../../types'
+import type { Bottle } from '@bartools/types'
 
 type BottleWithFill = Bottle & { fillPercent: number }
 
@@ -39,9 +39,7 @@ export default function InventoryScreen() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       result = result.filter(
-        (b) =>
-          b.brand.toLowerCase().includes(q) ||
-          b.product.toLowerCase().includes(q),
+        (b) => b.name.toLowerCase().includes(q),
       )
     }
 
@@ -88,8 +86,7 @@ export default function InventoryScreen() {
     return (
       <View style={styles.cardWrapper}>
         <BottleCard
-          brand={data.brand}
-          product={data.product}
+          name={data.name}
           subcategory={data.subcategory}
           sizeMl={data.sizeMl}
           fillPercent={data.fillPercent}
