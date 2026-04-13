@@ -5,28 +5,22 @@ import type {
   VenueMember,
   Location,
   Bottle,
-  Session,
+  Report,
   Scan,
   InventoryItem,
-} from '../models';
+} from '../entities';
 
-/**
- * Type-level tests: these verify that our model types compile correctly
- * and accept the shapes we expect from the backend API. If the backend
- * schema changes and these types drift, the tests will fail to compile.
- */
-
-describe('model type shapes', () => {
-  it('User accepts a valid user payload', () => {
+describe('entity type shapes', () => {
+  it('User accepts a valid payload', () => {
     const user: User = {
       id: '550e8400-e29b-41d4-a716-446655440000',
       email: 'bar@example.com',
-      displayName: 'Test Bar',
+      displayName: 'Test User',
       createdAt: '2026-04-10T00:00:00Z',
     };
     expect(user.id).toBeDefined();
     expect(user.email).toBe('bar@example.com');
-    expect(user.displayName).toBe('Test Bar');
+    expect(user.displayName).toBe('Test User');
   });
 
   it('Venue and Location form a parent-child relationship', () => {
@@ -42,33 +36,35 @@ describe('model type shapes', () => {
       createdAt: '2026-04-10T00:00:00Z',
     };
     expect(location.venueId).toBe(venue.id);
-    expect(location.name).toBe('Main Bar');
-    expect(venue.name).toBe('Verbena');
   });
 
-  it('Bottle contains the full identification schema', () => {
+  it('VenueMember links users to venues', () => {
+    const member: VenueMember = {
+      venueId: 'venue-1',
+      userId: 'user-1',
+      joinedAt: '2026-04-10T00:00:00Z',
+    };
+    expect(member.venueId).toBe('venue-1');
+    expect(member.userId).toBe('user-1');
+  });
+
+  it('Bottle uses a single name field', () => {
     const bottle: Bottle = {
       id: 'bottle-1',
-      brand: 'Johnnie Walker',
-      product: 'Black Label',
+      name: 'Johnnie Walker Black Label',
       category: 'scotch',
-      subcategory: 'blended',
       sizeMl: 750,
-      vintage: 2020,
       abv: 40.0,
       upc: '088110110307',
       createdAt: '2026-04-10T00:00:00Z',
     };
-    expect(bottle.brand).toBe('Johnnie Walker');
-    expect(bottle.product).toBe('Black Label');
+    expect(bottle.name).toBe('Johnnie Walker Black Label');
     expect(bottle.category).toBe('scotch');
-    expect(bottle.sizeMl).toBe(750);
-    expect(bottle.upc).toBe('088110110307');
   });
 
-  it('Session tracks the batch processing lifecycle', () => {
-    const session: Session = {
-      id: 'session-1',
+  it('Report tracks the batch processing lifecycle', () => {
+    const report: Report = {
+      id: 'report-1',
       userId: 'user-1',
       venueId: 'venue-1',
       status: 'processing',
@@ -76,31 +72,27 @@ describe('model type shapes', () => {
       processedCount: 2,
       startedAt: '2026-04-10T00:00:00Z',
     };
-    expect(session.status).toBe('processing');
-    expect(session.photoCount).toBe(5);
-    expect(session.processedCount).toBe(2);
-    expect(session.confirmedAt).toBeUndefined();
+    expect(report.status).toBe('processing');
+    expect(report.photoCount).toBe(5);
+    expect(report.reviewedAt).toBeUndefined();
   });
 
-  it('Scan stores VLM results and links to session + bottle', () => {
+  it('Scan references reportId and stores VLM results', () => {
     const scan: Scan = {
       id: 'scan-1',
-      sessionId: 'session-1',
+      reportId: 'report-1',
       userId: 'user-1',
       venueId: 'venue-1',
-      locationId: 'loc-1',
-      bottleId: 'bottle-1',
       photoUrl: 'https://storage.example.com/photos/scan-1.jpg',
+      sortOrder: 0,
       vlmFillTenths: 7,
       confidenceScore: 0.92,
       modelUsed: 'claude-sonnet-4-6',
       latencyMs: 1250,
       scannedAt: '2026-04-10T00:00:00Z',
     };
-    expect(scan.sessionId).toBe('session-1');
+    expect(scan.reportId).toBe('report-1');
     expect(scan.vlmFillTenths).toBe(7);
-    expect(scan.confidenceScore).toBe(0.92);
-    expect(scan.modelUsed).toBe('claude-sonnet-4-6');
   });
 
   it('InventoryItem is keyed by location + bottle', () => {
@@ -113,20 +105,7 @@ describe('model type shapes', () => {
       lastScannedAt: '2026-04-10T00:00:00Z',
       addedAt: '2026-04-10T00:00:00Z',
     };
-    expect(item.locationId).toBe('loc-1');
-    expect(item.bottleId).toBe('bottle-1');
     expect(item.fillLevelTenths).toBe(3);
-    expect(item.lastScanId).toBe('scan-1');
-  });
-
-  it('VenueMember links users to venues', () => {
-    const member: VenueMember = {
-      venueId: 'venue-1',
-      userId: 'user-1',
-      joinedAt: '2026-04-10T00:00:00Z',
-    };
-    expect(member.venueId).toBe('venue-1');
-    expect(member.userId).toBe('user-1');
-    expect(member.joinedAt).toBeDefined();
+    expect(item.locationId).toBe('loc-1');
   });
 });

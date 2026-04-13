@@ -1,10 +1,4 @@
-/**
- * Client-side model types mirroring the backend Drizzle schema.
- * These represent the JSON shapes returned by the API, not the DB columns directly.
- * UUIDs come across as strings; timestamps as ISO 8601 strings.
- */
-
-import type { ItemCategory, SessionStatus } from './enums';
+import type { ItemCategory, ReportStatus } from './enums';
 
 export type User = {
   id: string;
@@ -34,8 +28,7 @@ export type Location = {
 
 export type Bottle = {
   id: string;
-  brand: string;
-  product: string;
+  name: string;
   category: ItemCategory;
   subcategory?: string;
   sizeMl?: number;
@@ -46,25 +39,27 @@ export type Bottle = {
   createdAt: string;
 };
 
-export type Session = {
+export type Report = {
   id: string;
   userId: string;
   venueId: string;
-  status: SessionStatus;
+  locationId?: string;
+  status: ReportStatus;
   photoCount: number;
   processedCount: number;
   startedAt: string;
-  confirmedAt?: string;
+  reviewedAt?: string;
 };
 
 export type Scan = {
   id: string;
-  sessionId: string;
+  reportId: string;
   userId: string;
   venueId: string;
   locationId?: string;
   bottleId?: string;
   photoUrl: string;
+  sortOrder: number;
   vlmFillTenths?: number;
   confidenceScore?: number;
   rawResponse?: unknown;

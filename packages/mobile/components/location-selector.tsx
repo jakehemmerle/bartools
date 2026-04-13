@@ -1,6 +1,6 @@
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../theme/useTheme';
-import type { Location } from '../types';
+import type { Location } from '@bartools/types';
 
 type LocationSelectorProps = {
   locations: Location[];
