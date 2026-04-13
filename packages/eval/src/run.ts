@@ -1,19 +1,8 @@
-/**
- * Eval harness entry point.
- *
- * 1. Loads the bottle name list and the labeled subset of solutions.
- * 2. Syncs labeled solutions to the LangSmith dataset (create / update / skip).
- * 3. Runs evaluate() with askModel as the target and the two evaluators.
- * 4. Writes predictions to assets/verbena_simple_predictions.jsonl.
- * 5. Prints a local per-row table + aggregate name_acc / volume_mae.
- */
-
-import { resolve, basename } from "node:path";
+import { resolve } from "node:path";
 import { evaluate } from "langsmith/evaluation";
-import type { Example } from "langsmith/schemas";
 
+import { DEFAULT_MODEL } from "@bartools/inference";
 import { client } from "./client";
-import { loadBottleNames } from "./bottles";
 import { loadSolutions, writeSolutions } from "./solutions";
 import { askModel } from "./ask-model";
 import {
@@ -22,80 +11,17 @@ import {
   nameAccSummary,
   volumeMaeSummary,
 } from "./evaluators";
-import {
-  DATASET_NAME,
-  DEFAULT_MODEL,
-  PATHS,
-  type Prediction,
-  type Solution,
-} from "./types";
+import { syncDataset } from "./sync-dataset";
+import { DATASET_NAME, PATHS, REPO_ROOT, type Prediction } from "./types";
 
-const REPO_ROOT = resolve(import.meta.dir, "../../..");
 const SOLUTIONS_PATH = resolve(REPO_ROOT, PATHS.solutions);
 const PREDICTIONS_PATH = resolve(REPO_ROOT, PATHS.predictions);
 
-async function syncDataset(labeled: Solution[]): Promise<void> {
-  let datasetId: string;
-  if (await client.hasDataset({ datasetName: DATASET_NAME })) {
-    const ds = await client.readDataset({ datasetName: DATASET_NAME });
-    datasetId = ds.id;
-  } else {
-    const ds = await client.createDataset(DATASET_NAME, {
-      description:
-        "Verbena bar bottle photos with hand-labeled name + fill volume.",
-    });
-    datasetId = ds.id;
-  }
-
-  const existing = new Map<string, Example>();
-  for await (const ex of client.listExamples({ datasetId })) {
-    const file = (ex.inputs as { file?: string })?.file;
-    if (typeof file === "string") existing.set(file, ex);
-  }
-
-  const toCreate: Array<{
-    inputs: Record<string, unknown>;
-    outputs: Record<string, unknown>;
-    dataset_id: string;
-  }> = [];
-  let updated = 0;
-  let unchanged = 0;
-
-  for (const sol of labeled) {
-    const ex = existing.get(sol.file);
-    if (!ex) {
-      toCreate.push({
-        inputs: { file: sol.file },
-        outputs: { name: sol.name, volume: sol.volume },
-        dataset_id: datasetId,
-      });
-      continue;
-    }
-    const out = ex.outputs as { name?: string; volume?: number } | undefined;
-    if (out?.name === sol.name && out?.volume === sol.volume) {
-      unchanged += 1;
-      continue;
-    }
-    await client.updateExample({
-      id: ex.id,
-      inputs: { file: sol.file },
-      outputs: { name: sol.name, volume: sol.volume },
-    });
-    updated += 1;
-  }
-
-  if (toCreate.length > 0) {
-    await client.createExamples(toCreate);
-  }
-
-  console.log(
-    `dataset sync: +${toCreate.length} created, ~${updated} updated, =${unchanged} unchanged`,
-  );
+function readSourceFile(row: { metadata?: Record<string, unknown> }): string {
+  return typeof row.metadata?.source_file === "string" ? row.metadata.source_file : "";
 }
 
 async function main(): Promise<void> {
-  const bottleNames = await loadBottleNames();
-  console.log(`loaded ${bottleNames.length} unique bottle names`);
   console.log(`using model: ${DEFAULT_MODEL}`);
 
   const solutions = await loadSolutions(SOLUTIONS_PATH);
@@ -110,23 +36,32 @@ async function main(): Promise<void> {
     `${labeled.length}/${solutions.size} solutions are labeled — running eval on those`,
   );
 
-  await syncDataset(labeled);
+  const syncReport = await syncDataset(labeled);
+  console.log(
+    `${DATASET_NAME}: +${syncReport.created} created, ~${syncReport.updated} updated, =${syncReport.unchanged} unchanged (dataset_id=${syncReport.datasetId})`,
+  );
 
   const result = await evaluate(
-    async (input: { file: string }): Promise<Prediction> =>
-      askModel({ file: input.file, bottleNames }),
+    async (
+      _input: Record<string, never>,
+      config?: { attachments?: Record<string, unknown> },
+    ): Promise<Prediction> =>
+      askModel({
+        file: "",
+        attachments: config?.attachments as Parameters<typeof askModel>[0]["attachments"],
+      }),
     {
       data: DATASET_NAME,
       evaluators: [nameCorrect, volumeAbsErr],
       summaryEvaluators: [nameAccSummary, volumeMaeSummary],
       experimentPrefix: `${DEFAULT_MODEL}-`,
       description:
-        "Verbena bar bottle photos: Claude Agent SDK vision → name + fill volume.",
+        "Verbena bar bottle photos: Claude Agent SDK vision -> name + fill volume.",
       maxConcurrency: 1,
+      includeAttachments: true,
     },
   );
 
-  // Iterate the experiment results to drain the runner and collect predictions.
   const predictions: Prediction[] = [];
   type Row = {
     file: string;
@@ -139,7 +74,7 @@ async function main(): Promise<void> {
   const rows: Row[] = [];
 
   for await (const row of result) {
-    const file = (row.example.inputs as { file?: string })?.file ?? "";
+    const file = readSourceFile(row.example);
     const ref = row.example.outputs as
       | { name?: string; volume?: number }
       | undefined;
@@ -147,7 +82,7 @@ async function main(): Promise<void> {
     const traceId = row.run.trace_id ?? row.run.id;
 
     const prediction: Prediction = {
-      file: out.file ?? file,
+      file: out.file || file,
       name: out.name ?? "",
       volume: out.volume ?? 0,
       ...(traceId ? { trace_id: traceId } : {}),
@@ -165,9 +100,8 @@ async function main(): Promise<void> {
   }
 
   await writeSolutions(PREDICTIONS_PATH, predictions);
-  console.log(`wrote ${predictions.length} predictions → ${PREDICTIONS_PATH}`);
+  console.log(`wrote ${predictions.length} predictions -> ${PREDICTIONS_PATH}`);
 
-  // Local summary
   console.log("");
   console.log(
     "file                 | expected name              | got name                   | match | exp vol | got vol | abs err",

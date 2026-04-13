@@ -93,19 +93,19 @@ export type SyncDeps = {
   readPhoto?: ReadPhoto;
 };
 
-function sameBottleNames(
-  actual: unknown,
-  expected: readonly string[],
-): boolean {
-  if (!Array.isArray(actual) || actual.length !== expected.length) {
-    return false;
+function getSourceFile(example: Example): string | undefined {
+  const metadata = example.metadata as { source_file?: unknown } | undefined;
+  const sourceFile = metadata?.source_file;
+  if (typeof sourceFile === "string" && sourceFile.length > 0) {
+    return sourceFile;
   }
-  return actual.every((value, index) => value === expected[index]);
+
+  const legacyInputs = example.inputs as { file?: unknown } | undefined;
+  return typeof legacyInputs?.file === "string" ? legacyInputs.file : undefined;
 }
 
 export async function syncDataset(
   labeled: Solution[],
-  bottleNames: string[],
   deps: SyncDeps = {},
 ): Promise<SyncReport> {
   const ls = deps.client ?? defaultClient;
@@ -124,7 +124,7 @@ export async function syncDataset(
 
   const existing = new Map<string, Example>();
   for await (const ex of ls.listExamples({ datasetId, includeAttachments: true })) {
-    const file = (ex.inputs as { file?: string })?.file;
+    const file = getSourceFile(ex);
     if (typeof file === "string") existing.set(file, ex);
   }
 
@@ -141,13 +141,17 @@ export async function syncDataset(
       newSols.push(sol);
       continue;
     }
-    const inputs = ex.inputs as { possible_bottle_names?: unknown } | undefined;
     const out = ex.outputs as { name?: string; volume?: number } | undefined;
+    const metadata = ex.metadata as { source_file?: unknown } | undefined;
     const hasMatchingOutputs =
       out?.name === sol.name && out?.volume === sol.volume;
-    const hasBottleNames = sameBottleNames(inputs?.possible_bottle_names, bottleNames);
     const hasAttachment = Boolean(ex.attachments?.[ATTACHMENT_KEY]?.presigned_url);
-    if (hasMatchingOutputs && hasBottleNames && hasAttachment) {
+    const hasSourceFile = metadata?.source_file === sol.file;
+    const usesNewInputShape =
+      ex.inputs != null &&
+      typeof ex.inputs === "object" &&
+      Object.keys(ex.inputs).length === 0;
+    if (hasMatchingOutputs && hasAttachment && hasSourceFile && usesNewInputShape) {
       unchanged += 1;
       continue;
     }
@@ -176,8 +180,9 @@ export async function syncDataset(
     changed.map(({ sol, id, needsAttachment }) =>
       ls.updateExample({
         id,
-        inputs: { file: sol.file, possible_bottle_names: bottleNames },
+        inputs: {},
         outputs: { name: sol.name, volume: sol.volume },
+        metadata: { source_file: sol.file },
         ...(needsAttachment
           ? {
               attachments: {
@@ -193,8 +198,9 @@ export async function syncDataset(
   );
 
   const toCreate: ExampleCreate[] = newSols.map((sol, i) => ({
-    inputs: { file: sol.file, possible_bottle_names: bottleNames },
+    inputs: {},
     outputs: { name: sol.name, volume: sol.volume },
+    metadata: { source_file: sol.file },
     attachments: {
       [ATTACHMENT_KEY]: { mimeType: PHOTO_MIME, data: newPhotos[i]! },
     },
