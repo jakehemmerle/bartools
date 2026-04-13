@@ -6,7 +6,8 @@
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
-      "@bartools/inference": ["packages/inference/src/index.ts"]
+      "@bartools/inference": ["packages/inference/src/index.ts"],
+      "@bartools/types": ["packages/types/src/index.ts"]
     },
     "lib": ["ESNext"],
     "jsx": "react-jsx",
