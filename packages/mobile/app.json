@@ -2,31 +2,38 @@
   "expo": {
     "name": "BarBack",
     "slug": "barback",
+    "owner": "ray.ockenfels",
     "scheme": "barback",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#131313"
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.bartools.barback",
       "infoPlist": {
         "NSCameraUsageDescription": "BarBack uses the camera to photograph bottles for inventory identification.",
         "NSPhotoLibraryUsageDescription": "BarBack accesses your photo library to import bottle photos for inventory."
       }
     },
     "android": {
+      "package": "com.bartools.barback",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#131313"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -45,6 +52,12 @@
           "photosPermission": "BarBack accesses your photo library to import bottle photos for inventory."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7596766c-99a3-48ad-9735-efbd235130b0"
+      }
+    }
   }
 }

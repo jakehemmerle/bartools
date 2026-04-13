@@ -15,8 +15,8 @@ Read `thoughts/shared/research/` and `thoughts/shared/plans/plan.md` before maki
 
 ## Validation Gates (Required)
 Run and report before marking work complete:
-- `bun --filter @bartools/backend lint && bun --filter @bartools/mobile lint && bun --filter @bartools/dashboard lint`
-- `bunx tsc --noEmit -p packages/backend/tsconfig.json && bunx tsc --noEmit -p packages/eval/tsconfig.json && bunx tsc -b packages/dashboard/tsconfig.json && bunx tsc --noEmit -p packages/mobile/tsconfig.json`
+- `{lint-command}`
+- `{typecheck-command}`
 - `bun run test`
 
 If any gate fails, include exact error summary and next-fix steps.
