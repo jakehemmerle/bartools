@@ -21,7 +21,7 @@ import { ReviewScanSheet } from '../../components/ReviewScanSheet'
 import { useTheme } from '../../theme/useTheme'
 import { typography, spacing, radii } from '../../theme/tokens'
 import { MOCK_LOCATIONS } from '../../data/mockData'
-import type { Location } from '../../types'
+import type { Location } from '@bartools/types'
 import type { ScanResult } from '../../lib/scan-types'
 
 type CaptureMode = 'queue' | 'camera'

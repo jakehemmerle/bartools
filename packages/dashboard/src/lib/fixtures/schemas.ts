@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { REPORT_STATUSES } from '@bartools/types'
 
 export const userSchema = z.object({
   id: z.string(),
@@ -61,7 +62,7 @@ export const reportListItemSchema = z.object({
   userId: z.string().optional(),
   userDisplayName: z.string().optional(),
   bottleCount: z.number().int().nonnegative(),
-  status: z.enum(['created', 'processing', 'unreviewed', 'reviewed']),
+  status: z.enum(REPORT_STATUSES),
 })
 
 export const reportBottleRecordSchema = z.object({
@@ -99,7 +100,7 @@ export const reportDetailSchema = z.object({
   completedAt: z.string().optional(),
   userId: z.string().optional(),
   userDisplayName: z.string().optional(),
-  status: z.enum(['created', 'processing', 'unreviewed', 'reviewed']),
+  status: z.enum(REPORT_STATUSES),
   bottleRecords: z.array(reportBottleRecordSchema),
 })
 

@@ -6,13 +6,19 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
+    "lint": "eslint .",
+    "test": "bun test",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@bartools/inference": "workspace:*",
+    "@bartools/types": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.12.12",
-    "pg": "^8.20.0"
+    "motia": "^1.0.4-rc.1",
+    "pg": "^8.20.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/pg": "^8.20.0",
