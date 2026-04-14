@@ -9,6 +9,12 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7596766c-99a3-48ad-9735-efbd235130b0"
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -38,6 +44,10 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      ["expo-build-properties", {
+        "ios": { "newArchEnabled": true },
+        "android": { "newArchEnabled": true }
+      }],
       "expo-router",
       [
         "react-native-vision-camera",
@@ -50,7 +60,8 @@
         {
           "photosPermission": "BarBack accesses your photo library to import bottle photos for inventory."
         }
-      ]
+      ],
+      "./plugins/with-privacy-manifest"
     ],
     "extra": {
       "router": {},

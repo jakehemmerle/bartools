@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@bartools/types": "workspace:*",
+    "@react-native-async-storage/async-storage": "~2.1.2",
     "@expo/vector-icons": "^15.1.1",
     "expo": "~54.0.33",
+    "expo-build-properties": "~0.14.7",
     "expo-constants": "~18.0.13",
     "expo-dev-client": "~6.0.20",
     "expo-image-picker": "~17.0.10",
@@ -21,6 +23,7 @@
     "expo-router": "~6.0.23",
     "expo-status-bar": "~3.0.9",
     "expo-system-ui": "~6.0.9",
+    "expo-updates": "~0.28.13",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-safe-area-context": "~5.6.0",

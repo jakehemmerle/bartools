@@ -13,22 +13,46 @@
       },
       "android": {
         "buildType": "apk"
+      },
+      "channel": "development"
+    },
+    "development-simulator": {
+      "extends": "development",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
-    "preview": {
+    "staging": {
       "distribution": "internal",
       "ios": {
         "simulator": false
       },
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "staging"
     },
     "production": {
-      "autoIncrement": true
+      "distribution": "store",
+      "autoIncrement": true,
+      "channel": "production"
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      },
+      "ios": {
+        "ascAppId": "YOUR_APP_STORE_CONNECT_APP_ID",
+        "ascApiKeyPath": "./AuthKey.p8",
+        "ascApiKeyIssuerId": "YOUR_ISSUER_ID",
+        "ascApiKeyId": "YOUR_KEY_ID"
+      }
+    }
   }
 }
