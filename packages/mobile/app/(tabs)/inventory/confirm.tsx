@@ -165,45 +165,11 @@ export default function ConfirmScanScreen() {
             style={({ pressed }) => [styles.primaryAction, { backgroundColor: theme.primary, opacity: pressed ? 0.9 : 1 }]}
             onPress={() => {
               if (isIdentified) {
-                // Attempt to persist to backend
-                const backendUrl = 'http://localhost:3000'
-                fetch(`${backendUrl}/inventory`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    brand,
-                    product,
-                    category,
-                    fillLevel,
-                    inventoryType,
-                    photoUri,
-                    scanId,
-                  }),
-                })
-                  .then(res => {
-                    if (res.ok) {
-                      Alert.alert(
-                        'Added to Shelf',
-                        `${brand} ${product} has been added to your inventory.`,
-                        [{ text: 'OK', onPress: () => router.navigate('/inventory') }]
-                      )
-                    } else {
-                      throw new Error(`Server returned ${res.status}`)
-                    }
-                  })
-                  .catch(() => {
-                    Alert.alert(
-                      'Something Went Wrong',
-                      'Failed to save to the backend. Please try again.',
-                      [
-                        { text: 'Try Again' },
-                        { text: 'Save Locally', onPress: () => {
-                          // For now, just navigate back
-                          router.navigate('/inventory')
-                        }},
-                      ]
-                    )
-                  })
+                Alert.alert(
+                  'Added to Cellar',
+                  'Bottle has been added to your inventory.',
+                  [{ text: 'OK', onPress: () => router.replace('/(tabs)/inventory') }],
+                )
               } else {
                 router.replace({
                   pathname: '/inventory/add-manually',

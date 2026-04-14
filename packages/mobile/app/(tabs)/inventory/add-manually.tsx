@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { View, Text, TextInput, ScrollView, Pressable, Image, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter, useLocalSearchParams } from 'expo-router'
@@ -6,6 +6,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { FillLevelSlider } from '../../../components/FillLevelSlider'
 import { ITEM_CATEGORIES } from '@bartools/types'
+import type { LocationListItem } from '@bartools/types'
+import { getLocations } from '../../../lib/api'
+import { DEFAULT_VENUE_ID } from '../../../lib/config'
 import { MOCK_LOCATIONS } from '../../../data/mockData'
 
 export default function AddManuallyScreen() {
@@ -17,7 +20,22 @@ export default function AddManuallyScreen() {
   const [category, setCategory] = useState('bourbon')
   const [sizeMl, setSizeMl] = useState('750')
   const [fillLevel, setFillLevel] = useState(100)
-  const [location, setLocation] = useState(MOCK_LOCATIONS[0]?.name ?? 'Main Bar')
+  const [locations, setLocations] = useState<LocationListItem[]>([])
+  const [location, setLocation] = useState('')
+
+  // Load locations from API with mock fallback
+  useEffect(() => {
+    getLocations(DEFAULT_VENUE_ID)
+      .then((res) => {
+        setLocations(res.locations)
+        if (res.locations.length > 0) setLocation(res.locations[0].name)
+      })
+      .catch(() => {
+        const fallback = MOCK_LOCATIONS.map((l) => ({ id: l.id, name: l.name }))
+        setLocations(fallback)
+        if (fallback.length > 0) setLocation(fallback[0].name)
+      })
+  }, [])
 
   const handleSubmit = () => {
     console.log('Add to inventory:', { name, category, sizeMl, fillLevel, location, photoUri })
