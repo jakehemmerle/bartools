@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { FillLevelSlider } from '../../../components/FillLevelSlider'
+import { useScanContext } from '../../../lib/scan-context'
 
 // Mock VLM result
 const MOCK_RESULT = {
@@ -18,7 +19,8 @@ const MOCK_RESULT = {
 export default function ConfirmScanScreen() {
   const theme = useTheme()
   const router = useRouter()
-  const { photoUri, identified } = useLocalSearchParams<{ photoUri?: string; identified?: string }>()
+  const { identified } = useLocalSearchParams<{ identified?: string }>()
+  const { photoUri } = useScanContext()
 
   const isIdentified = identified !== 'false'
 
@@ -171,10 +173,7 @@ export default function ConfirmScanScreen() {
                   [{ text: 'OK', onPress: () => router.replace('/(tabs)/inventory') }],
                 )
               } else {
-                router.replace({
-                  pathname: '/inventory/add-manually',
-                  params: photoUri ? { photoUri } : {},
-                })
+                router.replace({ pathname: '/inventory/add-manually' })
               }
             }}
           >

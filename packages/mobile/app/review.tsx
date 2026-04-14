@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import type { BottleSearchResult, ReportBottleRecord } from '@bartools/types'
 import { useReportStream } from '../lib/use-report-stream'
-import { reviewReport } from '../lib/api'
+import { reviewReport, isValidUuid } from '../lib/api'
 import { DEFAULT_USER_ID } from '../lib/config'
 import { useTheme } from '../theme/useTheme'
 import { RecordCard } from '../components/RecordCard'
@@ -21,8 +21,9 @@ type RecordEdit = {
 export default function ReviewScreen() {
   const theme = useTheme()
   const router = useRouter()
-  const { reportId } = useLocalSearchParams<{ reportId: string }>()
-  const { status, progress, records, error } = useReportStream(reportId ?? null)
+  const { reportId: rawReportId } = useLocalSearchParams<{ reportId: string }>()
+  const reportId = rawReportId && isValidUuid(rawReportId) ? rawReportId : null
+  const { status, progress, records, error } = useReportStream(reportId)
 
   const [edits, setEdits] = useState<Record<string, RecordEdit>>({})
   const [searchTarget, setSearchTarget] = useState<string | null>(null)

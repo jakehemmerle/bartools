@@ -21,16 +21,45 @@ export class ApiError extends Error {
 }
 
 // ---------------------------------------------------------------------------
+// Validation helpers
+// ---------------------------------------------------------------------------
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+export function isValidUuid(value: string): boolean {
+  return UUID_RE.test(value)
+}
+
+export function isValidFileUri(value: string): boolean {
+  return value.startsWith('file://')
+}
+
+function encodePath(segment: string): string {
+  return encodeURIComponent(segment)
+}
+
+// ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+const REQUEST_TIMEOUT_MS = 30_000
+
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`, init)
-  if (!res.ok) {
-    const body = await res.text().catch(() => 'unknown error')
-    throw new ApiError(res.status, body)
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  try {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      signal: controller.signal,
+    })
+    if (!res.ok) {
+      const body = await res.text().catch(() => 'unknown error')
+      throw new ApiError(res.status, body)
+    }
+    return res.json() as Promise<T>
+  } finally {
+    clearTimeout(timeout)
   }
-  return res.json() as Promise<T>
 }
 
 // ---------------------------------------------------------------------------
@@ -75,7 +104,7 @@ export function uploadPhotos(
     // React Native's FormData accepts {uri,type,name} objects for file uploads
     formData.append(`photo_${i}`, { uri, type: 'image/jpeg', name: `photo_${i}.jpg` })
   }
-  return fetchJson(`/reports/${reportId}/photos`, {
+  return fetchJson(`/reports/${encodePath(reportId)}/photos`, {
     method: 'POST',
     body: formData,
     // Do NOT set Content-Type — RN sets the multipart boundary automatically
@@ -89,7 +118,7 @@ type SubmitReportResponse = {
 }
 
 export function submitReport(reportId: string): Promise<SubmitReportResponse> {
-  return fetchJson(`/reports/${reportId}/submit`, { method: 'POST' })
+  return fetchJson(`/reports/${encodePath(reportId)}/submit`, { method: 'POST' })
 }
 
 // ---------------------------------------------------------------------------
@@ -97,7 +126,7 @@ export function submitReport(reportId: string): Promise<SubmitReportResponse> {
 // ---------------------------------------------------------------------------
 
 export function getReport(reportId: string): Promise<ReportDetail> {
-  return fetchJson(`/reports/${reportId}`)
+  return fetchJson(`/reports/${encodePath(reportId)}`)
 }
 
 export function listReports(): Promise<{ reports: ReportListItem[] }> {
@@ -123,7 +152,7 @@ export function reviewReport(
   userId: string,
   records: ReviewRecord[],
 ): Promise<ReportDetail> {
-  return fetchJson(`/reports/${reportId}/review`, {
+  return fetchJson(`/reports/${encodePath(reportId)}/review`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -154,7 +183,7 @@ export function searchBottles(
 export function getLocations(
   venueId: string,
 ): Promise<{ locations: LocationListItem[] }> {
-  return fetchJson(`/venues/${venueId}/locations`)
+  return fetchJson(`/venues/${encodePath(venueId)}/locations`)
 }
 
 // ---------------------------------------------------------------------------
@@ -162,7 +191,7 @@ export function getLocations(
 // ---------------------------------------------------------------------------
 
 export function getReportStreamUrl(reportId: string): string {
-  return `${API_BASE_URL}/reports/${reportId}/stream`
+  return `${API_BASE_URL}/reports/${encodePath(reportId)}/stream`
 }
 
 // ---------------------------------------------------------------------------
@@ -170,6 +199,11 @@ export function getReportStreamUrl(reportId: string): string {
 // ---------------------------------------------------------------------------
 
 export function resolveImageUrl(path: string): string {
-  if (path.startsWith('http')) return path
+  if (path.startsWith('http')) {
+    const url = new URL(path)
+    const apiHost = new URL(API_BASE_URL).host
+    if (url.host !== apiHost) return '' // reject URLs outside our API domain
+    return path
+  }
   return `${API_BASE_URL}${path}`
 }

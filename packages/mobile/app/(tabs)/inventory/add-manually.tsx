@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { View, Text, TextInput, ScrollView, Pressable, Image, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter, useLocalSearchParams } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { FillLevelSlider } from '../../../components/FillLevelSlider'
@@ -9,11 +9,12 @@ import type { LocationListItem } from '@bartools/types'
 import { getLocations } from '../../../lib/api'
 import { DEFAULT_VENUE_ID } from '../../../lib/config'
 import { MOCK_LOCATIONS } from '../../../data/mockData'
+import { useScanContext } from '../../../lib/scan-context'
 
 export default function AddManuallyScreen() {
   const theme = useTheme()
   const router = useRouter()
-  const { photoUri } = useLocalSearchParams<{ photoUri?: string }>()
+  const { photoUri } = useScanContext()
 
   const [name, setName] = useState('')
   const [category, _setCategory] = useState('bourbon')
@@ -37,7 +38,7 @@ export default function AddManuallyScreen() {
   }, [])
 
   const handleSubmit = () => {
-    console.log('Add to inventory:', { name, category, sizeMl, fillLevel, location, photoUri })
+    // TODO: wire to backend API when manual-add endpoint exists
     router.back()
   }
 
