@@ -20,6 +20,7 @@ export type ReportListItem = {
 
 export type ReportBottleRecord = {
   id: string;
+  bottleId?: string;
   imageUrl: string;
   bottleName: string;
   category?: string;

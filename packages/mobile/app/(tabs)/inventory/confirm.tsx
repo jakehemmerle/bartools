@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { FillLevelSlider } from '../../../components/FillLevelSlider'
+import { useScanContext } from '../../../lib/scan-context'
 
 // Mock VLM result
 const MOCK_RESULT = {
@@ -18,13 +19,14 @@ const MOCK_RESULT = {
 export default function ConfirmScanScreen() {
   const theme = useTheme()
   const router = useRouter()
-  const { photoUri, identified } = useLocalSearchParams<{ photoUri?: string; identified?: string }>()
+  const { identified } = useLocalSearchParams<{ identified?: string }>()
+  const { photoUri, setPhotoUri } = useScanContext()
 
   const isIdentified = identified !== 'false'
 
   const [brand, setBrand] = useState(isIdentified ? MOCK_RESULT.brand : '')
   const [product, setProduct] = useState(isIdentified ? MOCK_RESULT.product : '')
-  const [category, setCategory] = useState(isIdentified ? MOCK_RESULT.category : '')
+  const [category, _setCategory] = useState(isIdentified ? MOCK_RESULT.category : '')
   const [fillLevel, setFillLevel] = useState(75)
   const [inventoryType, setInventoryType] = useState<'active' | 'backstock'>('active')
 
@@ -165,50 +167,16 @@ export default function ConfirmScanScreen() {
             style={({ pressed }) => [styles.primaryAction, { backgroundColor: theme.primary, opacity: pressed ? 0.9 : 1 }]}
             onPress={() => {
               if (isIdentified) {
-                // Attempt to persist to backend
-                const backendUrl = 'http://localhost:3000'
-                fetch(`${backendUrl}/inventory`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    brand,
-                    product,
-                    category,
-                    fillLevel,
-                    inventoryType,
-                    photoUri,
-                    scanId,
-                  }),
-                })
-                  .then(res => {
-                    if (res.ok) {
-                      Alert.alert(
-                        'Added to Shelf',
-                        `${brand} ${product} has been added to your inventory.`,
-                        [{ text: 'OK', onPress: () => router.navigate('/inventory') }]
-                      )
-                    } else {
-                      throw new Error(`Server returned ${res.status}`)
-                    }
-                  })
-                  .catch(() => {
-                    Alert.alert(
-                      'Something Went Wrong',
-                      'Failed to save to the backend. Please try again.',
-                      [
-                        { text: 'Try Again' },
-                        { text: 'Save Locally', onPress: () => {
-                          // For now, just navigate back
-                          router.navigate('/inventory')
-                        }},
-                      ]
-                    )
-                  })
+                Alert.alert(
+                  'Confirmation Saved',
+                  'Bottle details have been confirmed. Submit via the review flow to add to inventory.',
+                  [{ text: 'OK', onPress: () => {
+                    setPhotoUri(null)
+                    router.replace('/(tabs)/inventory')
+                  }}],
+                )
               } else {
-                router.replace({
-                  pathname: '/inventory/add-manually',
-                  params: photoUri ? { photoUri } : {},
-                })
+                router.replace({ pathname: '/inventory/add-manually' })
               }
             }}
           >

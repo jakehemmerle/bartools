@@ -7,13 +7,15 @@ import {
   Pressable,
   Animated,
   Easing,
-  Image,
   Alert,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
+import { useRouter } from 'expo-router'
 import { useBatchQueue } from '../../lib/use-batch-queue'
+import { createReport, uploadPhotos, submitReport, getLocations } from '../../lib/api'
+import { DEFAULT_USER_ID, DEFAULT_VENUE_ID } from '../../lib/config'
 import { CameraCapture } from '../../components/camera-capture'
 import { BatchQueue } from '../../components/batch-queue'
 import { AppHeader } from '../../components/AppHeader'
@@ -21,8 +23,7 @@ import { ReviewScanSheet } from '../../components/ReviewScanSheet'
 import { useTheme } from '../../theme/useTheme'
 import { typography, spacing, radii } from '../../theme/tokens'
 import { MOCK_LOCATIONS } from '../../data/mockData'
-import type { Location } from '@bartools/types'
-import type { ScanResult } from '../../lib/scan-types'
+import type { LocationListItem } from '@bartools/types'
 
 type CaptureMode = 'queue' | 'camera'
 
@@ -63,36 +64,33 @@ function PulseDot({ color }: { color: string }) {
 
 export default function CaptureScreen() {
   const theme = useTheme()
+  const router = useRouter()
   const { photos, isEmpty, addPhoto, addPhotos, removePhoto, clear } =
     useBatchQueue()
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(
-    MOCK_LOCATIONS[0]?.id ?? null,
-  )
+  const [locations, setLocations] = useState<LocationListItem[]>([])
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
   const [mode, setMode] = useState<CaptureMode>('queue')
-  const [scanResults, setScanResults] = useState<ScanResult[]>([])
   const [showReview, setShowReview] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const submittingRef = useRef<boolean>(false)
+
+  // Load locations from API with mock fallback
+  useEffect(() => {
+    getLocations(DEFAULT_VENUE_ID)
+      .then((res) => {
+        setLocations(res.locations)
+        if (res.locations.length > 0) setSelectedLocation(res.locations[0].id)
+      })
+      .catch(() => {
+        const fallback = MOCK_LOCATIONS.map((l) => ({ id: l.id, name: l.name }))
+        setLocations(fallback)
+        if (fallback.length > 0) setSelectedLocation(fallback[0].id)
+      })
+  }, [])
 
   const handlePhotoTaken = useCallback(
     (uri: string) => {
       addPhoto(uri)
-      // Create a scan result — mock VLM identification
-      // Randomly decide if identified (80% chance) or not (20%)
-      const isIdentified = Math.random() > 0.2
-      const mockBottles = [
-        { brand: 'Buffalo Trace', product: 'Kentucky Straight', category: 'Bourbon', fillLevel: 75, confidence: 98 },
-        { brand: 'Macallan', product: '12 Year', category: 'Scotch', fillLevel: 60, confidence: 94 },
-        { brand: 'Hendrick\'s', product: 'Gin', category: 'Gin', fillLevel: 85, confidence: 89 },
-        { brand: 'Old Forester', product: '1920', category: 'Bourbon', fillLevel: 45, confidence: 96 },
-      ]
-      const randomBottle = mockBottles[Math.floor(Math.random() * mockBottles.length)]
-
-      const result: ScanResult = {
-        id: `scan-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        photoUri: uri,
-        status: isIdentified ? 'identified' : 'unidentified',
-        bottle: isIdentified ? randomBottle : undefined,
-      }
-      setScanResults(prev => [...prev, result])
       setMode('queue')
     },
     [addPhoto],
@@ -105,59 +103,35 @@ export default function CaptureScreen() {
       quality: 0.8,
     })
     if (!result.canceled) {
-      const uris = result.assets.map((a) => a.uri)
-      addPhotos(uris)
-      // Create scan results for each
-      const mockBottles = [
-        { brand: 'Buffalo Trace', product: 'Kentucky Straight', category: 'Bourbon', fillLevel: 75, confidence: 98 },
-        { brand: 'Macallan', product: '12 Year', category: 'Scotch', fillLevel: 60, confidence: 94 },
-      ]
-      const newResults: ScanResult[] = uris.map((uri, i) => ({
-        id: `scan-${Date.now()}-${i}`,
-        photoUri: uri,
-        status: Math.random() > 0.2 ? 'identified' as const : 'unidentified' as const,
-        bottle: Math.random() > 0.2 ? mockBottles[i % mockBottles.length] : undefined,
-      }))
-      setScanResults(prev => [...prev, ...newResults])
+      addPhotos(result.assets.map((a) => a.uri))
     }
   }, [addPhotos])
 
-  const handleSync = useCallback(() => {
-    // Attempt to POST to backend
-    const backendUrl = 'http://localhost:3000' // Backend URL
-    fetch(`${backendUrl}/sessions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        locationId: selectedLocation,
-        scans: scanResults.map(r => ({
-          photoUri: r.photoUri,
-          status: r.status,
-          bottle: r.bottle,
-        })),
-      }),
-    })
-      .then(res => {
-        if (res.ok) {
-          Alert.alert('Success', 'Scan results synced to inventory successfully.', [
-            { text: 'OK', onPress: () => {
-              setShowReview(false)
-              setScanResults([])
-              clear()
-            }}
-          ])
-        } else {
-          throw new Error(`Server returned ${res.status}`)
-        }
-      })
-      .catch(() => {
-        Alert.alert(
-          'Sync Failed',
-          'Something went wrong while syncing to the backend. Please try again.',
-          [{ text: 'OK' }]
-        )
-      })
-  }, [scanResults, selectedLocation, clear])
+  const handleSubmit = useCallback(async () => {
+    if (submittingRef.current) return
+    try {
+      submittingRef.current = true
+      setSubmitting(true)
+      const report = await createReport(
+        DEFAULT_USER_ID,
+        DEFAULT_VENUE_ID,
+        selectedLocation ?? undefined,
+      )
+      await uploadPhotos(report.id, photos.map((p) => p.uri))
+      await submitReport(report.id)
+      setShowReview(false)
+      clear()
+      router.push({ pathname: '/review', params: { reportId: report.id } })
+    } catch {
+      Alert.alert(
+        'Submission Failed',
+        'Could not submit photos for analysis. Please try again.',
+      )
+    } finally {
+      submittingRef.current = false
+      setSubmitting(false)
+    }
+  }, [photos, selectedLocation, clear, router, submitting])
 
   // Reticle border color: white at 40% opacity (black and white aesthetic)
   const reticleBorderColor = `${theme.onSurface}66` // 66 hex = ~40% opacity
@@ -188,13 +162,8 @@ export default function CaptureScreen() {
       edges={['top']}
       style={[styles.container, { backgroundColor: theme.background }]}
     >
-      {/* Full-screen background bar shelf image (grayscale) */}
-      <Image
-        source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjGEQ110Ek0D6kpMsgxKlQ9yfiwwLdcLtoUBeAETwjXCN12T29I8JzMuIwRIILOK0bwOKiz_C3-milsCUzvAxY4_soaQYvbsJlqa41gj7tHC7AtU1reN_KLF9bv9E0sZhJzXEaYY0s9g8m2xfVRpI3qVOEtvy-F578LUdZcPAWBHXbnqOY8qNULqC4pNsZdQOQ9PNyCyudIG_UDBeTdza_z7GnKqWfAz4eNJhJq1WEfFAGYqgoq6E0RdH0vGv4BrnoD07mtZk6PZgV' }}
-        style={[styles.backgroundImage, { opacity: 0.35 }]}
-        resizeMode="cover"
-        accessible={false}
-      />
+      {/* Full-screen background (dark wash — no external image dependency) */}
+      <View style={[styles.backgroundImage, { backgroundColor: '#1a1a1a', opacity: 0.9 }]} />
       {/* Heavy gray overlay to wash out color — simulates grayscale */}
       <View style={[styles.backgroundImage, { backgroundColor: '#1a1a1a', opacity: 0.7 }]} />
       {/* Top gradient darkening */}
@@ -304,7 +273,7 @@ export default function CaptureScreen() {
 
         {/* Location badges below capture row */}
         <View style={styles.locationRow}>
-          {MOCK_LOCATIONS.map((loc) => {
+          {locations.map((loc) => {
             const isSelected = selectedLocation === loc.id
             return (
               <TouchableOpacity
@@ -344,8 +313,9 @@ export default function CaptureScreen() {
       <ReviewScanSheet
         visible={showReview}
         onDismiss={() => setShowReview(false)}
-        results={scanResults}
-        onSync={handleSync}
+        photos={photos}
+        onSubmit={handleSubmit}
+        submitting={submitting}
       />
     </SafeAreaView>
   )

@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
-import { View, Text, TextInput, ScrollView, FlatList, Pressable, Alert, StyleSheet } from 'react-native'
+import { View, Text, TextInput, ScrollView, FlatList, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { AppHeader } from '../../../components/AppHeader'
@@ -10,7 +9,7 @@ import { BottleCard } from '../../../components/BottleCard'
 import { AlertBanner } from '../../../components/AlertBanner'
 import { AddToInventorySheet } from '../../../components/AddToInventorySheet'
 import { MOCK_BOTTLES, MOCK_INVENTORY, INVENTORY_FILTERS } from '../../../data/mockData'
-import type { Bottle } from '../../../types'
+import type { Bottle } from '@bartools/types'
 
 type BottleWithFill = Bottle & { fillPercent: number }
 
@@ -20,7 +19,6 @@ type SectionItem =
 
 export default function InventoryScreen() {
   const theme = useTheme()
-  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<string>('All Bottles')
   const [showAddSheet, setShowAddSheet] = useState(false)
@@ -39,9 +37,7 @@ export default function InventoryScreen() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       result = result.filter(
-        (b) =>
-          b.brand.toLowerCase().includes(q) ||
-          b.product.toLowerCase().includes(q),
+        (b) => b.name.toLowerCase().includes(q),
       )
     }
 
@@ -88,8 +84,7 @@ export default function InventoryScreen() {
     return (
       <View style={styles.cardWrapper}>
         <BottleCard
-          brand={data.brand}
-          product={data.product}
+          name={data.name}
           subcategory={data.subcategory}
           sizeMl={data.sizeMl}
           fillPercent={data.fillPercent}
@@ -98,7 +93,7 @@ export default function InventoryScreen() {
     )
   }
 
-  const keyExtractor = (item: SectionItem, index: number) => {
+  const keyExtractor = (item: SectionItem) => {
     if (item.type === 'header') return `header-${item.category}`
     return item.data.id
   }
