@@ -9,8 +9,6 @@ import {
 } from "./sync-dataset";
 import { DATASET_NAME, type Solution } from "./types";
 
-const BOTTLE_NAMES = ["Aperol", "Campari", "Angostura Bitters"];
-
 type FakeCalls = {
   createDataset: Array<[string, { description?: string } | undefined]>;
   createExamples: ExampleCreate[][];
@@ -67,17 +65,17 @@ function makeExample(
   file: string,
   name: string,
   volume: number,
-  options: { bottleNames?: string[]; withAttachment?: boolean } = {},
+  options: {
+    withAttachment?: boolean;
+    inputs?: Record<string, unknown>;
+    metadata?: Record<string, unknown>;
+  } = {},
 ): Example {
   return {
     id: `ex-${file}`,
-    inputs: {
-      file,
-      ...(options.bottleNames
-        ? { possible_bottle_names: options.bottleNames }
-        : {}),
-    },
+    inputs: options.inputs ?? {},
     outputs: { name, volume },
+    ...(options.metadata ? { metadata: options.metadata } : { metadata: { source_file: file } }),
     ...(options.withAttachment
       ? {
           attachments: {
@@ -101,11 +99,11 @@ describe("syncDataset", () => {
       { file: "c.jpg", name: "Angostura Bitters", volume: 0.3 },
     ];
 
-    const report = await syncDataset(labeled, BOTTLE_NAMES, {
+    const report = await syncDataset(labeled, {
       client,
       readPhoto: fakeReadPhoto,
     });
-
+    
     expect(calls.createDataset).toHaveLength(1);
     expect(calls.createDataset[0]?.[0]).toBe(DATASET_NAME);
 
@@ -114,13 +112,11 @@ describe("syncDataset", () => {
     expect(created).toHaveLength(3);
     for (const sol of labeled) {
       const found = created.find(
-        (c) => (c.inputs as { file?: string }).file === sol.file,
+        (c) => (c.metadata as { source_file?: string }).source_file === sol.file,
       );
       expect(found).toBeDefined();
-      expect(found?.inputs).toEqual({
-        file: sol.file,
-        possible_bottle_names: BOTTLE_NAMES,
-      });
+      expect(found?.inputs).toEqual({});
+      expect(found?.metadata).toEqual({ source_file: sol.file });
       expect(found?.outputs).toEqual({ name: sol.name, volume: sol.volume });
       expect(found?.dataset_id).toBe("ds-new");
       const att = (found?.attachments ?? {}) as Record<
@@ -145,11 +141,9 @@ describe("syncDataset", () => {
   test("no-ops when every existing example matches the labeled outputs", async () => {
     const existing = [
       makeExample("a.jpg", "Aperol", 0.5, {
-        bottleNames: BOTTLE_NAMES,
         withAttachment: true,
       }),
       makeExample("b.jpg", "Campari", 0.7, {
-        bottleNames: BOTTLE_NAMES,
         withAttachment: true,
       }),
     ];
@@ -163,7 +157,7 @@ describe("syncDataset", () => {
       { file: "b.jpg", name: "Campari", volume: 0.7 },
     ];
 
-    const report = await syncDataset(labeled, BOTTLE_NAMES, {
+    const report = await syncDataset(labeled, {
       client,
       readPhoto: fakeReadPhoto,
     });
@@ -182,7 +176,6 @@ describe("syncDataset", () => {
   test("updates outputs in place when label drifts and never re-uploads attachments", async () => {
     const existing = [
       makeExample("a.jpg", "OldName", 0.5, {
-        bottleNames: BOTTLE_NAMES,
         withAttachment: true,
       }),
     ];
@@ -193,7 +186,7 @@ describe("syncDataset", () => {
     });
     const labeled: Solution[] = [{ file: "a.jpg", name: "Aperol", volume: 0.6 }];
 
-    const report = await syncDataset(labeled, BOTTLE_NAMES, {
+    const report = await syncDataset(labeled, {
       client,
       readPhoto: fakeReadPhoto,
     });
@@ -202,10 +195,8 @@ describe("syncDataset", () => {
     expect(calls.updateExample).toHaveLength(1);
     const update = calls.updateExample[0]!;
     expect(update.id).toBe("ex-a.jpg");
-    expect(update.inputs).toEqual({
-      file: "a.jpg",
-      possible_bottle_names: BOTTLE_NAMES,
-    });
+    expect(update.inputs).toEqual({});
+    expect(update.metadata).toEqual({ source_file: "a.jpg" });
     expect(update.outputs).toEqual({ name: "Aperol", volume: 0.6 });
     expect((update as { attachments?: unknown }).attachments).toBeUndefined();
     expect(report).toEqual({
@@ -216,8 +207,13 @@ describe("syncDataset", () => {
     });
   });
 
-  test("backfills possible_bottle_names and missing attachment on matching existing rows", async () => {
-    const existing = [makeExample("a.jpg", "Aperol", 0.5)];
+  test("migrates legacy rows to metadata.source_file and backfills missing attachments", async () => {
+    const existing = [
+      makeExample("a.jpg", "Aperol", 0.5, {
+        inputs: { file: "a.jpg", possible_bottle_names: ["legacy"] },
+        metadata: {},
+      }),
+    ];
     const { client, calls } = makeFakeClient({
       hasDataset: true,
       datasetId: "ds-1",
@@ -225,17 +221,15 @@ describe("syncDataset", () => {
     });
     const labeled: Solution[] = [{ file: "a.jpg", name: "Aperol", volume: 0.5 }];
 
-    const report = await syncDataset(labeled, BOTTLE_NAMES, {
+    const report = await syncDataset(labeled, {
       client,
       readPhoto: fakeReadPhoto,
     });
 
     expect(calls.createExamples).toHaveLength(0);
     expect(calls.updateExample).toHaveLength(1);
-    expect(calls.updateExample[0]?.inputs).toEqual({
-      file: "a.jpg",
-      possible_bottle_names: BOTTLE_NAMES,
-    });
+    expect(calls.updateExample[0]?.inputs).toEqual({});
+    expect(calls.updateExample[0]?.metadata).toEqual({ source_file: "a.jpg" });
     expect(calls.updateExample[0]?.attachments).toBeDefined();
     expect(report).toEqual({
       datasetId: "ds-1",
@@ -248,11 +242,9 @@ describe("syncDataset", () => {
   test("mixed: 1 unchanged + 1 update + 1 new — readPhoto invoked once", async () => {
     const existing = [
       makeExample("a.jpg", "Aperol", 0.5, {
-        bottleNames: BOTTLE_NAMES,
         withAttachment: true,
       }),
       makeExample("b.jpg", "WrongName", 0.5, {
-        bottleNames: BOTTLE_NAMES,
         withAttachment: true,
       }),
     ];
@@ -273,7 +265,7 @@ describe("syncDataset", () => {
       return fakeReadPhoto(file);
     };
 
-    const report = await syncDataset(labeled, BOTTLE_NAMES, {
+    const report = await syncDataset(labeled, {
       client,
       readPhoto: countingReadPhoto,
     });
@@ -281,10 +273,11 @@ describe("syncDataset", () => {
     expect(readPhotoCalls).toBe(1);
     expect(calls.updateExample).toHaveLength(1);
     expect(calls.updateExample[0]?.id).toBe("ex-b.jpg");
+    expect(calls.updateExample[0]?.inputs).toEqual({});
     expect(calls.createExamples).toHaveLength(1);
     const created = calls.createExamples[0]!;
     expect(created).toHaveLength(1);
-    expect((created[0]?.inputs as { file?: string }).file).toBe("c.jpg");
+    expect(created[0]?.metadata).toEqual({ source_file: "c.jpg" });
     expect(report).toEqual({
       datasetId: "ds-1",
       created: 1,
@@ -301,7 +294,7 @@ describe("syncDataset", () => {
     });
     const labeled: Solution[] = [{ file: "a.jpg", name: "Aperol", volume: 0.5 }];
 
-    await syncDataset(labeled, BOTTLE_NAMES, {
+    await syncDataset(labeled, {
       client,
       readPhoto: fakeReadPhoto,
     });

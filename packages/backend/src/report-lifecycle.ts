@@ -1,0 +1,183 @@
+import { count, eq, sql } from 'drizzle-orm';
+import { z } from 'zod';
+import { db } from './db';
+import { inferenceJobs, reportRecords, reports, scans } from './schema';
+import { saveUploadedPhoto } from './uploads';
+
+export const createReportSchema = z.object({
+  userId: z.string().uuid(),
+  venueId: z.string().uuid(),
+  locationId: z.string().uuid().optional(),
+});
+
+export type ReportScanInferencePayload = {
+  jobId: string;
+  reportId: string;
+  scanId: string;
+};
+
+export async function createReport(input: z.infer<typeof createReportSchema>) {
+  const [report] = await db
+    .insert(reports)
+    .values(input)
+    .returning();
+
+  return report;
+}
+
+export async function addReportPhotos(reportId: string, files: File[]) {
+  const [report] = await db
+    .select({
+      id: reports.id,
+      userId: reports.userId,
+      venueId: reports.venueId,
+      locationId: reports.locationId,
+      status: reports.status,
+    })
+    .from(reports)
+    .where(eq(reports.id, reportId))
+    .limit(1);
+
+  if (!report) {
+    throw new Error('report_not_found');
+  }
+
+  if (report.status !== 'created') {
+    throw new Error('report_not_editable');
+  }
+
+  const [{ existingCount }] = await db
+    .select({ existingCount: count(scans.id) })
+    .from(scans)
+    .where(eq(scans.reportId, reportId));
+
+  const offset = Number(existingCount);
+  const photoUrls = await Promise.all(
+    files.map((file) => saveUploadedPhoto(reportId, file))
+  );
+  const uploaded = photoUrls.map((photoUrl, index) => ({
+    reportId,
+    userId: report.userId,
+    venueId: report.venueId,
+    locationId: report.locationId,
+    photoUrl,
+    sortOrder: offset + index,
+  }));
+
+  const created = uploaded.length
+    ? await db.insert(scans).values(uploaded).returning()
+    : [];
+
+  const nextPhotoCount = offset + created.length;
+  await db
+    .update(reports)
+    .set({ photoCount: nextPhotoCount })
+    .where(eq(reports.id, reportId));
+
+  return created;
+}
+
+export async function submitReport(reportId: string): Promise<ReportScanInferencePayload[]> {
+  return db.transaction(async (tx) => {
+    const [report] = await tx
+      .select({
+        id: reports.id,
+        status: reports.status,
+      })
+      .from(reports)
+      .where(eq(reports.id, reportId))
+      .limit(1);
+
+    if (!report) {
+      throw new Error('report_not_found');
+    }
+
+    if (report.status !== 'created') {
+      throw new Error('report_not_submittable');
+    }
+
+    const reportScans = await tx
+      .select({
+        id: scans.id,
+      })
+      .from(scans)
+      .where(eq(scans.reportId, reportId));
+
+    if (reportScans.length === 0) {
+      throw new Error('report_has_no_photos');
+    }
+
+    const queuedAt = new Date();
+    const recordRows = reportScans.map((scan) => ({
+      reportId,
+      scanId: scan.id,
+      status: 'pending' as const,
+      createdAt: queuedAt,
+      updatedAt: queuedAt,
+    }));
+
+    const jobRows = reportScans.map((scan) => ({
+      reportId,
+      scanId: scan.id,
+      status: 'queued' as const,
+      provider: 'anthropic',
+      jobKey: `${reportId}:${scan.id}`,
+      queuedAt,
+      createdAt: queuedAt,
+      updatedAt: queuedAt,
+    }));
+
+    const createdJobs = await tx.insert(inferenceJobs).values(jobRows).returning({
+      jobId: inferenceJobs.id,
+      reportId: inferenceJobs.reportId,
+      scanId: inferenceJobs.scanId,
+    });
+
+    await tx.insert(reportRecords).values(recordRows);
+    await tx
+      .update(reports)
+      .set({
+        status: 'processing',
+        photoCount: reportScans.length,
+        processedCount: 0,
+      })
+      .where(eq(reports.id, reportId));
+
+    return createdJobs;
+  });
+}
+
+export async function syncReportProgress(reportId: string) {
+  const [scanTotals] = await db
+    .select({
+      photoCount: count(scans.id),
+      processedCount: sql<number>`
+        count(*) filter (
+          where ${inferenceJobs.status} in ('succeeded', 'failed')
+        )
+      `,
+    })
+    .from(scans)
+    .leftJoin(inferenceJobs, eq(inferenceJobs.scanId, scans.id))
+    .where(eq(scans.reportId, reportId));
+
+  const photoCount = Number(scanTotals?.photoCount ?? 0);
+  const processedCount = Number(scanTotals?.processedCount ?? 0);
+
+  const nextStatus = photoCount > 0 && processedCount >= photoCount ? 'unreviewed' : 'processing';
+
+  await db
+    .update(reports)
+    .set({
+      photoCount,
+      processedCount,
+      status: nextStatus,
+    })
+    .where(eq(reports.id, reportId));
+
+  return {
+    photoCount,
+    processedCount,
+    status: nextStatus,
+  };
+}

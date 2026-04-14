@@ -8,16 +8,13 @@ import {
 } from "./prompt";
 
 describe("prompt template", () => {
-  test("default template renders expected system and user prompt", async () => {
-    const rendered = await renderPromptTemplate(buildDefaultPromptTemplate(), [
-      "Aperol",
-      "Campari",
-    ]);
+  test("default template renders a fully materialized catalog prompt", async () => {
+    const rendered = await renderPromptTemplate(await buildDefaultPromptTemplate());
     expect(rendered.systemPrompt).toContain("submit_answer");
-    expect(rendered.userPrompt).toContain("2 bottle names");
-    expect(rendered.userPrompt).toContain("Aperol\nCampari");
+    expect(rendered.userPrompt).toContain("bottle names");
+    expect(rendered.userPrompt).toContain("Aperol");
+    expect(rendered.userPrompt).toContain("Campari");
     expect(rendered.userPrompt).not.toContain("{bottle_count}");
-    expect(rendered.userPrompt).not.toContain("{possible_bottle_names_text}");
   });
 
   test("promptValueToModelInput rejects unsupported message types", () => {

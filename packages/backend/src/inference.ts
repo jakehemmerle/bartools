@@ -1,0 +1,367 @@
+import { and, count, eq } from 'drizzle-orm';
+import {
+  client as langsmithClient,
+  DEFAULT_MODEL,
+  PROMPT_NAME,
+  pullPromptTemplate,
+  renderPromptTemplate,
+  runBottleInference,
+} from '@bartools/inference';
+import { z } from 'zod';
+import { db } from './db';
+import { syncReportProgress } from './report-service';
+import {
+  bottles,
+  inferenceAttempts,
+  inferenceJobs,
+  reportRecords,
+  scans,
+} from './schema';
+import { resolveUploadPathFromUrl } from './uploads';
+
+export const reportScanInferenceTopic = 'report.scan.inference';
+
+export const reportScanInferencePayloadSchema = z.object({
+  jobId: z.string().uuid(),
+  reportId: z.string().uuid(),
+  scanId: z.string().uuid(),
+});
+
+type PromptCache = {
+  promptName: string;
+  version: string;
+  prompt: Awaited<ReturnType<typeof pullPromptTemplate>>;
+  cachedAt: number;
+};
+
+let promptCache: PromptCache | null = null;
+const promptCacheTtlMs = 30_000;
+
+async function resolvePrompt() {
+  const promptName = process.env.BACKEND_LANGSMITH_PROMPT_NAME ?? PROMPT_NAME;
+  const now = Date.now();
+  if (
+    promptCache &&
+    promptCache.promptName === promptName &&
+    now - promptCache.cachedAt < promptCacheTtlMs
+  ) {
+    return promptCache;
+  }
+
+  const [prompt, commit] = await Promise.all([
+    pullPromptTemplate({
+      promptName,
+      skipCache: true,
+    }),
+    langsmithClient.pullPromptCommit(promptName, { skipCache: true }),
+  ]);
+
+  promptCache = {
+    promptName,
+    version: commit.commit_hash,
+    prompt,
+    cachedAt: now,
+  };
+
+  return promptCache;
+}
+
+async function markAttemptFailure(args: {
+  attemptId: string;
+  errorCode: string;
+  errorMessage: string;
+}) {
+  await db
+    .update(inferenceAttempts)
+    .set({
+      errorCode: args.errorCode,
+      errorMessage: args.errorMessage,
+      finishedAt: new Date(),
+    })
+    .where(eq(inferenceAttempts.id, args.attemptId));
+}
+
+async function failJob(args: {
+  jobId: string;
+  reportId: string;
+  scanId: string;
+  errorCode: string;
+  errorMessage: string;
+}) {
+  const finishedAt = new Date();
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(inferenceJobs)
+      .set({
+        status: 'failed',
+        lastErrorCode: args.errorCode,
+        lastErrorMessage: args.errorMessage,
+        finishedAt,
+        updatedAt: finishedAt,
+      })
+      .where(eq(inferenceJobs.id, args.jobId));
+
+    await tx
+      .update(reportRecords)
+      .set({
+        status: 'failed',
+        errorCode: args.errorCode,
+        errorMessage: args.errorMessage,
+        updatedAt: finishedAt,
+      })
+      .where(eq(reportRecords.scanId, args.scanId));
+  });
+
+  await syncReportProgress(args.reportId);
+}
+
+export async function processQueuedInferenceJob(
+  payloadInput: z.input<typeof reportScanInferencePayloadSchema>
+) {
+  const payload = reportScanInferencePayloadSchema.parse(payloadInput);
+
+  const [job] = await db
+    .select({
+      id: inferenceJobs.id,
+      status: inferenceJobs.status,
+      reportId: inferenceJobs.reportId,
+      scanId: inferenceJobs.scanId,
+    })
+    .from(inferenceJobs)
+    .where(eq(inferenceJobs.id, payload.jobId))
+    .limit(1);
+
+  if (!job || (job.status !== 'queued' && job.status !== 'running')) {
+    return;
+  }
+
+  const startedAt = new Date();
+  await db
+    .update(inferenceJobs)
+    .set({
+      status: 'running',
+      startedAt,
+      updatedAt: startedAt,
+    })
+    .where(eq(inferenceJobs.id, payload.jobId));
+
+  const [attemptCountRow] = await db
+    .select({ count: count(inferenceAttempts.id) })
+    .from(inferenceAttempts)
+    .where(eq(inferenceAttempts.jobId, payload.jobId));
+
+  const attemptNumber = Number(attemptCountRow?.count ?? 0) + 1;
+  const prompt = await resolvePrompt();
+
+  const [attempt] = await db
+    .insert(inferenceAttempts)
+    .values({
+      jobId: payload.jobId,
+      attemptNumber,
+      promptName: prompt.promptName,
+      promptResolvedVersion: prompt.version,
+      modelUsed: DEFAULT_MODEL,
+    })
+    .returning({ id: inferenceAttempts.id });
+
+  const [scan] = await db
+    .select({
+      id: scans.id,
+      photoUrl: scans.photoUrl,
+      reportId: scans.reportId,
+    })
+    .from(scans)
+    .where(and(eq(scans.id, payload.scanId), eq(scans.reportId, payload.reportId)))
+    .limit(1);
+
+  if (!scan) {
+    await markAttemptFailure({
+      attemptId: attempt.id,
+      errorCode: 'scan_not_found',
+      errorMessage: 'Scan could not be found for this job.',
+    });
+    await failJob({
+      jobId: payload.jobId,
+      reportId: payload.reportId,
+      scanId: payload.scanId,
+      errorCode: 'scan_not_found',
+      errorMessage: 'Scan could not be found for this job.',
+    });
+    return;
+  }
+
+  const catalog = await db
+    .select({
+      id: bottles.id,
+      name: bottles.name,
+      category: bottles.category,
+      upc: bottles.upc,
+      sizeMl: bottles.sizeMl,
+    })
+    .from(bottles)
+    .orderBy(bottles.name);
+
+  if (catalog.length === 0) {
+    await markAttemptFailure({
+      attemptId: attempt.id,
+      errorCode: 'catalog_empty',
+      errorMessage: 'Bottle catalog is empty.',
+    });
+    await failJob({
+      jobId: payload.jobId,
+      reportId: payload.reportId,
+      scanId: payload.scanId,
+      errorCode: 'catalog_empty',
+      errorMessage: 'Bottle catalog is empty.',
+    });
+    return;
+  }
+
+  const filePath = resolveUploadPathFromUrl(scan.photoUrl);
+  const imageFile = Bun.file(filePath);
+
+  if (!(await imageFile.exists())) {
+    await markAttemptFailure({
+      attemptId: attempt.id,
+      errorCode: 'photo_missing',
+      errorMessage: `Uploaded file is missing at ${scan.photoUrl}.`,
+    });
+    await failJob({
+      jobId: payload.jobId,
+      reportId: payload.reportId,
+      scanId: payload.scanId,
+      errorCode: 'photo_missing',
+      errorMessage: `Uploaded file is missing at ${scan.photoUrl}.`,
+    });
+    return;
+  }
+
+  const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
+  const possibleBottleNames = catalog.map((b) => b.name);
+  const rendered = await renderPromptTemplate(prompt.prompt, {
+    possible_bottle_names_text: possibleBottleNames.join('\n'),
+    bottle_count: possibleBottleNames.length,
+  });
+  const inferenceStartedAt = Date.now();
+  const result = await runBottleInference({
+    imageBytes,
+    systemPrompt: rendered.systemPrompt,
+    userPrompt: rendered.userPrompt,
+  });
+  const latencyMs = Date.now() - inferenceStartedAt;
+
+  if (result.error) {
+    await db
+      .update(inferenceAttempts)
+      .set({
+        latencyMs,
+        rawResponse: {
+          error: result.error,
+        },
+        errorCode: 'model_error',
+        errorMessage: result.error,
+        finishedAt: new Date(),
+      })
+      .where(eq(inferenceAttempts.id, attempt.id));
+
+    await failJob({
+      jobId: payload.jobId,
+      reportId: payload.reportId,
+      scanId: payload.scanId,
+      errorCode: 'model_error',
+      errorMessage: result.error,
+    });
+    return;
+  }
+
+  const matchedBottle = catalog.find((bottle) => bottle.name === result.name);
+
+  if (!matchedBottle) {
+    const errorMessage = `Model returned ${result.name}, which is not present in the catalog snapshot.`;
+    await db
+      .update(inferenceAttempts)
+      .set({
+        latencyMs,
+        rawResponse: {
+          name: result.name,
+          volume: result.volume,
+        },
+        errorCode: 'catalog_miss',
+        errorMessage,
+        finishedAt: new Date(),
+      })
+      .where(eq(inferenceAttempts.id, attempt.id));
+
+    await failJob({
+      jobId: payload.jobId,
+      reportId: payload.reportId,
+      scanId: payload.scanId,
+      errorCode: 'catalog_miss',
+      errorMessage,
+    });
+    return;
+  }
+
+  const finishedAt = new Date();
+  const fillTenths = Math.round(result.volume * 10);
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(inferenceAttempts)
+      .set({
+        latencyMs,
+        rawResponse: {
+          name: result.name,
+          volume: result.volume,
+        },
+        finishedAt,
+      })
+      .where(eq(inferenceAttempts.id, attempt.id));
+
+    await tx
+      .update(scans)
+      .set({
+        bottleId: matchedBottle.id,
+        vlmFillTenths: fillTenths,
+        modelUsed: DEFAULT_MODEL,
+        latencyMs,
+        rawResponse: {
+          name: result.name,
+          volume: result.volume,
+          promptVersion: prompt.version,
+        },
+      })
+      .where(eq(scans.id, scan.id));
+
+    await tx
+      .update(reportRecords)
+      .set({
+        status: 'inferred',
+        originalBottleId: matchedBottle.id,
+        originalBottleName: matchedBottle.name,
+        originalCategory: matchedBottle.category,
+        originalUpc: matchedBottle.upc,
+        originalVolumeMl: matchedBottle.sizeMl,
+        originalFillTenths: fillTenths,
+        inferredAt: finishedAt,
+        updatedAt: finishedAt,
+        errorCode: null,
+        errorMessage: null,
+      })
+      .where(eq(reportRecords.scanId, scan.id));
+
+    await tx
+      .update(inferenceJobs)
+      .set({
+        status: 'succeeded',
+        finishedAt,
+        lastErrorCode: null,
+        lastErrorMessage: null,
+        updatedAt: finishedAt,
+      })
+      .where(eq(inferenceJobs.id, payload.jobId));
+  });
+
+  await syncReportProgress(payload.reportId);
+}

@@ -9,7 +9,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@anthropic-ai/claude-agent-sdk": "^0.2.98",
+    "@bartools/inference": "workspace:*",
     "langsmith": "^0.5.18",
     "zod": "^4.3.6"
   }

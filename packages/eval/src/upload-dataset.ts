@@ -7,7 +7,6 @@ import { resolve } from "node:path";
 
 import { client } from "./client";
 import { optionalFlag } from "./cli";
-import { loadBottleNames } from "./bottles";
 import { loadSolutions } from "./solutions";
 import { formatSyncReport, syncDataset } from "./sync-dataset";
 import { DATASET_NAME, PATHS, REPO_ROOT } from "./types";
@@ -40,7 +39,6 @@ async function main(): Promise<void> {
   const args = Bun.argv.slice(2);
   const datasetTag = optionalFlag(args, "--dataset-tag", "");
 
-  const bottleNames = await loadBottleNames();
   const solutions = await loadSolutions(SOLUTIONS_PATH);
   const labeled = [...solutions.values()].filter((s) => s.name.trim() !== "");
   if (labeled.length === 0) {
@@ -53,7 +51,7 @@ async function main(): Promise<void> {
     `${labeled.length}/${solutions.size} solutions are labeled — uploading those`,
   );
 
-  const report = await syncDataset(labeled, bottleNames);
+  const report = await syncDataset(labeled);
   console.log(formatSyncReport(report));
 
   if (!datasetTag) {
