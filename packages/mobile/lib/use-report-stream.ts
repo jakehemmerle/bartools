@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import EventSource from 'react-native-sse'
 import type { ReportBottleRecord, ReportProgress } from '@bartools/types'
 import { getReportStreamUrl } from './api'
+import { mergeRecord } from './merge-record'
+
+export { mergeRecord } from './merge-record'
 
 export type StreamStatus = 'connecting' | 'streaming' | 'ready_for_review' | 'error' | 'closed'
 
@@ -10,20 +13,6 @@ type ReportStreamState = {
   progress: ReportProgress | null
   records: ReportBottleRecord[]
   error: string | null
-}
-
-/** Replace or append a record, deduplicating by id */
-export function mergeRecord(
-  existing: ReportBottleRecord[],
-  incoming: ReportBottleRecord,
-): ReportBottleRecord[] {
-  const idx = existing.findIndex((r) => r.id === incoming.id)
-  if (idx >= 0) {
-    const next = [...existing]
-    next[idx] = incoming
-    return next
-  }
-  return [...existing, incoming]
 }
 
 export function useReportStream(reportId: string | null) {
