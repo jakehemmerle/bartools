@@ -42,3 +42,13 @@ Docs/context.md
 # SkillShed (subfolder tooling)
 SkillShed/
 .gstack/
+
+# Local-only research reference docs (not for repo)
+thoughts/shared/research/references/deployment-*.md
+
+# Office temp/lock files
+~$*
+
+# Local data / runtime uploads
+assets/*.jsonl
+packages/backend/data/
