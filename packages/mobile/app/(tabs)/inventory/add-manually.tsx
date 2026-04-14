@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text, TextInput, ScrollView, Pressable, Image, StyleSheet } from 'react-native'
+import { View, Text, TextInput, ScrollView, Pressable, Image, StyleSheet, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -37,9 +37,16 @@ export default function AddManuallyScreen() {
       })
   }, [])
 
+  // TODO: wire to POST /inventory endpoint when backend supports manual entry
   const handleSubmit = () => {
-    // TODO: wire to backend API when manual-add endpoint exists
-    router.back()
+    Alert.alert(
+      'Coming Soon',
+      'Manual bottle entry is not yet supported. Please use the photo capture flow to add bottles.',
+      [
+        { text: 'Go Back', onPress: () => router.back() },
+        { text: 'Stay', style: 'cancel' },
+      ],
+    )
   }
 
   return (

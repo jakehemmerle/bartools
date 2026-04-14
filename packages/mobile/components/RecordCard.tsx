@@ -24,15 +24,22 @@ export function RecordCard({ record, onEdit, editedFill, editedName }: Readonly<
   const fillPercent = editedFill ?? record.fillPercent
   const bottleName = editedName ?? record.bottleName
   const statusStyle = STATUS_COLORS[record.status] ?? STATUS_COLORS.pending
+  const resolvedImageUrl = resolveImageUrl(record.imageUrl)
 
   return (
     <View style={[styles.card, { backgroundColor: theme.surfaceContainerHigh }]}>
       <View style={styles.row}>
         {/* Thumbnail */}
-        <Image
-          source={{ uri: resolveImageUrl(record.imageUrl) }}
-          style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer }]}
-        />
+        {resolvedImageUrl ? (
+          <Image
+            source={{ uri: resolvedImageUrl }}
+            style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer }]}
+          />
+        ) : (
+          <View style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer, alignItems: 'center', justifyContent: 'center' }]}>
+            <MaterialCommunityIcons name="image-off" size={24} color={theme.onSurfaceVariant} />
+          </View>
+        )}
 
         {/* Details */}
         <View style={styles.details}>
