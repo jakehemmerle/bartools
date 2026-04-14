@@ -2,6 +2,33 @@ export function toIso(value: Date | null | undefined): string | undefined {
   return value?.toISOString();
 }
 
+function maybeBottleValues(fields: {
+  bottleName: string | null;
+  category: string | null;
+  upc: string | null;
+  volumeMl: number | null;
+  fillTenths: number | null;
+}) {
+  const hasValue =
+    fields.bottleName !== null ||
+    fields.category !== null ||
+    fields.upc !== null ||
+    fields.volumeMl !== null ||
+    fields.fillTenths !== null;
+
+  if (!hasValue) {
+    return undefined;
+  }
+
+  return {
+    bottleName: fields.bottleName ?? undefined,
+    category: fields.category ?? undefined,
+    upc: fields.upc ?? undefined,
+    volumeMl: fields.volumeMl ?? undefined,
+    fillPercent: fields.fillTenths === null ? undefined : fields.fillTenths * 10,
+  };
+}
+
 export function maybeModelOutput(record: {
   originalBottleName: string | null;
   originalCategory: string | null;
@@ -9,25 +36,13 @@ export function maybeModelOutput(record: {
   originalVolumeMl: number | null;
   originalFillTenths: number | null;
 }) {
-  const hasValue =
-    record.originalBottleName !== null ||
-    record.originalCategory !== null ||
-    record.originalUpc !== null ||
-    record.originalVolumeMl !== null ||
-    record.originalFillTenths !== null;
-
-  if (!hasValue) {
-    return undefined;
-  }
-
-  return {
-    bottleName: record.originalBottleName ?? undefined,
-    category: record.originalCategory ?? undefined,
-    upc: record.originalUpc ?? undefined,
-    volumeMl: record.originalVolumeMl ?? undefined,
-    fillPercent:
-      record.originalFillTenths === null ? undefined : record.originalFillTenths * 10,
-  };
+  return maybeBottleValues({
+    bottleName: record.originalBottleName,
+    category: record.originalCategory,
+    upc: record.originalUpc,
+    volumeMl: record.originalVolumeMl,
+    fillTenths: record.originalFillTenths,
+  });
 }
 
 export function maybeCorrectedValues(record: {
@@ -37,25 +52,13 @@ export function maybeCorrectedValues(record: {
   correctedVolumeMl: number | null;
   correctedFillTenths: number | null;
 }) {
-  const hasValue =
-    record.correctedBottleName !== null ||
-    record.correctedCategory !== null ||
-    record.correctedUpc !== null ||
-    record.correctedVolumeMl !== null ||
-    record.correctedFillTenths !== null;
-
-  if (!hasValue) {
-    return undefined;
-  }
-
-  return {
-    bottleName: record.correctedBottleName ?? undefined,
-    category: record.correctedCategory ?? undefined,
-    upc: record.correctedUpc ?? undefined,
-    volumeMl: record.correctedVolumeMl ?? undefined,
-    fillPercent:
-      record.correctedFillTenths === null ? undefined : record.correctedFillTenths * 10,
-  };
+  return maybeBottleValues({
+    bottleName: record.correctedBottleName,
+    category: record.correctedCategory,
+    upc: record.correctedUpc,
+    volumeMl: record.correctedVolumeMl,
+    fillTenths: record.correctedFillTenths,
+  });
 }
 
 export function wasCorrected(record: {

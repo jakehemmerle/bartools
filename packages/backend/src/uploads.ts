@@ -3,13 +3,15 @@ import { extname, resolve } from 'node:path';
 
 export const uploadRoot = resolve(import.meta.dir, '../data/uploads');
 
+const ensureUploadDir = mkdir(uploadRoot, { recursive: true });
+
 function sanitizeExtension(name: string): string {
   const extension = extname(name).toLowerCase();
   return extension && extension.length <= 10 ? extension : '.jpg';
 }
 
 export async function saveUploadedPhoto(reportId: string, file: File): Promise<string> {
-  await mkdir(uploadRoot, { recursive: true });
+  await ensureUploadDir;
 
   const extension = sanitizeExtension(file.name);
   const filename = `${reportId}-${crypto.randomUUID()}${extension}`;

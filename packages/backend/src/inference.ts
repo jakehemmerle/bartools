@@ -66,10 +66,6 @@ async function resolvePrompt() {
   return promptCache;
 }
 
-function now() {
-  return new Date();
-}
-
 async function markAttemptFailure(args: {
   attemptId: string;
   errorCode: string;
@@ -80,7 +76,7 @@ async function markAttemptFailure(args: {
     .set({
       errorCode: args.errorCode,
       errorMessage: args.errorMessage,
-      finishedAt: now(),
+      finishedAt: new Date(),
     })
     .where(eq(inferenceAttempts.id, args.attemptId));
 }
@@ -92,7 +88,7 @@ async function failJob(args: {
   errorCode: string;
   errorMessage: string;
 }) {
-  const finishedAt = now();
+  const finishedAt = new Date();
 
   await db.transaction(async (tx) => {
     await tx
@@ -140,7 +136,7 @@ export async function processQueuedInferenceJob(
     return;
   }
 
-  const startedAt = now();
+  const startedAt = new Date();
   await db
     .update(inferenceJobs)
     .set({
@@ -242,7 +238,11 @@ export async function processQueuedInferenceJob(
   }
 
   const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
-  const rendered = await renderPromptTemplate(prompt.prompt);
+  const possibleBottleNames = catalog.map((b) => b.name);
+  const rendered = await renderPromptTemplate(prompt.prompt, {
+    possible_bottle_names_text: possibleBottleNames.join('\n'),
+    bottle_count: possibleBottleNames.length,
+  });
   const inferenceStartedAt = Date.now();
   const result = await runBottleInference({
     imageBytes,
@@ -261,7 +261,7 @@ export async function processQueuedInferenceJob(
         },
         errorCode: 'model_error',
         errorMessage: result.error,
-        finishedAt: now(),
+        finishedAt: new Date(),
       })
       .where(eq(inferenceAttempts.id, attempt.id));
 
@@ -289,7 +289,7 @@ export async function processQueuedInferenceJob(
         },
         errorCode: 'catalog_miss',
         errorMessage,
-        finishedAt: now(),
+        finishedAt: new Date(),
       })
       .where(eq(inferenceAttempts.id, attempt.id));
 
@@ -303,7 +303,7 @@ export async function processQueuedInferenceJob(
     return;
   }
 
-  const finishedAt = now();
+  const finishedAt = new Date();
   const fillTenths = Math.round(result.volume * 10);
 
   await db.transaction(async (tx) => {
