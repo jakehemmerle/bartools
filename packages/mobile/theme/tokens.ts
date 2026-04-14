@@ -81,7 +81,7 @@ export const darkTokens = {
   border: '#524439',
 } as const
 
-export type ThemeTokens = typeof darkTokens
+export type ThemeTokens = { [K in keyof typeof darkTokens]: string }
 
 // Typography tokens
 export const typography = {

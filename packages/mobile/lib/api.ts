@@ -74,11 +74,8 @@ export function uploadPhotos(
 ): Promise<UploadPhotosResponse> {
   const formData = new FormData()
   for (const [i, uri] of photoUris.entries()) {
-    formData.append(`photo_${i}`, {
-      uri,
-      type: 'image/jpeg',
-      name: `photo_${i}.jpg`,
-    } as unknown as Blob) // RN FormData accepts {uri,type,name} objects
+    // React Native's FormData accepts {uri,type,name} objects for file uploads
+    formData.append(`photo_${i}`, { uri, type: 'image/jpeg', name: `photo_${i}.jpg` })
   }
   return fetchJson(`/reports/${reportId}/photos`, {
     method: 'POST',

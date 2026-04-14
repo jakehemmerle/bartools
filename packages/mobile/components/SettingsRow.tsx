@@ -1,6 +1,9 @@
 import { View, Text, Pressable, Switch, StyleSheet } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import type { ComponentProps } from 'react'
 import { useTheme } from '../theme/useTheme'
+
+type IconName = ComponentProps<typeof MaterialCommunityIcons>['name']
 
 interface SettingsRowProps {
   type: 'header' | 'nav' | 'toggle' | 'link'
@@ -8,7 +11,7 @@ interface SettingsRowProps {
   description?: string
   value?: boolean
   detail?: string
-  iconName?: string
+  iconName?: IconName
   onPress?: () => void
   onToggle?: (value: boolean) => void
   background?: string
@@ -29,7 +32,7 @@ export function SettingsRow({ type, label, description, value, detail, iconName,
     return (
       <View style={[styles.row, { backgroundColor: background ?? theme.surfaceContainer }]}>
         {iconName ? (
-          <MaterialCommunityIcons name={iconName as any} size={22} color={theme.outline} />
+          <MaterialCommunityIcons name={iconName} size={22} color={theme.outline} />
         ) : null}
         <View style={styles.rowContent}>
           <Text style={[styles.label, { color: theme.text }]}>{label}</Text>
@@ -59,7 +62,7 @@ export function SettingsRow({ type, label, description, value, detail, iconName,
       accessibilityLabel={label}
     >
       {iconName ? (
-        <MaterialCommunityIcons name={iconName as any} size={22} color={theme.outline} />
+        <MaterialCommunityIcons name={iconName} size={22} color={theme.outline} />
       ) : null}
       <View style={styles.rowContent}>
         <Text style={[styles.label, { color: type === 'link' ? theme.primary : theme.text }]}>{label}</Text>

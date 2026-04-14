@@ -1,13 +1,16 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import type { ComponentProps } from 'react'
 import { useTheme } from '../theme/useTheme'
+
+type IconName = ComponentProps<typeof MaterialCommunityIcons>['name']
 
 interface GradientButtonProps {
   label: string
   onPress?: () => void
   disabled?: boolean
   variant?: 'primary' | 'text'
-  iconName?: string
+  iconName?: IconName
 }
 
 export function GradientButton({ label, onPress, disabled = false, variant = 'primary', iconName }: Readonly<GradientButtonProps>) {

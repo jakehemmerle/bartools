@@ -42,34 +42,34 @@ export function useReportStream(reportId: string | null) {
     const es = new EventSource(url)
     esRef.current = es
 
-    es.addEventListener('report.progress', ((event: MessageEvent) => {
+    es.addEventListener('report.progress', (event: MessageEvent) => {
       const data: ReportProgress = JSON.parse(event.data)
       setState((prev) => ({ ...prev, status: 'streaming', progress: data }))
-    }) as EventListener)
+    })
 
-    es.addEventListener('record.inferred', ((event: MessageEvent) => {
+    es.addEventListener('record.inferred', (event: MessageEvent) => {
       const record: ReportBottleRecord = JSON.parse(event.data)
       setState((prev) => ({
         ...prev,
         records: mergeRecord(prev.records, record),
       }))
-    }) as EventListener)
+    })
 
-    es.addEventListener('record.failed', ((event: MessageEvent) => {
+    es.addEventListener('record.failed', (event: MessageEvent) => {
       const record: ReportBottleRecord = JSON.parse(event.data)
       setState((prev) => ({
         ...prev,
         records: mergeRecord(prev.records, record),
       }))
-    }) as EventListener)
+    })
 
-    es.addEventListener('report.ready_for_review', (() => {
+    es.addEventListener('report.ready_for_review', () => {
       setState((prev) => ({ ...prev, status: 'ready_for_review' }))
-    }) as EventListener)
+    })
 
-    es.addEventListener('error', (() => {
+    es.addEventListener('error', () => {
       setState((prev) => ({ ...prev, status: 'error', error: 'Connection lost' }))
-    }) as EventListener)
+    })
 
     return () => {
       es.close()
