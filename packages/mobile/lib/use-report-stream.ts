@@ -25,6 +25,12 @@ export function useReportStream(reportId: string | null) {
   const esRef = useRef<EventSource | null>(null)
 
   useEffect(() => {
+    setState({
+      status: reportId ? 'connecting' : 'closed',
+      progress: null,
+      records: [],
+      error: null,
+    })
     if (!reportId) return
 
     const url = getReportStreamUrl(reportId)
@@ -59,11 +65,17 @@ export function useReportStream(reportId: string | null) {
     })
 
     es.addEventListener('report.ready_for_review', () => {
-      setState((prev) => ({ ...prev, status: 'ready_for_review' }))
+      setState((prev) => ({ ...prev, status: 'ready_for_review', error: null }))
+      es.close()
+      esRef.current = null
     })
 
     es.addEventListener('error', () => {
-      setState((prev) => ({ ...prev, status: 'error', error: 'Connection lost' }))
+      setState((prev) =>
+        prev.status === 'ready_for_review' || prev.status === 'closed'
+          ? prev
+          : { ...prev, status: 'error', error: 'Connection lost' },
+      )
     })
 
     return () => {

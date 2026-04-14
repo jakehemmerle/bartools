@@ -17,18 +17,36 @@ export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<Bot
   const [results, setResults] = useState<BottleSearchResult[]>([])
   const [loading, setLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const requestIdRef = useRef(0)
 
   const doSearch = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    const trimmed = q.trim()
+    if (!trimmed) {
+      setResults([])
+      setLoading(false)
+      return
+    }
+
+    requestIdRef.current += 1
+    const requestId = requestIdRef.current
+
     debounceRef.current = setTimeout(async () => {
       setLoading(true)
       try {
-        const res = await searchBottles(q)
-        setResults(res.bottles)
+        const res = await searchBottles(trimmed)
+        if (requestIdRef.current === requestId) {
+          setResults(res.bottles)
+        }
       } catch {
-        setResults([])
+        if (requestIdRef.current === requestId) {
+          setResults([])
+        }
       } finally {
-        setLoading(false)
+        if (requestIdRef.current === requestId) {
+          setLoading(false)
+        }
       }
     }, 300)
   }, [])

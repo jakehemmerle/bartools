@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterAll } from 'bun:test'
 
 // Track fetch calls manually for type-safe assertions
 const fetchCalls: Array<{ url: string; init: RequestInit | undefined }> = []
@@ -26,6 +26,9 @@ function queueErrorResponse(status: number, text: string) {
   })
 }
 
+// Save original fetch so we can restore it after tests
+const originalFetch = globalThis.fetch
+
 // Install a typed fetch interceptor
 globalThis.fetch = ((url: string | URL | Request, init?: RequestInit) => {
   fetchCalls.push({ url: String(url), init })
@@ -36,6 +39,10 @@ globalThis.fetch = ((url: string | URL | Request, init?: RequestInit) => {
   }
   return Promise.resolve(response as Response)
 }) as typeof fetch
+
+afterAll(() => {
+  globalThis.fetch = originalFetch
+})
 
 import {
   createReport,

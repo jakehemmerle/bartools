@@ -65,7 +65,7 @@ export default function ReviewScreen() {
         const edit = edits[r.id]
         return {
           id: r.id,
-          bottleId: edit?.bottleId ?? r.id, // Use edited bottleId or record id as fallback
+          bottleId: edit?.bottleId ?? r.bottleId ?? '',
           fillPercent: edit?.fillPercent ?? r.fillPercent,
         }
       })

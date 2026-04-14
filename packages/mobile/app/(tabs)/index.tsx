@@ -72,6 +72,7 @@ export default function CaptureScreen() {
   const [mode, setMode] = useState<CaptureMode>('queue')
   const [showReview, setShowReview] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const submittingRef = useRef<boolean>(false)
 
   // Load locations from API with mock fallback
   useEffect(() => {
@@ -107,7 +108,9 @@ export default function CaptureScreen() {
   }, [addPhotos])
 
   const handleSubmit = useCallback(async () => {
+    if (submittingRef.current) return
     try {
+      submittingRef.current = true
       setSubmitting(true)
       const report = await createReport(
         DEFAULT_USER_ID,
@@ -125,9 +128,10 @@ export default function CaptureScreen() {
         'Could not submit photos for analysis. Please try again.',
       )
     } finally {
+      submittingRef.current = false
       setSubmitting(false)
     }
-  }, [photos, selectedLocation, clear, router])
+  }, [photos, selectedLocation, clear, router, submitting])
 
   // Reticle border color: white at 40% opacity (black and white aesthetic)
   const reticleBorderColor = `${theme.onSurface}66` // 66 hex = ~40% opacity

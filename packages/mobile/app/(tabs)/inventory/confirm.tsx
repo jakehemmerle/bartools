@@ -20,7 +20,7 @@ export default function ConfirmScanScreen() {
   const theme = useTheme()
   const router = useRouter()
   const { identified } = useLocalSearchParams<{ identified?: string }>()
-  const { photoUri } = useScanContext()
+  const { photoUri, setPhotoUri } = useScanContext()
 
   const isIdentified = identified !== 'false'
 
@@ -168,9 +168,12 @@ export default function ConfirmScanScreen() {
             onPress={() => {
               if (isIdentified) {
                 Alert.alert(
-                  'Added to Cellar',
-                  'Bottle has been added to your inventory.',
-                  [{ text: 'OK', onPress: () => router.replace('/(tabs)/inventory') }],
+                  'Confirmation Saved',
+                  'Bottle details have been confirmed. Submit via the review flow to add to inventory.',
+                  [{ text: 'OK', onPress: () => {
+                    setPhotoUri(null)
+                    router.replace('/(tabs)/inventory')
+                  }}],
                 )
               } else {
                 router.replace({ pathname: '/inventory/add-manually' })

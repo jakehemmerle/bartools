@@ -7,7 +7,9 @@ type ScanContextValue = {
 
 export const ScanContext = createContext<ScanContextValue>({
   photoUri: null,
-  setPhotoUri: () => {},
+  setPhotoUri: () => {
+    if (__DEV__) console.warn('ScanContext provider missing: setPhotoUri call ignored')
+  },
 })
 
 export function useScanContext() {
