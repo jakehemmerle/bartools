@@ -28,8 +28,8 @@ export default function ConfirmScanScreen() {
   const [fillLevel, setFillLevel] = useState(75)
   const [inventoryType, setInventoryType] = useState<'active' | 'backstock'>('active')
 
-  const scanId = `#BB-${Math.floor(Math.random() * 99999).toString().padStart(5, '0')}-RX`
-  const capturedAt = new Date().toLocaleTimeString('en-US', { hour12: false, timeZoneName: 'short' })
+  const [scanId] = useState(() => `#BB-${Math.floor(Math.random() * 99999).toString().padStart(5, '0')}-RX`)
+  const [capturedAt] = useState(() => new Date().toLocaleTimeString('en-US', { hour12: false, timeZoneName: 'short' }))
 
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>

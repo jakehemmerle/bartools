@@ -117,28 +117,29 @@ export async function getReportDetail(reportId: string) {
 }
 
 export async function getReportStreamState(reportId: string) {
-  const detail = await getReportDetail(reportId);
+  const [[report], detail] = await Promise.all([
+    db
+      .select({
+        status: reports.status,
+        photoCount: reports.photoCount,
+        processedCount: reports.processedCount,
+      })
+      .from(reports)
+      .where(eq(reports.id, reportId))
+      .limit(1),
+    getReportDetail(reportId),
+  ]);
 
-  if (!detail) {
+  if (!detail || !report) {
     return null;
   }
-
-  const [report] = await db
-    .select({
-      status: reports.status,
-      photoCount: reports.photoCount,
-      processedCount: reports.processedCount,
-    })
-    .from(reports)
-    .where(eq(reports.id, reportId))
-    .limit(1);
 
   return {
     report: {
       id: reportId,
-      status: report?.status ?? detail.status,
-      photoCount: report?.photoCount ?? detail.bottleRecords.length,
-      processedCount: report?.processedCount ?? 0,
+      status: report.status,
+      photoCount: report.photoCount ?? detail.bottleRecords.length,
+      processedCount: report.processedCount ?? 0,
     },
     records: detail.bottleRecords,
   };

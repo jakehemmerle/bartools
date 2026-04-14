@@ -52,19 +52,17 @@ export async function addReportPhotos(reportId: string, files: File[]) {
     .where(eq(scans.reportId, reportId));
 
   const offset = Number(existingCount);
-  const uploaded = [];
-
-  for (const [index, file] of files.entries()) {
-    const photoUrl = await saveUploadedPhoto(reportId, file);
-    uploaded.push({
-      reportId,
-      userId: report.userId,
-      venueId: report.venueId,
-      locationId: report.locationId,
-      photoUrl,
-      sortOrder: offset + index,
-    });
-  }
+  const photoUrls = await Promise.all(
+    files.map((file) => saveUploadedPhoto(reportId, file))
+  );
+  const uploaded = photoUrls.map((photoUrl, index) => ({
+    reportId,
+    userId: report.userId,
+    venueId: report.venueId,
+    locationId: report.locationId,
+    photoUrl,
+    sortOrder: offset + index,
+  }));
 
   const created = uploaded.length
     ? await db.insert(scans).values(uploaded).returning()

@@ -1,4 +1,3 @@
-// Barrel re-export — preserves the original import path for all consumers.
 export {
   createReport,
   addReportPhotos,

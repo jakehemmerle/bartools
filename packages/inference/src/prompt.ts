@@ -83,8 +83,9 @@ export function promptValueToModelInput(
 
 export async function renderPromptTemplate(
   prompt: Pick<ChatPromptTemplate, "invoke">,
+  variables: Record<string, unknown> = {},
 ): Promise<RenderedPrompt> {
-  return promptValueToModelInput(await prompt.invoke({}));
+  return promptValueToModelInput(await prompt.invoke(variables));
 }
 
 function isMissingPromptCommitError(error: unknown): boolean {
