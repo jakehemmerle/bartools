@@ -7,7 +7,6 @@ import {
   Pressable,
   Animated,
   Easing,
-  Image,
   Alert,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -159,13 +158,8 @@ export default function CaptureScreen() {
       edges={['top']}
       style={[styles.container, { backgroundColor: theme.background }]}
     >
-      {/* Full-screen background bar shelf image (grayscale) */}
-      <Image
-        source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjGEQ110Ek0D6kpMsgxKlQ9yfiwwLdcLtoUBeAETwjXCN12T29I8JzMuIwRIILOK0bwOKiz_C3-milsCUzvAxY4_soaQYvbsJlqa41gj7tHC7AtU1reN_KLF9bv9E0sZhJzXEaYY0s9g8m2xfVRpI3qVOEtvy-F578LUdZcPAWBHXbnqOY8qNULqC4pNsZdQOQ9PNyCyudIG_UDBeTdza_z7GnKqWfAz4eNJhJq1WEfFAGYqgoq6E0RdH0vGv4BrnoD07mtZk6PZgV' }}
-        style={[styles.backgroundImage, { opacity: 0.35 }]}
-        resizeMode="cover"
-        accessible={false}
-      />
+      {/* Full-screen background (dark wash — no external image dependency) */}
+      <View style={[styles.backgroundImage, { backgroundColor: '#1a1a1a', opacity: 0.9 }]} />
       {/* Heavy gray overlay to wash out color — simulates grayscale */}
       <View style={[styles.backgroundImage, { backgroundColor: '#1a1a1a', opacity: 0.7 }]} />
       {/* Top gradient darkening */}

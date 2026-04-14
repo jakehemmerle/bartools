@@ -32,24 +32,30 @@ export function useReportStream(reportId: string | null) {
     esRef.current = es
 
     es.addEventListener('report.progress', (event: MessageEvent) => {
-      const data: ReportProgress = JSON.parse(event.data)
-      setState((prev) => ({ ...prev, status: 'streaming', progress: data }))
+      try {
+        const data: ReportProgress = JSON.parse(event.data)
+        setState((prev) => ({ ...prev, status: 'streaming', progress: data }))
+      } catch { /* ignore malformed event */ }
     })
 
     es.addEventListener('record.inferred', (event: MessageEvent) => {
-      const record: ReportBottleRecord = JSON.parse(event.data)
-      setState((prev) => ({
-        ...prev,
-        records: mergeRecord(prev.records, record),
-      }))
+      try {
+        const record: ReportBottleRecord = JSON.parse(event.data)
+        setState((prev) => ({
+          ...prev,
+          records: mergeRecord(prev.records, record),
+        }))
+      } catch { /* ignore malformed event */ }
     })
 
     es.addEventListener('record.failed', (event: MessageEvent) => {
-      const record: ReportBottleRecord = JSON.parse(event.data)
-      setState((prev) => ({
-        ...prev,
-        records: mergeRecord(prev.records, record),
-      }))
+      try {
+        const record: ReportBottleRecord = JSON.parse(event.data)
+        setState((prev) => ({
+          ...prev,
+          records: mergeRecord(prev.records, record),
+        }))
+      } catch { /* ignore malformed event */ }
     })
 
     es.addEventListener('report.ready_for_review', () => {

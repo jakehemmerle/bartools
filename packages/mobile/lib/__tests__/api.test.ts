@@ -179,7 +179,12 @@ describe('api client', () => {
     expect(resolveImageUrl('/uploads/photo.jpg')).toMatch(/^http/)
   })
 
-  it('resolveImageUrl passes through absolute URLs', () => {
-    expect(resolveImageUrl('https://cdn.example.com/photo.jpg')).toBe('https://cdn.example.com/photo.jpg')
+  it('resolveImageUrl rejects URLs from unknown domains', () => {
+    expect(resolveImageUrl('https://cdn.example.com/photo.jpg')).toBe('')
+  })
+
+  it('resolveImageUrl passes through URLs from the API domain', () => {
+    // API_BASE_URL defaults to http://localhost:3000 in tests
+    expect(resolveImageUrl('http://localhost:3000/uploads/photo.jpg')).toBe('http://localhost:3000/uploads/photo.jpg')
   })
 })
