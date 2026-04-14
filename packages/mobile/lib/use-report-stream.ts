@@ -25,6 +25,8 @@ export function useReportStream(reportId: string | null) {
   const esRef = useRef<EventSource | null>(null)
 
   useEffect(() => {
+    // Reset state for new reportId — valid synchronous setState for subscription reset
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState({
       status: reportId ? 'connecting' : 'closed',
       progress: null,

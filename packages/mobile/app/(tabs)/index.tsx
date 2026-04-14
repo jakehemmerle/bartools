@@ -131,7 +131,7 @@ export default function CaptureScreen() {
       submittingRef.current = false
       setSubmitting(false)
     }
-  }, [photos, selectedLocation, clear, router, submitting])
+  }, [photos, selectedLocation, clear, router])
 
   // Reticle border color: white at 40% opacity (black and white aesthetic)
   const reticleBorderColor = `${theme.onSurface}66` // 66 hex = ~40% opacity
