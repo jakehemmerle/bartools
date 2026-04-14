@@ -8,6 +8,7 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="review" options={{ headerShown: false, presentation: 'modal' }} />
       </Stack>
     </SafeAreaProvider>
   )
