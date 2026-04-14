@@ -1,9 +1,12 @@
 import { View, Text, StyleSheet } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import type { ComponentProps } from 'react'
 import { useTheme } from '../theme/useTheme'
 
+type IconName = ComponentProps<typeof MaterialCommunityIcons>['name']
+
 interface EmptyStateProps {
-  iconName?: string
+  iconName?: IconName
   title: string
   description: string
 }
