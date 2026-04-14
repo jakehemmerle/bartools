@@ -52,3 +52,7 @@ thoughts/shared/research/references/deployment-*.md
 # Local data / runtime uploads
 assets/*.jsonl
 packages/backend/data/
+
+# EAS submission credentials (never commit)
+packages/mobile/google-service-account.json
+packages/mobile/AuthKey.p8
