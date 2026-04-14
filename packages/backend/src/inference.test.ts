@@ -24,6 +24,7 @@ if (!LIVE) {
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { eq } from 'drizzle-orm';
+import { client as langsmithClient } from '@bartools/inference';
 import { db, pool } from './db';
 import { processQueuedInferenceJob } from './inference';
 import {
@@ -61,6 +62,10 @@ describe('processQueuedInferenceJob', () => {
     if (testIds) {
       await cleanup({ ids: testIds, bottleIds });
     }
+    // LangSmith batches trace writes; flush before the process exits so the
+    // runBottleInference span gets its end event recorded (otherwise traces
+    // appear stuck in "running" forever).
+    await langsmithClient.awaitPendingTraceBatches();
     await pool.end();
   });
 

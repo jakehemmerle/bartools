@@ -4,9 +4,11 @@ import {
   tool,
   type SDKUserMessage,
 } from "@anthropic-ai/claude-agent-sdk";
+import { traceable } from "langsmith/traceable";
 import { z } from "zod";
 
 import { loadCatalogBottleNames } from "./catalog";
+import { client } from "./client";
 import { DEFAULT_MODEL, MAX_ATTEMPTS, VOLUME_ENUM } from "./types";
 
 const VALID_VOLUMES: ReadonlySet<number> = new Set<number>(VOLUME_ENUM);
@@ -45,13 +47,17 @@ export type InferenceResult = {
   error?: string;
 };
 
-export async function runBottleInference(input: {
+type RunBottleInferenceInput = {
   imageBytes: Uint8Array;
   systemPrompt: string;
   userPrompt: string;
   model?: string;
   validNames?: readonly string[];
-}): Promise<InferenceResult> {
+};
+
+async function runBottleInferenceImpl(
+  input: RunBottleInferenceInput,
+): Promise<InferenceResult> {
   const base64 = Buffer.from(input.imageBytes).toString("base64");
   const validNames = new Set(input.validNames ?? (await loadCatalogBottleNames()));
   let attempts = 0;
@@ -178,3 +184,16 @@ export async function runBottleInference(input: {
     error: `agent never produced a valid answer; tried [${triedInvalid.join(", ")}]`,
   };
 }
+
+export const runBottleInference = traceable(runBottleInferenceImpl, {
+  name: "runBottleInference",
+  run_type: "chain",
+  client,
+  processInputs: (input: Readonly<RunBottleInferenceInput>) => ({
+    systemPrompt: input.systemPrompt,
+    userPrompt: input.userPrompt,
+    model: input.model ?? DEFAULT_MODEL,
+    imageBytes: `<${input.imageBytes.length} bytes>`,
+    validNamesCount: input.validNames?.length,
+  }),
+});
