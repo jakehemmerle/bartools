@@ -1,79 +1,29 @@
-import { View, Text, Pressable, Modal, StyleSheet, ScrollView, Image } from 'react-native'
-import { useRouter } from 'expo-router'
+import { View, Text, Pressable, Modal, StyleSheet, FlatList, Image, ActivityIndicator } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../theme/useTheme'
-import type { ScanResult } from '../lib/scan-types'
+
+type QueuedPhoto = { uri: string; id: string }
 
 interface ReviewScanSheetProps {
   visible: boolean
   onDismiss: () => void
-  results: ScanResult[]
-  onSync: () => void
+  photos: QueuedPhoto[]
+  onSubmit: () => void
+  submitting: boolean
 }
 
-function ResultCard({ result, onPress }: { result: ScanResult; onPress: () => void }) {
+function PhotoThumbnail({ uri }: { uri: string }) {
   const theme = useTheme()
-  const isIdentified = result.status === 'identified' && result.bottle
-
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.resultCard, { backgroundColor: theme.surfaceContainer, borderColor: `${theme.outlineVariant}33`, opacity: pressed ? 0.8 : 1 }]}
-      accessible
-      accessibilityRole="button"
-      accessibilityLabel={isIdentified && result.bottle ? `Review ${result.bottle.brand}` : 'Add details for unidentified bottle'}
-    >
-      {/* Thumbnail */}
-      <Image source={{ uri: result.photoUri }} style={styles.thumbnail} />
-
-      {/* Details */}
-      <View style={styles.resultDetails}>
-        {isIdentified && result.bottle ? (
-          <>
-            <Text style={[styles.bottleBrand, { color: theme.onSurface }]}>
-              {result.bottle.brand}
-            </Text>
-            <Text style={[styles.bottleProduct, { color: theme.onSurfaceVariant }]}>
-              {result.bottle.product} - {result.bottle.category}
-            </Text>
-            <View style={styles.metaRow}>
-              <Text style={[styles.metaLabel, { color: theme.outline }]}>
-                Fill: {result.bottle.fillLevel}%
-              </Text>
-              <Text style={[styles.metaLabel, { color: theme.outline }]}>
-                Conf: {result.bottle.confidence}%
-              </Text>
-            </View>
-          </>
-        ) : (
-          <>
-            <Text style={[styles.bottleBrand, { color: theme.error ?? '#ef4444' }]}>
-              Unidentified
-            </Text>
-            <Text style={[styles.bottleProduct, { color: theme.onSurfaceVariant }]}>
-              Needs manual review
-            </Text>
-          </>
-        )}
-      </View>
-
-      {/* Status icon */}
-      <View style={[styles.statusIcon, { backgroundColor: isIdentified ? '#22c55e22' : '#ef444422' }]}>
-        <MaterialCommunityIcons
-          name={isIdentified ? 'check-circle' : 'help-circle'}
-          size={20}
-          color={isIdentified ? '#22c55e' : '#ef4444'}
-        />
-      </View>
-    </Pressable>
+    <Image
+      source={{ uri }}
+      style={[styles.thumbnail, { backgroundColor: theme.surfaceContainerHigh }]}
+    />
   )
 }
 
-export function ReviewScanSheet({ visible, onDismiss, results, onSync }: Readonly<ReviewScanSheetProps>) {
+export function ReviewScanSheet({ visible, onDismiss, photos, onSubmit, submitting }: Readonly<ReviewScanSheetProps>) {
   const theme = useTheme()
-  const router = useRouter()
-  const identified = results.filter(r => r.status === 'identified').length
-  const unidentified = results.length - identified
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onDismiss}>
@@ -86,49 +36,44 @@ export function ReviewScanSheet({ visible, onDismiss, results, onSync }: Readonl
 
           <View style={styles.content}>
             {/* Title */}
-            <Text style={[styles.title, { color: theme.onSurface }]}>Review Scan Results</Text>
+            <Text style={[styles.title, { color: theme.onSurface }]}>Submit for Analysis</Text>
 
             {/* Summary */}
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryText, { color: theme.onSurfaceVariant }]}>
-                {identified} identified, {unidentified} unidentified
-              </Text>
-            </View>
+            <Text style={[styles.summaryText, { color: theme.onSurfaceVariant }]}>
+              {photos.length} photo{photos.length !== 1 ? 's' : ''} ready for identification
+            </Text>
 
-            {/* Results list */}
-            <ScrollView style={styles.resultsList} showsVerticalScrollIndicator={false}>
-              {results.map(result => (
-                <ResultCard
-                  key={result.id}
-                  result={result}
-                  onPress={() => {
-                    onDismiss()
-                    if (result.status === 'identified') {
-                      router.push({
-                        pathname: '/inventory/confirm',
-                        params: { photoUri: result.photoUri, identified: 'true' },
-                      })
-                    } else {
-                      router.push({
-                        pathname: '/inventory/add-manually',
-                        params: { photoUri: result.photoUri },
-                      })
-                    }
-                  }}
-                />
-              ))}
-            </ScrollView>
+            {/* Photo grid */}
+            <FlatList
+              data={photos}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.photoGrid}
+              renderItem={({ item }) => <PhotoThumbnail uri={item.uri} />}
+              style={styles.photoList}
+            />
 
-            {/* Sync button */}
+            {/* Submit button */}
             <Pressable
-              style={({ pressed }) => [styles.syncButton, { backgroundColor: theme.primary, opacity: pressed ? 0.9 : 1 }]}
-              onPress={onSync}
+              style={({ pressed }) => [
+                styles.submitButton,
+                { backgroundColor: theme.primary, opacity: submitting ? 0.6 : pressed ? 0.9 : 1 },
+              ]}
+              onPress={onSubmit}
+              disabled={submitting || photos.length === 0}
               accessible
               accessibilityRole="button"
-              accessibilityLabel="Sync to inventory"
+              accessibilityLabel="Submit for analysis"
             >
-              <MaterialCommunityIcons name="cloud-upload" size={20} color={theme.onPrimary} />
-              <Text style={[styles.syncButtonText, { color: theme.onPrimary }]}>SYNC TO INVENTORY</Text>
+              {submitting ? (
+                <ActivityIndicator color={theme.onPrimary} size="small" />
+              ) : (
+                <MaterialCommunityIcons name="flask-outline" size={20} color={theme.onPrimary} />
+              )}
+              <Text style={[styles.submitButtonText, { color: theme.onPrimary }]}>
+                {submitting ? 'SUBMITTING...' : 'SUBMIT FOR ANALYSIS'}
+              </Text>
             </Pressable>
 
             {/* Dismiss */}
@@ -149,26 +94,11 @@ const styles = StyleSheet.create({
   handle: { width: 48, height: 4, borderRadius: 2 },
   content: { paddingHorizontal: 24, paddingBottom: 48, gap: 12 },
   title: { fontFamily: 'Newsreader', fontSize: 24, fontWeight: '400' },
-  summaryRow: { marginBottom: 4 },
   summaryText: { fontFamily: 'Manrope', fontSize: 13 },
-  resultsList: { maxHeight: 320 },
-  resultCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 8,
-  },
-  thumbnail: { width: 48, height: 48, borderRadius: 8, backgroundColor: '#333' },
-  resultDetails: { flex: 1 },
-  bottleBrand: { fontFamily: 'SpaceGrotesk', fontSize: 14, fontWeight: '700' },
-  bottleProduct: { fontFamily: 'Manrope', fontSize: 11, marginTop: 2 },
-  metaRow: { flexDirection: 'row', gap: 12, marginTop: 4 },
-  metaLabel: { fontFamily: 'Manrope', fontSize: 10 },
-  statusIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  syncButton: {
+  photoList: { maxHeight: 80 },
+  photoGrid: { gap: 8 },
+  thumbnail: { width: 64, height: 64, borderRadius: 8 },
+  submitButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -177,7 +107,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 8,
   },
-  syncButtonText: { fontFamily: 'SpaceGrotesk', fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 2 },
+  submitButtonText: { fontFamily: 'SpaceGrotesk', fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 2 },
   dismissButton: { paddingVertical: 12, alignItems: 'center' },
   dismissText: { fontFamily: 'SpaceGrotesk', fontSize: 12, fontWeight: '500', textTransform: 'uppercase', letterSpacing: 3 },
 })
