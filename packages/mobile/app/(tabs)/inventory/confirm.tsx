@@ -24,7 +24,7 @@ export default function ConfirmScanScreen() {
 
   const [brand, setBrand] = useState(isIdentified ? MOCK_RESULT.brand : '')
   const [product, setProduct] = useState(isIdentified ? MOCK_RESULT.product : '')
-  const [category, setCategory] = useState(isIdentified ? MOCK_RESULT.category : '')
+  const [category, _setCategory] = useState(isIdentified ? MOCK_RESULT.category : '')
   const [fillLevel, setFillLevel] = useState(75)
   const [inventoryType, setInventoryType] = useState<'active' | 'backstock'>('active')
 

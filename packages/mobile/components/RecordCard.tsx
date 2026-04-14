@@ -8,7 +8,6 @@ import { FillLevelBar } from './FillLevelBar'
 interface RecordCardProps {
   record: ReportBottleRecord
   onEdit: () => void
-  onFillChange: (fillPercent: number) => void
   editedFill?: number
   editedName?: string
 }
@@ -20,7 +19,7 @@ const STATUS_COLORS: Record<string, { bg: string; fg: string; icon: string }> = 
   pending: { bg: '#a8a29e22', fg: '#a8a29e', icon: 'clock-outline' },
 }
 
-export function RecordCard({ record, onEdit, onFillChange, editedFill, editedName }: Readonly<RecordCardProps>) {
+export function RecordCard({ record, onEdit, editedFill, editedName }: Readonly<RecordCardProps>) {
   const theme = useTheme()
   const fillPercent = editedFill ?? record.fillPercent
   const bottleName = editedName ?? record.bottleName

@@ -2,8 +2,6 @@ import { API_BASE_URL } from './config'
 import type {
   ReportDetail,
   ReportListItem,
-  ReportProgress,
-  ReportBottleRecord,
   BottleSearchResult,
   LocationListItem,
 } from '@bartools/types'

@@ -5,7 +5,6 @@ import { useRouter, useLocalSearchParams } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { FillLevelSlider } from '../../../components/FillLevelSlider'
-import { ITEM_CATEGORIES } from '@bartools/types'
 import type { LocationListItem } from '@bartools/types'
 import { getLocations } from '../../../lib/api'
 import { DEFAULT_VENUE_ID } from '../../../lib/config'
@@ -17,10 +16,10 @@ export default function AddManuallyScreen() {
   const { photoUri } = useLocalSearchParams<{ photoUri?: string }>()
 
   const [name, setName] = useState('')
-  const [category, setCategory] = useState('bourbon')
-  const [sizeMl, setSizeMl] = useState('750')
+  const [category, _setCategory] = useState('bourbon')
+  const [sizeMl, _setSizeMl] = useState('750')
   const [fillLevel, setFillLevel] = useState(100)
-  const [locations, setLocations] = useState<LocationListItem[]>([])
+  const [_locations, setLocations] = useState<LocationListItem[]>([])
   const [location, setLocation] = useState('')
 
   // Load locations from API with mock fallback
