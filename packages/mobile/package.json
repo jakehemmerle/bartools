@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@bartools/types": "workspace:*",
+    "@expo/vector-icons": "^15.1.1",
     "expo": "~54.0.33",
     "expo-constants": "~18.0.13",
     "expo-dev-client": "~6.0.20",
@@ -26,6 +27,7 @@
     "react-native-vision-camera": "^4.7.3"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/react": "~19.1.0",
     "typescript": "~5.9.2"
   },
