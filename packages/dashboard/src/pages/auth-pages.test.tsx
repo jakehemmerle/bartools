@@ -9,7 +9,7 @@ describe('LandingPage', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: 'A calmer back office for bar inventory.',
+        name: 'Track report progress and saved bottle records.',
       }),
     ).toBeInTheDocument()
     expect(
@@ -17,5 +17,6 @@ describe('LandingPage', () => {
     ).not.toBeInTheDocument()
     expect(screen.queryByText(/default signed-in view/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/warning badges/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/sign in/i)).not.toBeInTheDocument()
   })
 })

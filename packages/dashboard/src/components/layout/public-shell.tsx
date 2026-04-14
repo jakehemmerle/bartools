@@ -1,5 +1,4 @@
 import {
-  Anchor,
   Box,
   Button,
   Container,
@@ -27,17 +26,12 @@ export function PublicShell({ children }: PropsWithChildren) {
               bartools
             </Text>
             <Text c="dimmed" size="sm">
-              Bar inventory, minus the spreadsheet sprawl.
+              Report review for operators.
             </Text>
           </Box>
-          <Group gap="sm">
-            <Anchor component={Link} fw={600} to="/sign-in">
-              Sign in
-            </Anchor>
-            <Button color="slate" component={Link} radius="sm" to="/sign-up">
-              Start free
-            </Button>
-          </Group>
+          <Button color="slate" component={Link} radius="sm" to="/reports">
+            Open workbench
+          </Button>
         </Group>
         <Paper
           px={{ base: 'lg', md: 'xl' }}
