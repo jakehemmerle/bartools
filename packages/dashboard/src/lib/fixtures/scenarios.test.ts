@@ -23,4 +23,13 @@ describe('fixture scenarios', () => {
     expect(detail).toBeDefined()
     expect(detail.bottleRecords[0]?.imageUrl).toBe('')
   })
+
+  it('covers the full backend report lifecycle in fixtures', () => {
+    expect(reportsScenario.reports.map((report) => report.status)).toEqual([
+      'reviewed',
+      'unreviewed',
+      'processing',
+      'created',
+    ])
+  })
 })

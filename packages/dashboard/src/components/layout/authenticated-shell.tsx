@@ -12,19 +12,14 @@ import {
 import { useDisclosure } from '@mantine/hooks'
 import type { PropsWithChildren } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { useFixtureSession } from '../../lib/fixture-session'
 
 const appLinks = [
-  { to: '/inventory', label: 'Inventory' },
-  { to: '/low-stock', label: 'Low Stock' },
   { to: '/reports', label: 'Reports' },
-  { to: '/settings', label: 'Settings' },
 ]
 
-export function AuthenticatedShell({ children }: PropsWithChildren) {
+export function WorkbenchShell({ children }: PropsWithChildren) {
   const [opened, { toggle }] = useDisclosure(false)
   const location = useLocation()
-  const { persona, signOut } = useFixtureSession()
 
   return (
     <AppShell
@@ -45,7 +40,7 @@ export function AuthenticatedShell({ children }: PropsWithChildren) {
         <Group h="100%" justify="space-between" px="lg">
           <Group gap="md">
             <Burger
-              aria-label="Toggle dashboard navigation"
+              aria-label="Toggle workbench navigation"
               hiddenFrom="sm"
               opened={opened}
               onClick={toggle}
@@ -53,25 +48,16 @@ export function AuthenticatedShell({ children }: PropsWithChildren) {
             />
             <Box>
               <Text c="ink.8" fw={700}>
-                bartools dashboard
+                bartools
               </Text>
               <Text c="dimmed" size="sm">
-                Keep service stocked without spreadsheet sprawl.
+                Reports workbench
               </Text>
             </Box>
           </Group>
           <Group gap="sm">
-            <Badge color="slate" radius="sm" variant="light">
-              {persona === 'manager' ? 'Manager account' : 'Staff account'}
-            </Badge>
-            <Badge
-              color="slate"
-              onClick={signOut}
-              radius="sm"
-              style={{ cursor: 'pointer' }}
-              variant="outline"
-            >
-              Sign out
+            <Badge color="brass" radius="sm" variant="light">
+              Review progress and saved records
             </Badge>
           </Group>
         </Group>
@@ -87,10 +73,10 @@ export function AuthenticatedShell({ children }: PropsWithChildren) {
         <Stack gap="xs">
           <Box px="sm" py="xs">
             <Text c="ink.8" fw={700} size="sm">
-              The Challenger
+              Operator surface
             </Text>
             <Text c="dimmed" size="sm">
-              Austin, TX • America/Chicago
+              Reports-first until venue context is connected
             </Text>
           </Box>
           <Divider />

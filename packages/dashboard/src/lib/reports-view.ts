@@ -1,4 +1,4 @@
-import type { ReportListItem } from './fixtures/schemas'
+import type { ReportListItem } from '@bartools/types'
 
 export function sortReportsNewestFirst(reports: ReportListItem[]) {
   return [...reports].sort((left, right) => {

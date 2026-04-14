@@ -108,6 +108,7 @@ export function makeReportDetail(
         volumeMl: 750,
         fillPercent: 62,
         corrected: false,
+        status: 'reviewed',
       }),
     ],
     ...overrides,
