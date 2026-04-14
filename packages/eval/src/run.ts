@@ -73,7 +73,7 @@ async function main(): Promise<void> {
   };
   const rows: Row[] = [];
 
-  for await (const row of result) {
+  for (const row of result.results) {
     const file = readSourceFile(row.example);
     const ref = row.example.outputs as
       | { name?: string; volume?: number }
