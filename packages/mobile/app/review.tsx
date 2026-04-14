@@ -98,7 +98,7 @@ export default function ReviewScreen() {
             editedFill={edit?.fillPercent}
             editedName={edit?.bottleName}
             onEdit={() => setSearchTarget(item.id)}
-            onFillChange={(fp) => handleFillChange(item.id, fp)}
+
           />
           {/* Inline fill edit — tap the fill bar area */}
           <Pressable

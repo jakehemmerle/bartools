@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react'
-import { View, Text, TextInput, ScrollView, FlatList, Pressable, Alert, StyleSheet } from 'react-native'
+import { View, Text, TextInput, ScrollView, FlatList, Pressable, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { AppHeader } from '../../../components/AppHeader'
@@ -20,7 +19,6 @@ type SectionItem =
 
 export default function InventoryScreen() {
   const theme = useTheme()
-  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<string>('All Bottles')
   const [showAddSheet, setShowAddSheet] = useState(false)
@@ -95,7 +93,7 @@ export default function InventoryScreen() {
     )
   }
 
-  const keyExtractor = (item: SectionItem, index: number) => {
+  const keyExtractor = (item: SectionItem) => {
     if (item.type === 'header') return `header-${item.category}`
     return item.data.id
   }

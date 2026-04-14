@@ -18,7 +18,7 @@ export function FillLevelSlider({
   label,
 }: Readonly<FillLevelSliderProps>) {
   const theme = useTheme()
-  const [trackLength, setTrackLength] = useState(0)
+  const [, setTrackLength] = useState(0)
   const trackRef = useRef<View>(null)
 
   const clampedValue = Math.max(0, Math.min(100, value))
