@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test'
-import { mergeRecord } from '../use-report-stream'
+import { mergeRecord } from '../merge-record'
 import type { ReportBottleRecord } from '@bartools/types'
 
 function makeRecord(overrides: Partial<ReportBottleRecord> = {}): ReportBottleRecord {
