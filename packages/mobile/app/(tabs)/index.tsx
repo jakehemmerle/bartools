@@ -3,6 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
+  Image,
   TouchableOpacity,
   Pressable,
   Animated,
@@ -162,14 +163,19 @@ export default function CaptureScreen() {
       edges={['top']}
       style={[styles.container, { backgroundColor: theme.background }]}
     >
-      {/* Full-screen background (dark wash — no external image dependency) */}
-      <View style={[styles.backgroundImage, { backgroundColor: '#1a1a1a', opacity: 0.9 }]} />
+      {/* Full-screen background — bundled local asset (no external URL) */}
+      <Image
+        source={require('../../assets/bar-background.png')}
+        style={[styles.backgroundImage, { opacity: 0.35 }]}
+        resizeMode="cover"
+        accessible={false}
+      />
       {/* Heavy gray overlay to wash out color — simulates grayscale */}
       <View style={[styles.backgroundImage, { backgroundColor: '#1a1a1a', opacity: 0.7 }]} />
       {/* Top gradient darkening */}
       <View style={[styles.bgGradientTop, { backgroundColor: theme.background }]} />
-      {/* Bottom gradient darkening */}
-      <View style={[styles.bgGradientBottom, { backgroundColor: theme.background }]} />
+      {/* Bottom gradient darkening — reduced so bar image shows through */}
+      <View style={[styles.bgGradientBottom, { backgroundColor: theme.background, opacity: 0.5 }]} />
 
       <AppHeader />
 
@@ -205,8 +211,8 @@ export default function CaptureScreen() {
         )}
       </View>
 
-      {/* Bottom controls */}
-      <View style={[styles.bottomPanel, { backgroundColor: theme.surfaceContainerLow }]}>
+      {/* Bottom controls — semi-transparent so bar background bleeds through */}
+      <View style={[styles.bottomPanel, { backgroundColor: `${theme.surfaceContainerLow}E6` }]}>
         {/* Controls row: Gallery | Capture | Settings */}
         <View style={styles.controlsRow}>
           {/* Gallery preview thumbnail */}
