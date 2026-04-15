@@ -13,10 +13,6 @@
       },
       "android": {
         "buildType": "apk"
-      },
-      "channel": "development",
-      "env": {
-        "EX_UPDATES_NATIVE_DEBUG": "1"
       }
     },
     "development-simulator": {
