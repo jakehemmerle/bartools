@@ -1,25 +1,22 @@
-const { withXcodeProject } = require('expo/config-plugins');
+const { withDangerousMod } = require('expo/config-plugins');
 const path = require('path');
 const fs = require('fs');
 
 module.exports = function withPrivacyManifest(config) {
-  return withXcodeProject(config, async (config) => {
-    const xcodeProject = config.modResults;
-    const projectRoot = config.modRequest.projectRoot;
-    const sourceFilePath = path.join(projectRoot, 'ios-privacy', 'PrivacyInfo.xcprivacy');
-    const targetDir = path.join(config.modRequest.platformProjectRoot, config.modRequest.projectName);
-    const targetFilePath = path.join(targetDir, 'PrivacyInfo.xcprivacy');
+  return withDangerousMod(config, [
+    'ios',
+    async (config) => {
+      const projectRoot = config.modRequest.projectRoot;
+      const sourceFile = path.join(projectRoot, 'ios-privacy', 'PrivacyInfo.xcprivacy');
+      const iosDir = path.join(config.modRequest.platformProjectRoot, config.modRequest.projectName);
+      const targetFile = path.join(iosDir, 'PrivacyInfo.xcprivacy');
 
-    // Copy the file
-    fs.copyFileSync(sourceFilePath, targetFilePath);
+      if (fs.existsSync(sourceFile)) {
+        fs.mkdirSync(path.dirname(targetFile), { recursive: true });
+        fs.copyFileSync(sourceFile, targetFile);
+      }
 
-    // Add to Xcode project if not already there
-    const groupName = config.modRequest.projectName;
-    const group = xcodeProject.pbxGroupByName(groupName);
-    if (group && !xcodeProject.hasFile('PrivacyInfo.xcprivacy')) {
-      xcodeProject.addResourceFile('PrivacyInfo.xcprivacy', { target: xcodeProject.getFirstTarget().uuid });
-    }
-
-    return config;
-  });
+      return config;
+    },
+  ]);
 };
