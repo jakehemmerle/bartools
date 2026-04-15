@@ -52,7 +52,8 @@
       [
         "react-native-vision-camera",
         {
-          "cameraPermissionText": "BarBack uses the camera to photograph bottles for inventory identification."
+          "cameraPermissionText": "BarBack uses the camera to photograph bottles for inventory identification.",
+          "enableMicrophonePermission": false
         }
       ],
       [
