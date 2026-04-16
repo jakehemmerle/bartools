@@ -26,6 +26,7 @@ Use this directory for:
 - `stitch_handoff_selection.md` — canonical mockup winners, locked design decisions, and mockup defects to correct or ignore
 - `stitch_prompt_v4_3_handoff.md` — constrained Stitch prompt for a final handoff-oriented cleanup pass
 - `golden-set-approved/` — consolidated approved screen bundle with upload-ready images and copied source folders
+- `reports-workbench-implementation/` — detailed execution plan for turning the approved mockups into the real reports-first web app
 
 ## Working Agreement
 
