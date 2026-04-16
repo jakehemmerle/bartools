@@ -56,3 +56,7 @@ packages/backend/data/
 # EAS submission credentials (never commit)
 packages/mobile/google-service-account.json
 packages/mobile/AuthKey.p8
+
+# Large local-only assets
+assets/videos/
+prototypes/
