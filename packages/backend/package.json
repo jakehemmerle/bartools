@@ -7,7 +7,7 @@
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
     "lint": "eslint .",
-    "test": "bun test",
+    "test": "bun --env-file=../../.env test",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
