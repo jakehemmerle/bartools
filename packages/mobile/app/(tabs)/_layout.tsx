@@ -36,12 +36,32 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="scan-live"
+        options={{
+          title: 'Live',
+          tabBarLabel: 'Live',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cube-scan" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="inventory"
         options={{
           title: 'Inventory',
           tabBarLabel: 'Inventory',
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="liquor" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="reports"
+        options={{
+          title: 'Reports',
+          tabBarLabel: 'Reports',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="chart-box-outline" color={color} size={size} />
           ),
         }}
       />

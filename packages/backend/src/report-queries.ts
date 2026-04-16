@@ -1,7 +1,7 @@
 import { count, desc, eq, sql } from 'drizzle-orm';
 import type { ReportDetail, ReportListItem } from '@bartools/types';
 import { db } from './db';
-import { reportRecords, reports, scans, users } from './schema';
+import { locations, reportRecords, reports, scans, users } from './schema';
 import {
   toIso,
   maybeModelOutput,
@@ -17,13 +17,17 @@ export async function listReports() {
       completedAt: reports.reviewedAt,
       userId: users.id,
       userDisplayName: users.displayName,
+      locationName: locations.name,
       bottleCount: count(scans.id),
+      photoCount: reports.photoCount,
+      processedCount: reports.processedCount,
       status: reports.status,
     })
     .from(reports)
     .leftJoin(users, eq(users.id, reports.userId))
+    .leftJoin(locations, eq(locations.id, reports.locationId))
     .leftJoin(scans, eq(scans.reportId, reports.id))
-    .groupBy(reports.id, users.id)
+    .groupBy(reports.id, users.id, locations.name)
     .orderBy(desc(sql`coalesce(${reports.reviewedAt}, ${reports.startedAt})`));
 
   return rows.map((row) => ({
@@ -32,7 +36,10 @@ export async function listReports() {
     completedAt: toIso(row.completedAt),
     userId: row.userId ?? undefined,
     userDisplayName: row.userDisplayName ?? undefined,
+    locationName: row.locationName ?? undefined,
     bottleCount: Number(row.bottleCount),
+    photoCount: row.photoCount ?? 0,
+    processedCount: row.processedCount ?? 0,
     status: row.status,
   })) satisfies ReportListItem[];
 }
