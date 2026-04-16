@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BARBACK - Unreviewed Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#88d982",
+                      "outline-variant": "#524439",
+                      "tertiary-fixed": "#ffdad6",
+                      "error-container": "#93000a",
+                      "inverse-primary": "#8c4f10",
+                      "background": "#131313",
+                      "on-primary-container": "#432100",
+                      "outline": "#a08d80",
+                      "surface-container-lowest": "#0e0e0e",
+                      "on-surface-variant": "#d8c3b4",
+                      "surface-bright": "#393939",
+                      "on-tertiary-fixed": "#410003",
+                      "on-primary-fixed-variant": "#6d3a00",
+                      "on-primary": "#4d2700",
+                      "on-background": "#e5e2e1",
+                      "on-error": "#690005",
+                      "on-secondary": "#003909",
+                      "surface": "#131313",
+                      "tertiary-container": "#ff544d",
+                      "on-surface": "#e5e2e1",
+                      "tertiary": "#ffb4ac",
+                      "surface-container-highest": "#353534",
+                      "surface-container": "#201f1f",
+                      "on-tertiary-container": "#5c0005",
+                      "surface-container-low": "#1c1b1b",
+                      "on-tertiary-fixed-variant": "#93000e",
+                      "error": "#ffb4ab",
+                      "secondary-fixed-dim": "#88d982",
+                      "primary-fixed": "#ffdcc2",
+                      "surface-tint": "#ffb77b",
+                      "primary-fixed-dim": "#ffb77b",
+                      "tertiary-fixed-dim": "#ffb4ac",
+                      "on-primary-fixed": "#2e1500",
+                      "on-tertiary": "#690007",
+                      "secondary-fixed": "#a3f69c",
+                      "surface-variant": "#353534",
+                      "primary": "#ffb77b",
+                      "on-error-container": "#ffdad6",
+                      "primary-container": "#c8803f",
+                      "on-secondary-fixed": "#002204",
+                      "inverse-surface": "#e5e2e1",
+                      "on-secondary-fixed-variant": "#005312",
+                      "inverse-on-surface": "#313030",
+                      "surface-container-high": "#2a2a2a",
+                      "secondary-container": "#005b14",
+                      "surface-dim": "#131313",
+                      "on-secondary-container": "#81d27c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Newsreader", "serif"
+                      ],
+                      "body": [
+                              "Inter", "sans-serif"
+                      ],
+                      "label": [
+                              "Space Grotesk", "sans-serif"
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: theme('colors.surface-container-lowest');
+            color: theme('colors.on-background');
+            font-family: theme('fontFamily.body');
+        }
+        
+        .ghost-border {
+            border: 1px solid theme('colors.outline-variant');
+            border-opacity: 0.2;
+        }
+
+        .copper-glow {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 4px rgba(184, 115, 51, 0.05);
+        }
+
+        .gradient-primary {
+            background: linear-gradient(135deg, theme('colors.primary'), theme('colors.primary-container'));
+        }
+
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: theme('colors.surface-container-lowest');
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-container');
+            border-radius: theme('borderRadius.DEFAULT');
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.surface-container-high');
+        }
+      </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-8 py-4 bg-[#131313] border-b border-white/5 top-0 z-50">
+<div class="flex items-center gap-6">
+<a class="font-serif text-2xl font-bold tracking-tight text-[#B87333]" href="#">BARBACK</a>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-neutral-400 font-medium font-label text-sm uppercase tracking-wider hover:text-[#FFB77B] transition-colors scale-95 duration-100 flex items-center gap-2" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+                    Back
+                </a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<!-- Hidden search bar placeholder -->
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center py-12 px-4 md:px-8 max-w-7xl mx-auto w-full">
+<!-- Report Header Section -->
+<div class="w-full mb-16 max-w-5xl">
+<div class="flex justify-between items-end border-b border-outline-variant/20 pb-8 mb-8">
+<div>
+<div class="flex items-center gap-3 mb-4">
+<span class="font-label text-xs tracking-widest text-on-surface-variant uppercase">Inventory Report</span>
+<div class="flex items-center gap-2 px-2 py-1 ghost-border rounded-sm">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="font-label text-xs text-on-surface-variant tracking-wider uppercase">Unreviewed</span>
+</div>
+</div>
+<h1 class="font-headline text-5xl md:text-6xl text-on-background font-medium mb-2">Main Bar Audit</h1>
+<p class="font-body text-on-surface-variant text-lg">Zone 1 • Oct 24, 2023 • 03:15 AM</p>
+</div>
+<div class="text-right">
+<p class="font-label text-sm text-on-surface-variant mb-1 uppercase tracking-widest">Total Items</p>
+<p class="font-headline text-4xl text-primary">142</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="bg-surface p-6 ghost-border rounded">
+<p class="font-label text-xs text-on-surface-variant uppercase tracking-widest mb-2">Variance Target</p>
+<p class="font-headline text-3xl text-on-background">&lt; 2.5%</p>
+</div>
+<div class="bg-surface p-6 ghost-border rounded">
+<p class="font-label text-xs text-on-surface-variant uppercase tracking-widest mb-2">Expected Value</p>
+<p class="font-headline text-3xl text-on-background">$14,250</p>
+</div>
+<div class="bg-surface p-6 ghost-border rounded">
+<p class="font-label text-xs text-on-surface-variant uppercase tracking-widest mb-2">Auditor</p>
+<p class="font-headline text-3xl text-on-background">J. Doe</p>
+</div>
+</div>
+</div>
+<!-- Review Canvas -->
+<div class="w-full max-w-5xl space-y-6 mb-24">
+<h2 class="font-headline text-3xl text-on-background mb-8">Pending Items</h2>
+<!-- Record Card 1 -->
+<div class="bg-surface p-6 rounded ghost-border flex flex-col md:flex-row items-start md:items-center gap-6">
+<!-- Visual / ID -->
+<div class="flex-shrink-0 w-24 h-24 bg-surface-container-low rounded overflow-hidden relative border border-outline-variant/10">
+<img alt="Bottle of premium bourbon whiskey" class="w-full h-full object-cover opacity-80 mix-blend-luminosity" data-alt="Close-up of a premium bourbon whiskey bottle with a dark amber liquid against a moody dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXyzlyeLkx4Zrvz8CsIUbgQXO1cbsdaKZFes9hpyOTFWemHAMCKx3cluiQ3a620Ca4RbrmUWOALlT5G4oSfd0x7AC4pck-TqjgaLru-VaOj1W4_rGQHWdKvD09KvPvngZ0QhWwpvahxl4v6xSbGHrA9wkG4fYA8KXSo1RAoXVlk8cQvxsftowZfk_QYCk7lyshLU7gqX5HDYMqs1BnxnI90n_xSxAuqqABzulEvAOPppJyEfep4pl8qBkqZ8DrYkeYVKDKiruir3D9"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent"></div>
+<span class="absolute bottom-1 left-2 font-label text-[10px] tracking-wider text-on-surface">#001</span>
+</div>
+<!-- Details -->
+<div class="flex-grow min-w-0">
+<h3 class="font-headline text-xl text-on-background truncate">Woodford Reserve Double Oaked</h3>
+<p class="font-label text-sm text-on-surface-variant tracking-widest uppercase mt-1">Bourbon • 750ml</p>
+</div>
+<!-- Review Controls -->
+<div class="flex-shrink-0 w-full md:w-auto flex flex-col md:flex-row items-end gap-4 bg-surface-container p-4 rounded ghost-border">
+<div class="w-full md:w-48">
+<label class="block font-label text-xs text-on-surface-variant uppercase tracking-widest mb-2">Verified Brand</label>
+<input class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 text-on-background font-body text-sm py-2 px-0 transition-colors" type="text" value="Woodford Reserve"/>
+</div>
+<div class="w-full md:w-32">
+<label class="block font-label text-xs text-on-surface-variant uppercase tracking-widest mb-2">Fill Level (0.1)</label>
+<select class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 text-on-background font-body text-sm py-2 px-0 transition-colors appearance-none">
+<option>1.0</option>
+<option>0.9</option>
+<option selected="">0.8</option>
+<option>0.7</option>
+<option>0.6</option>
+<option>0.5</option>
+<option>0.4</option>
+<option>0.3</option>
+<option>0.2</option>
+<option>0.1</option>
+<option>0.0</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Record Card 2 -->
+<div class="bg-surface p-6 rounded ghost-border flex flex-col md:flex-row items-start md:items-center gap-6">
+<!-- Visual / ID -->
+<div class="flex-shrink-0 w-24 h-24 bg-surface-container-low rounded overflow-hidden relative border border-outline-variant/10">
+<img alt="Bottle of clear gin" class="w-full h-full object-cover opacity-80 mix-blend-luminosity" data-alt="Clear gin bottle with a minimalist label illuminated from behind against a dark textured background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoZFvp0dU8SPZjeSJI2dRm-RkGePlLkJzvXK29xCWyff-V0WVuHvj1Pgj1IE6Iu_b6q0L9Re7sjt-D3WDe_ZDkpNKrqtAKG1PE_0IZ1BN_1fOgz-iQOy7YP93QMI5usBR5a_1Wq_chnmDcrE9DZiqXk8qwxBjNbTkRmEHYULUb2YTqitV7HlaHvFnylr09dMPuiLvjU6upKudBXVKq5edHzzozN6MEZJ00kUYWN2x4QE_gK29dNLZoLwh4cqfNf7xgHoFvUL7erUa9"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent"></div>
+<span class="absolute bottom-1 left-2 font-label text-[10px] tracking-wider text-on-surface">#002</span>
+</div>
+<!-- Details -->
+<div class="flex-grow min-w-0">
+<h3 class="font-headline text-xl text-on-background truncate">Hendrick's Gin</h3>
+<p class="font-label text-sm text-on-surface-variant tracking-widest uppercase mt-1">Gin • 1000ml</p>
+</div>
+<!-- Review Controls -->
+<div class="flex-shrink-0 w-full md:w-auto flex flex-col md:flex-row items-end gap-4 bg-surface-container p-4 rounded ghost-border">
+<div class="w-full md:w-48">
+<label class="block font-label text-xs text-on-surface-variant uppercase tracking-widest mb-2">Verified Brand</label>
+<input class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 text-on-background font-body text-sm py-2 px-0 transition-colors" type="text" value="Hendrick's"/>
+</div>
+<div class="w-full md:w-32">
+<label class="block font-label text-xs text-on-surface-variant uppercase tracking-widest mb-2">Fill Level (0.1)</label>
+<select class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 text-on-background font-body text-sm py-2 px-0 transition-colors appearance-none">
+<option>1.0</option>
+<option>0.9</option>
+<option>0.8</option>
+<option>0.7</option>
+<option>0.6</option>
+<option>0.5</option>
+<option selected="">0.4</option>
+<option>0.3</option>
+<option>0.2</option>
+<option>0.1</option>
+<option>0.0</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Record Card 3 -->
+<div class="bg-surface p-6 rounded ghost-border flex flex-col md:flex-row items-start md:items-center gap-6">
+<!-- Visual / ID -->
+<div class="flex-shrink-0 w-24 h-24 bg-surface-container-low rounded overflow-hidden relative border border-outline-variant/10">
+<div class="w-full h-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-outline-variant text-4xl" style="font-variation-settings: 'FILL' 0;">wine_bar</span>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest/80 to-transparent"></div>
+<span class="absolute bottom-1 left-2 font-label text-[10px] tracking-wider text-on-surface">#003</span>
+</div>
+<!-- Details -->
+<div class="flex-grow min-w-0">
+<h3 class="font-headline text-xl text-on-background truncate">Campari</h3>
+<p class="font-label text-sm text-on-surface-variant tracking-widest uppercase mt-1">Liqueur • 750ml</p>
+</div>
+<!-- Review Controls -->
+<div class="flex-shrink-0 w-full md:w-auto flex flex-col md:flex-row items-end gap-4 bg-surface-container p-4 rounded ghost-border">
+<div class="w-full md:w-48">
+<label class="block font-label text-xs text-on-surface-variant uppercase tracking-widest mb-2">Verified Brand</label>
+<input class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 text-on-background font-body text-sm py-2 px-0 transition-colors" placeholder="Search Brand..." type="text" value="Campari"/>
+</div>
+<div class="w-full md:w-32">
+<label class="block font-label text-xs text-on-surface-variant uppercase tracking-widest mb-2">Fill Level (0.1)</label>
+<select class="w-full bg-surface-container-lowest border-0 border-b border-outline-variant/20 focus:border-primary focus:ring-0 text-on-background font-body text-sm py-2 px-0 transition-colors appearance-none">
+<option>1.0</option>
+<option>0.9</option>
+<option>0.8</option>
+<option>0.7</option>
+<option>0.6</option>
+<option>0.5</option>
+<option>0.4</option>
+<option>0.3</option>
+<option selected="">0.2</option>
+<option>0.1</option>
+<option>0.0</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Action Area -->
+<div class="pt-12 flex justify-center border-t border-outline-variant/10">
+<button class="gradient-primary text-on-primary-fixed font-label uppercase tracking-widest text-sm px-12 py-4 rounded-sm hover:brightness-110 transition-all">
+                    Submit Review
+                </button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="flex justify-between items-center w-full px-8 py-6 border-t border-white/5 opacity-50 bg-[#0E0E0E] mt-auto">
+<p class="text-[10px] font-mono tracking-widest uppercase text-neutral-600">© BARBACK OPERATIONAL SYSTEMS</p>
+<div class="flex gap-6">
+<a class="text-[10px] font-mono tracking-widest uppercase text-neutral-600 hover:text-neutral-300 transition-colors" href="#">Status</a>
+<a class="text-[10px] font-mono tracking-widest uppercase text-neutral-600 hover:text-neutral-300 transition-colors" href="#">Documentation</a>
+<a class="text-[10px] font-mono tracking-widest uppercase text-neutral-600 hover:text-neutral-300 transition-colors" href="#">Support</a>
+</div>
+</footer>
+</body></html>

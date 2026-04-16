@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reports List - Operator Edition</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#e5e2e1",
+                        "on-primary-fixed-variant": "#6d3a00",
+                        "inverse-on-surface": "#313030",
+                        "on-error": "#690005",
+                        "secondary": "#88d982",
+                        "on-secondary-fixed": "#002204",
+                        "surface-container-high": "#2a2a2a",
+                        "outline": "#a08d80",
+                        "surface-bright": "#393939",
+                        "on-primary-fixed": "#2e1500",
+                        "primary-fixed": "#ffdcc2",
+                        "on-tertiary-container": "#5c0005",
+                        "error-container": "#93000a",
+                        "on-tertiary": "#690007",
+                        "surface-container": "#201f1f",
+                        "surface-container-highest": "#353534",
+                        "surface-variant": "#353534",
+                        "on-surface-variant": "#d8c3b4",
+                        "on-background": "#e5e2e1",
+                        "tertiary-fixed-dim": "#ffb4ac",
+                        "secondary-container": "#005b14",
+                        "inverse-surface": "#e5e2e1",
+                        "secondary-fixed": "#a3f69c",
+                        "outline-variant": "#524439",
+                        "on-secondary": "#003909",
+                        "on-secondary-container": "#81d27c",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#88d982",
+                        "on-tertiary-fixed": "#410003",
+                        "background": "#131313",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#ffb77b",
+                        "tertiary": "#ffb4ac",
+                        "on-tertiary-fixed-variant": "#93000e",
+                        "on-primary-container": "#432100",
+                        "surface-tint": "#ffb77b",
+                        "primary-container": "#c8803f",
+                        "on-primary": "#4d2700",
+                        "inverse-primary": "#8c4f10",
+                        "surface-container-low": "#1c1b1b",
+                        "tertiary-fixed": "#ffdad6",
+                        "primary": "#ffb77b",
+                        "tertiary-container": "#ff544d",
+                        "on-secondary-fixed-variant": "#005312",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-dim": "#131313",
+                        "surface": "#131313"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Space Grotesk", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: #0e0e0e; color: #e5e2e1; }
+        .ghost-border { border: 1px solid rgba(82, 68, 57, 0.2); }
+        .ghost-border-b { border-bottom: 1px solid rgba(82, 68, 57, 0.2); }
+    </style>
+</head>
+<body class="font-body antialiased flex flex-col md:flex-row min-h-screen">
+<!-- TopNavBar (Mobile Only) -->
+<nav class="md:hidden bg-[#131313] fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 shadow-none border-b border-surface-container-high/50">
+<div class="flex items-center gap-4">
+<span class="text-xl font-medium tracking-tight text-[#FFB77B] font-headline">BARBACK</span>
+</div>
+<div class="flex items-center gap-4 text-[#FFB77B]">
+<span class="material-symbols-outlined hover:text-[#FFB77B] transition-colors cursor-pointer">search</span>
+<span class="material-symbols-outlined hover:text-[#FFB77B] transition-colors cursor-pointer">notifications</span>
+<span class="material-symbols-outlined hover:text-[#FFB77B] transition-colors cursor-pointer">settings</span>
+</div>
+</nav>
+<!-- SideNavBar (Web Only) -->
+<aside class="hidden md:flex flex-col bg-[#0E0E0E] h-screen w-64 border-r border-zinc-800/20 fixed left-0 top-0 p-4 z-40">
+<div class="flex items-center gap-3 mb-10 mt-2 px-2">
+<img alt="Operator Profile" class="w-10 h-10 rounded object-cover ghost-border" data-alt="Dark, moody cocktail lounge interior with soft ambient lighting on brass fixtures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLJd2WumYChoJzbxckTP6bk7i_zhN3-5G1cXtvvwAUu9s-IWx8R7xkM2BCRwcn7oDv_WZl5C0mj3P5G2u8RzPPlvNRWWvTqSB9DYpBdKWVCdQ5co-2y2pj2ZpJoCjYdRqcoQmllWeBV3q2yCEvpj1w0KDvrm9pzPmr5uJufPgT_bI8PteGyQiAoXgGGlLPUzuvm473BY1W3sZd5I8FTz8L5kWOkpg2Wm_Ot-bgz5JZDUsSGcm9BG_nV6axBAYM2T2vD20DtuuMwrJx"/>
+<div>
+<h1 class="text-lg font-bold text-[#FFB77B] font-body leading-tight">Main Lounge</h1>
+<p class="text-zinc-500 font-label text-xs uppercase tracking-widest mt-0.5">Operator Workbench</p>
+</div>
+</div>
+<button class="mb-8 w-full bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed font-label text-sm uppercase tracking-widest py-3 px-4 rounded shadow-none hover:opacity-90 transition-opacity flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span> New Report
+        </button>
+<nav class="flex-1 flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2.5 text-[#FFB77B] bg-[#201F1F] rounded-sm transition-transform translate-x-1 font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-base">fiber_new</span>
+<span>Created</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-400 hover:bg-[#131313] hover:text-zinc-200 transition-colors rounded-sm font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-base">sync</span>
+<span>Processing</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-400 hover:bg-[#131313] hover:text-zinc-200 transition-colors rounded-sm font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-base">visibility_off</span>
+<span>Unreviewed</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-zinc-400 hover:bg-[#131313] hover:text-zinc-200 transition-colors rounded-sm font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-base">verified</span>
+<span>Reviewed</span>
+</a>
+</nav>
+<div class="mt-auto flex flex-col gap-2 pt-6 ghost-border-t">
+<a class="flex items-center gap-3 px-3 py-2 text-zinc-500 hover:text-zinc-300 transition-colors font-label text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[14px]">help_outline</span> Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-zinc-500 hover:text-zinc-300 transition-colors font-label text-xs uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-[14px]">history</span> Logs
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 mt-16 md:mt-0 p-6 md:p-12 lg:p-16 bg-[#131313] min-h-screen">
+<!-- Header Section -->
+<header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="font-headline text-4xl md:text-5xl text-on-surface mb-2 font-medium">Inventory Reports</h2>
+<p class="font-body text-on-surface-variant text-sm md:text-base max-w-2xl">Archived and active inventory audits. Review operational metrics and bottle counts across all venues.</p>
+</div>
+<!-- Contextual Actions -->
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="bg-surface-container-lowest border border-outline-variant/20 rounded pl-9 pr-4 py-2 text-sm font-body text-on-surface focus:outline-none focus:border-b-primary focus:border-b-2 placeholder-outline/50 w-full md:w-64 transition-all" placeholder="Search ID or Operator" type="text"/>
+</div>
+<button class="bg-surface-container-high hover:bg-surface-bright text-on-surface p-2 rounded ghost-border transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+</button>
+</div>
+</header>
+<!-- Reports Table Area -->
+<div class="bg-surface-container rounded-lg overflow-hidden ghost-border">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-high/50">
+<th class="py-4 px-6 font-label text-xs uppercase tracking-[0.05em] text-outline font-semibold">Report ID</th>
+<th class="py-4 px-6 font-label text-xs uppercase tracking-[0.05em] text-outline font-semibold">Status</th>
+<th class="py-4 px-6 font-label text-xs uppercase tracking-[0.05em] text-outline font-semibold">Operator</th>
+<th class="py-4 px-6 font-label text-xs uppercase tracking-[0.05em] text-outline font-semibold">Timestamp</th>
+<th class="py-4 px-6 font-label text-xs uppercase tracking-[0.05em] text-outline font-semibold text-right">Bottle Count</th>
+<th class="py-4 px-6 font-label text-xs uppercase tracking-[0.05em] text-outline font-semibold text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body text-sm">
+<!-- Row 1 (Created) -->
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer border-b border-surface-container-lowest/50 last:border-0">
+<td class="py-4 px-6">
+<span class="font-label text-on-surface tracking-wider">RPT-8892</span>
+</td>
+<td class="py-4 px-6">
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-sm bg-surface-container-lowest ghost-border">
+<div class="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_4px_rgba(255,183,123,0.5)]"></div>
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Created</span>
+</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">J. Vance</td>
+<td class="py-4 px-6 font-label text-xs text-outline tracking-wider">OCT 24, 23:45</td>
+<td class="py-4 px-6 text-right font-headline text-lg text-primary">--</td>
+<td class="py-4 px-6 text-right">
+<button class="text-outline hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 (Processing) -->
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer bg-surface-container/30 border-b border-surface-container-lowest/50 last:border-0">
+<td class="py-4 px-6">
+<span class="font-label text-on-surface tracking-wider">RPT-8891</span>
+</td>
+<td class="py-4 px-6">
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-sm bg-surface-container-lowest ghost-border">
+<span class="material-symbols-outlined text-[10px] text-outline animate-spin">sync</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-outline">Processing</span>
+</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">System</td>
+<td class="py-4 px-6 font-label text-xs text-outline tracking-wider">OCT 24, 21:12</td>
+<td class="py-4 px-6 text-right font-headline text-lg text-primary">--</td>
+<td class="py-4 px-6 text-right">
+<button class="text-outline hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 (Unreviewed) -->
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer border-b border-surface-container-lowest/50 last:border-0">
+<td class="py-4 px-6">
+<span class="font-label text-on-surface tracking-wider">RPT-8890</span>
+</td>
+<td class="py-4 px-6">
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-sm bg-surface-container-lowest ghost-border">
+<div class="w-1.5 h-1.5 rounded-full bg-error shadow-[0_0_4px_rgba(255,180,171,0.5)]"></div>
+<span class="font-label text-[10px] uppercase tracking-widest text-error">Unreviewed</span>
+</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">S. Miller</td>
+<td class="py-4 px-6 font-label text-xs text-outline tracking-wider">OCT 23, 02:30</td>
+<td class="py-4 px-6 text-right font-headline text-lg text-on-surface">412</td>
+<td class="py-4 px-6 text-right">
+<button class="text-outline hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 (Reviewed) -->
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer bg-surface-container/30 border-b border-surface-container-lowest/50 last:border-0">
+<td class="py-4 px-6">
+<span class="font-label text-on-surface tracking-wider">RPT-8889</span>
+</td>
+<td class="py-4 px-6">
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-sm bg-surface-container-lowest ghost-border">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_4px_rgba(136,217,130,0.5)]"></div>
+<span class="font-label text-[10px] uppercase tracking-widest text-secondary">Reviewed</span>
+</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">A. Chen</td>
+<td class="py-4 px-6 font-label text-xs text-outline tracking-wider">OCT 22, 04:15</td>
+<td class="py-4 px-6 text-right font-headline text-lg text-on-surface">398</td>
+<td class="py-4 px-6 text-right">
+<button class="text-outline hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 (Reviewed) -->
+<tr class="hover:bg-surface-container-high transition-colors group cursor-pointer border-b border-surface-container-lowest/50 last:border-0">
+<td class="py-4 px-6">
+<span class="font-label text-on-surface tracking-wider">RPT-8888</span>
+</td>
+<td class="py-4 px-6">
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-sm bg-surface-container-lowest ghost-border">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_4px_rgba(136,217,130,0.5)]"></div>
+<span class="font-label text-[10px] uppercase tracking-widest text-secondary">Reviewed</span>
+</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">S. Miller</td>
+<td class="py-4 px-6 font-label text-xs text-outline tracking-wider">OCT 21, 03:00</td>
+<td class="py-4 px-6 text-right font-headline text-lg text-on-surface">405</td>
+<td class="py-4 px-6 text-right">
+<button class="text-outline hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="bg-surface-container-lowest px-6 py-4 flex items-center justify-between ghost-border-t">
+<span class="font-label text-xs text-outline uppercase tracking-wider">Showing 1-5 of 142</span>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container hover:bg-surface-bright text-outline hover:text-on-surface transition-colors ghost-border disabled:opacity-50 disabled:cursor-not-allowed">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container hover:bg-surface-bright text-outline hover:text-on-surface transition-colors ghost-border">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>
