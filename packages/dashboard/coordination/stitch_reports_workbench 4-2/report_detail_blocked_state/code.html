@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Access Unavailable - BARBACK</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=Space+Grotesk:wght@300..700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#ffb782",
+                      "tertiary-fixed-dim": "#c8c6c6",
+                      "background": "#131313",
+                      "tertiary": "#e4e2e2",
+                      "surface-dim": "#131313",
+                      "outline-variant": "#52443b",
+                      "primary-container": "#ffb782",
+                      "surface-container-low": "#1c1b1b",
+                      "surface-bright": "#393939",
+                      "primary-fixed-dim": "#ffb782",
+                      "on-tertiary-fixed": "#1b1c1c",
+                      "on-background": "#e5e2e1",
+                      "outline": "#9f8d82",
+                      "surface-variant": "#353534",
+                      "surface-container-lowest": "#0e0e0e",
+                      "secondary-fixed": "#ffdcc5",
+                      "surface": "#131313",
+                      "on-secondary-container": "#f1a46a",
+                      "surface-container-high": "#2a2a2a",
+                      "on-primary-container": "#79461b",
+                      "on-primary-fixed-variant": "#6b3a10",
+                      "tertiary-container": "#c8c6c6",
+                      "inverse-on-surface": "#313030",
+                      "error-container": "#93000a",
+                      "tertiary-fixed": "#e4e2e1",
+                      "inverse-primary": "#875125",
+                      "on-surface-variant": "#d7c3b6",
+                      "on-error": "#690005",
+                      "secondary": "#ffb783",
+                      "on-secondary": "#4f2500",
+                      "on-tertiary-container": "#535252",
+                      "error": "#ffb4ab",
+                      "secondary-container": "#6f3806",
+                      "surface-container-highest": "#353534",
+                      "primary-fixed": "#ffdcc5",
+                      "on-primary": "#4f2500",
+                      "on-secondary-fixed-variant": "#6f3806",
+                      "on-tertiary": "#303030",
+                      "surface-container": "#201f1f",
+                      "on-secondary-fixed": "#301400",
+                      "on-tertiary-fixed-variant": "#474747",
+                      "primary": "#ffdcc5",
+                      "on-surface": "#e5e2e1",
+                      "on-primary-fixed": "#301400",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#ffb783",
+                      "inverse-surface": "#e5e2e1"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Newsreader"
+                      ],
+                      "body": [
+                              "Manrope"
+                      ],
+                      "label": [
+                              "Space Grotesk"
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body h-screen flex flex-col antialiased">
+<header class="flex justify-between items-center w-full px-8 py-4 h-16 bg-[#131313] dark:bg-[#131313] bg-[#1C1B1B] border-none docked full-width top-0 flat no shadows z-50">
+<div class="flex items-center gap-4">
+<button class="text-[#FFDCC5] dark:text-[#FFDCC5] hover:bg-[#353535] transition-colors duration-200 p-2 rounded-full active:scale-95 transition-transform duration-150 flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+</div>
+<div class="font-['Newsreader'] text-2xl tracking-[0.2em] uppercase text-[#FFDCC5] dark:text-[#FFDCC5]">
+            BARBACK
+        </div>
+<div class="w-10"></div>
+</header>
+<main class="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+<div class="absolute inset-0 z-0 pointer-events-none flex justify-center items-center opacity-5">
+<span class="material-symbols-outlined text-[400px] text-primary" style="font-variation-settings: 'FILL' 0;">lock</span>
+</div>
+<div class="z-10 flex flex-col items-center max-w-md w-full text-center space-y-8">
+<div class="space-y-4">
+<span class="material-symbols-outlined text-4xl text-outline-variant mb-4" style="font-variation-settings: 'FILL' 0;">block</span>
+<h1 class="font-headline text-4xl md:text-5xl text-on-background tracking-wide">Access Unavailable</h1>
+<p class="font-body text-base text-on-surface-variant leading-relaxed px-4">
+                    Live report access requires venue and user context. Review submission requires user context.
+                </p>
+</div>
+<div class="w-full h-px bg-outline-variant opacity-15 my-4"></div>
+<div class="w-full space-y-4 pt-4">
+<button class="w-full py-4 px-6 bg-surface-container-highest text-tertiary-fixed-dim font-label text-sm uppercase tracking-wider rounded-sm cursor-not-allowed opacity-50 flex items-center justify-center gap-2" disabled="">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">send</span>
+                    Submit Review
+                </button>
+<button class="w-full py-4 px-6 bg-transparent text-primary font-label text-sm uppercase tracking-wider rounded-sm border border-outline-variant/15 hover:bg-surface-container-highest transition-colors duration-300 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">receipt_long</span>
+                    Back to Reports
+                </button>
+</div>
+</div>
+</main>
+</body></html>

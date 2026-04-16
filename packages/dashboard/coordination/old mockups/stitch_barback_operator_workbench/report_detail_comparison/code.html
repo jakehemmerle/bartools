@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Report Detail - BARBACK</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-surface": "#e5e2e1",
+                        "on-primary-fixed-variant": "#6d3a00",
+                        "inverse-on-surface": "#313030",
+                        "on-error": "#690005",
+                        "secondary": "#88d982",
+                        "on-secondary-fixed": "#002204",
+                        "surface-container-high": "#2a2a2a",
+                        "outline": "#a08d80",
+                        "surface-bright": "#393939",
+                        "on-primary-fixed": "#2e1500",
+                        "primary-fixed": "#ffdcc2",
+                        "on-tertiary-container": "#5c0005",
+                        "error-container": "#93000a",
+                        "on-tertiary": "#690007",
+                        "surface-container": "#201f1f",
+                        "surface-container-highest": "#353534",
+                        "surface-variant": "#353534",
+                        "on-surface-variant": "#d8c3b4",
+                        "on-background": "#e5e2e1",
+                        "tertiary-fixed-dim": "#ffb4ac",
+                        "secondary-container": "#005b14",
+                        "inverse-surface": "#e5e2e1",
+                        "secondary-fixed": "#a3f69c",
+                        "outline-variant": "#524439",
+                        "on-secondary": "#003909",
+                        "on-secondary-container": "#81d27c",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#88d982",
+                        "on-tertiary-fixed": "#410003",
+                        "background": "#131313",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#ffb77b",
+                        "tertiary": "#ffb4ac",
+                        "on-tertiary-fixed-variant": "#93000e",
+                        "on-primary-container": "#432100",
+                        "surface-tint": "#ffb77b",
+                        "primary-container": "#c8803f",
+                        "on-primary": "#4d2700",
+                        "inverse-primary": "#8c4f10",
+                        "surface-container-low": "#1c1b1b",
+                        "tertiary-fixed": "#ffdad6",
+                        "primary": "#ffb77b",
+                        "tertiary-container": "#ff544d",
+                        "on-secondary-fixed-variant": "#005312",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-dim": "#131313",
+                        "surface": "#131313"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    fontFamily: {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Space Grotesk", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Newsreader', serif; }
+        .font-label { font-family: 'Space Grotesk', sans-serif; }
+        .ghost-border { border: 1px solid rgba(82, 68, 57, 0.2); }
+        .glow-shadow { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 4px rgba(184, 115, 51, 0.05); }
+        .primary-gradient { background: linear-gradient(135deg, #FFB77B 0%, #C8803F 100%); }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface antialiased min-h-screen selection:bg-primary selection:text-on-primary">
+<!-- Top Navigation (Shell) -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-[#131313] bg-[#201F1F]">
+<div class="flex items-center gap-8">
+<span class="text-xl font-medium tracking-tight text-[#FFB77B] font-headline">BARBACK</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-[#FFB77B] border-b border-[#FFB77B] pb-1 font-label text-sm uppercase tracking-widest hover:text-[#FFB77B] transition-colors opacity-80 transition-opacity" href="#">Reports</a>
+<a class="text-zinc-500 font-label text-sm uppercase tracking-widest hover:text-[#FFB77B] transition-colors" href="#">Inventory</a>
+<a class="text-zinc-500 font-label text-sm uppercase tracking-widest hover:text-[#FFB77B] transition-colors" href="#">Venues</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-zinc-500 hover:text-[#FFB77B] transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-zinc-500 hover:text-[#FFB77B] transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="Operator Profile" class="w-8 h-8 rounded-full object-cover ghost-border" data-alt="Black and white portrait of a professional bartender looking directly at camera, high contrast" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJJlFspdZXeSOB3FZ0mII_WdC3O6xkcV_1QJ48ciCiiR09334_QQWAaTrzNIslrOMBEPZGVns930VAcymJ2fYtrJWdhI5zw7apmeMx3CPHGOufmnhxvFXtXE9pGlQw1Hwm72nxtVqtVvjaY1FNLgH_X7Yz3W9lARZOKOuNmXN0J3-EoV-VF41jiJl5wnZ_PxLjIX7ktQnKjSLLNPuAoadiTRpY4H3bBVMIt3HthKu6LBhxIr0fpcbhTZS5k-40RBuKjrICrfo6OVow"/>
+</div>
+</nav>
+<!-- Side Navigation (Shell) -->
+<aside class="hidden md:flex fixed left-0 top-16 h-[calc(100vh-64px)] w-64 flex-col p-4 bg-[#0E0E0E] border-r border-zinc-800/20">
+<div class="mb-8 px-2 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container flex items-center justify-center ghost-border">
+<span class="material-symbols-outlined text-primary text-xl">local_bar</span>
+</div>
+<div>
+<h2 class="font-headline font-semibold text-on-surface">Main Lounge</h2>
+<p class="font-label text-xs text-zinc-500 uppercase tracking-wider">Operator Workbench</p>
+</div>
+</div>
+<button class="primary-gradient text-on-primary-fixed rounded-sm px-4 py-2 mb-8 font-label text-sm uppercase tracking-widest font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+            New Report
+        </button>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2 text-zinc-400 hover:bg-[#131313] hover:text-zinc-200 rounded-sm transition-all group font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg group-hover:text-primary transition-colors">fiber_new</span>
+                Created
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-zinc-400 hover:bg-[#131313] hover:text-zinc-200 rounded-sm transition-all group font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg group-hover:text-primary transition-colors">sync</span>
+                Processing
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-[#FFB77B] bg-[#201F1F] rounded-sm translate-x-1 transition-transform font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">visibility_off</span>
+                Unreviewed
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-zinc-400 hover:bg-[#131313] hover:text-zinc-200 rounded-sm transition-all group font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg group-hover:text-primary transition-colors">verified</span>
+                Reviewed
+            </a>
+</nav>
+<div class="mt-auto flex flex-col gap-1 pt-4 border-t border-zinc-800/20">
+<a class="flex items-center gap-3 px-3 py-2 text-zinc-400 hover:bg-[#131313] hover:text-zinc-200 rounded-sm transition-all group font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">help_outline</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 px-3 py-2 text-zinc-400 hover:bg-[#131313] hover:text-zinc-200 rounded-sm transition-all group font-label text-sm uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined text-lg">history</span>
+                Logs
+            </a>
+</div>
+</aside>
+<!-- Main Workspace -->
+<main class="pt-16 md:pl-64 min-h-screen">
+<div class="p-8 max-w-[1600px] mx-auto space-y-8">
+<!-- Header -->
+<header class="flex justify-between items-end">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="font-label text-xs uppercase tracking-widest text-primary ghost-border px-2 py-1 rounded-sm flex items-center gap-1">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                            Unreviewed
+                        </span>
+<span class="font-label text-xs text-zinc-500 tracking-widest">REP-2023-11-A</span>
+</div>
+<h1 class="font-headline text-4xl text-on-surface">End of Shift Reconciliation</h1>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-2 rounded-sm ghost-border text-on-surface hover:bg-surface-container transition-colors font-label text-sm uppercase tracking-widest">Discard</button>
+<button class="primary-gradient text-on-primary-fixed px-6 py-2 rounded-sm font-label text-sm uppercase tracking-widest font-semibold hover:opacity-90 transition-opacity">Approve Report</button>
+</div>
+</header>
+<!-- Metrics Bar -->
+<div class="grid grid-cols-4 gap-1 bg-surface ghost-border rounded-sm p-1">
+<div class="bg-surface-container-low p-6 flex flex-col gap-2">
+<span class="font-label text-xs uppercase tracking-widest text-zinc-500">Total Variances</span>
+<span class="font-headline text-3xl text-primary">12</span>
+</div>
+<div class="bg-surface-container-low p-6 flex flex-col gap-2">
+<span class="font-label text-xs uppercase tracking-widest text-zinc-500">Net Impact</span>
+<span class="font-headline text-3xl text-error">-$142.50</span>
+</div>
+<div class="bg-surface-container-low p-6 flex flex-col gap-2">
+<span class="font-label text-xs uppercase tracking-widest text-zinc-500">System Confidence</span>
+<span class="font-headline text-3xl text-secondary">84%</span>
+</div>
+<div class="bg-surface-container-low p-6 flex flex-col gap-2">
+<span class="font-label text-xs uppercase tracking-widest text-zinc-500">Operator</span>
+<div class="flex items-center gap-3 mt-1">
+<img alt="Shift Lead" class="w-8 h-8 rounded-full object-cover" data-alt="Black and white professional headshot of a female manager in a dark environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC28w8xj0MMxDXlHao10ZZlD8n_LooXGjRQr7s7sAVtlC9IQLHt_gGiv-FQWvK7GBTvT0_BeRon9OC-eugMjX-_eBHnVuv0M3PZzYZ2TRrjTgRk13YBJjPBV06PsquF2njZqjLGYKomi7Aagbc8iqwjBFcGxGgELXF-X8vO_OEA1VSWLfaFpnHGGRY3cByDc4Thdv2hhX3lPpUW9Tgf99nJBZiaL62ebdO6mXftwnv7q_w8bBiJ1kZYBZmoxRu1UC3-o4SyWd78le6-"/>
+<span class="font-body text-sm font-medium text-on-surface">J. Davies</span>
+</div>
+</div>
+</div>
+<!-- Content Area: Side-by-Side Comparison -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Panel: Inferred Values -->
+<div class="col-span-5 bg-surface rounded-sm ghost-border p-6 flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-outline-variant/20 pb-4">
+<h3 class="font-headline text-xl text-on-surface">System Inference</h3>
+<span class="material-symbols-outlined text-zinc-500">memory</span>
+</div>
+<div class="space-y-4">
+<!-- Record Item -->
+<div class="p-4 bg-surface-container-lowest ghost-border rounded-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label text-xs uppercase tracking-widest text-zinc-400">SKU-892 • Grey Goose 1L</span>
+<span class="font-label text-xs text-secondary bg-secondary/10 px-2 py-0.5 rounded-sm">Match</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="font-body text-sm text-zinc-500">Closing Weight</span>
+<span class="font-headline text-xl">842g</span>
+</div>
+</div>
+<!-- Record Item (Variance) -->
+<div class="p-4 bg-surface-container-lowest ghost-border border-l-2 border-l-error rounded-sm relative overflow-hidden">
+<div class="absolute inset-0 bg-error/5 pointer-events-none"></div>
+<div class="flex justify-between items-start mb-2 relative z-10">
+<span class="font-label text-xs uppercase tracking-widest text-zinc-400">SKU-114 • Hendrick's 750ml</span>
+<span class="font-label text-xs text-error bg-error/10 px-2 py-0.5 rounded-sm">Variance</span>
+</div>
+<div class="flex justify-between items-baseline relative z-10">
+<span class="font-body text-sm text-zinc-500">Closing Weight</span>
+<span class="font-headline text-xl line-through text-zinc-500">420g</span>
+</div>
+<div class="flex justify-between items-baseline mt-1 relative z-10">
+<span class="font-body text-sm text-error">Expected</span>
+<span class="font-headline text-lg text-error">580g</span>
+</div>
+</div>
+<!-- Record Item -->
+<div class="p-4 bg-surface-container-lowest ghost-border rounded-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label text-xs uppercase tracking-widest text-zinc-400">SKU-442 • Maker's Mark 1L</span>
+<span class="font-label text-xs text-zinc-500 bg-surface-bright px-2 py-0.5 rounded-sm">Pending</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="font-body text-sm text-zinc-500">Closing Weight</span>
+<span class="font-headline text-xl">910g</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Center Divider -->
+<div class="col-span-2 flex flex-col items-center justify-center relative">
+<div class="absolute top-0 bottom-0 w-[1px] bg-outline-variant/20"></div>
+<div class="relative z-10 bg-surface-container-highest rounded-full p-2 ghost-border">
+<span class="material-symbols-outlined text-primary">arrow_forward</span>
+</div>
+</div>
+<!-- Right Panel: Operator Correction -->
+<div class="col-span-5 bg-surface-container rounded-sm ghost-border p-6 flex flex-col gap-6 relative">
+<div class="absolute inset-0 bg-primary/5 pointer-events-none rounded-sm"></div>
+<div class="flex items-center justify-between border-b border-primary/20 pb-4 relative z-10">
+<h3 class="font-headline text-xl text-primary">Operator Correction</h3>
+<span class="material-symbols-outlined text-primary">edit</span>
+</div>
+<div class="space-y-4 relative z-10">
+<!-- Correction Field -->
+<div class="p-4 bg-surface-container-lowest ghost-border rounded-sm opacity-50">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label text-xs uppercase tracking-widest text-zinc-500">SKU-892 • Grey Goose 1L</span>
+</div>
+<input class="w-full bg-transparent border-none text-right font-headline text-xl text-zinc-500 p-0 focus:ring-0" disabled="" type="text" value="842"/>
+</div>
+<!-- Active Correction Field -->
+<div class="p-4 bg-surface-container-lowest ghost-border border-b-primary rounded-sm glow-shadow">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label text-xs uppercase tracking-widest text-primary">SKU-114 • Hendrick's 750ml</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex-1 relative">
+<input class="w-full bg-surface border border-outline-variant/20 rounded-sm text-right font-headline text-xl text-on-surface p-3 focus:outline-none focus:border-primary focus:border-b-2 transition-all" type="number" value="420"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 font-label text-xs text-zinc-500">g</span>
+</div>
+<button class="p-3 bg-surface-bright rounded-sm ghost-border hover:text-primary transition-colors">
+<span class="material-symbols-outlined">check</span>
+</button>
+</div>
+<div class="mt-3">
+<input class="w-full bg-transparent border-b border-outline-variant/20 pb-1 text-sm font-body text-on-surface focus:outline-none focus:border-primary placeholder:text-zinc-600" placeholder="Add variance note..." type="text"/>
+</div>
+</div>
+<!-- Correction Field -->
+<div class="p-4 bg-surface-container-lowest ghost-border rounded-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label text-xs uppercase tracking-widest text-zinc-400">SKU-442 • Maker's Mark 1L</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex-1 relative">
+<input class="w-full bg-surface border border-outline-variant/20 rounded-sm text-right font-headline text-xl text-on-surface p-3 focus:outline-none focus:border-primary focus:border-b-2 transition-all" type="number" value="910"/>
+<span class="absolute right-3 top-1/2 -translate-y-1/2 font-label text-xs text-zinc-500">g</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

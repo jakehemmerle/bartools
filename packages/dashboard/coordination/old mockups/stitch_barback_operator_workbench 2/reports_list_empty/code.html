@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Barback - Reports</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#88d982",
+                        "outline-variant": "#524439",
+                        "tertiary-fixed": "#ffdad6",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#8c4f10",
+                        "background": "#131313",
+                        "on-primary-container": "#432100",
+                        "outline": "#a08d80",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-surface-variant": "#d8c3b4",
+                        "surface-bright": "#393939",
+                        "on-tertiary-fixed": "#410003",
+                        "on-primary-fixed-variant": "#6d3a00",
+                        "on-primary": "#4d2700",
+                        "on-background": "#e5e2e1",
+                        "on-error": "#690005",
+                        "on-secondary": "#003909",
+                        "surface": "#131313",
+                        "tertiary-container": "#ff544d",
+                        "on-surface": "#e5e2e1",
+                        "tertiary": "#ffb4ac",
+                        "surface-container-highest": "#353534",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-container": "#5c0005",
+                        "surface-container-low": "#1c1b1b",
+                        "on-tertiary-fixed-variant": "#93000e",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#88d982",
+                        "primary-fixed": "#ffdcc2",
+                        "surface-tint": "#ffb77b",
+                        "primary-fixed-dim": "#ffb77b",
+                        "tertiary-fixed-dim": "#ffb4ac",
+                        "on-primary-fixed": "#2e1500",
+                        "on-tertiary": "#690007",
+                        "secondary-fixed": "#a3f69c",
+                        "surface-variant": "#353534",
+                        "primary": "#ffb77b",
+                        "on-error-container": "#ffdad6",
+                        "primary-container": "#c8803f",
+                        "on-secondary-fixed": "#002204",
+                        "inverse-surface": "#e5e2e1",
+                        "on-secondary-fixed-variant": "#005312",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-high": "#2a2a2a",
+                        "secondary-container": "#005b14",
+                        "surface-dim": "#131313",
+                        "on-secondary-container": "#81d27c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Space Grotesk", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Newsreader', serif; }
+        .font-label { font-family: 'Space Grotesk', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-background min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-fixed">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-8 py-4 bg-[#131313] border-b border-white/5 z-50 sticky top-0">
+<div class="flex items-center gap-8">
+<a class="font-serif text-2xl font-bold tracking-tight text-[#B87333] hover:text-[#FFB77B] transition-colors" href="#">BARBACK</a>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-label text-sm uppercase tracking-wider text-neutral-400 font-medium hover:text-[#FFB77B] transition-colors" href="#">Dashboard</a>
+<a class="font-label text-sm uppercase tracking-wider text-[#B87333] border-b border-[#B87333] pb-1 hover:text-[#FFB77B] transition-colors" href="#">Reports</a>
+<a class="font-label text-sm uppercase tracking-wider text-neutral-400 font-medium hover:text-[#FFB77B] transition-colors" href="#">Venues</a>
+<a class="font-label text-sm uppercase tracking-wider text-neutral-400 font-medium hover:text-[#FFB77B] transition-colors" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="text-neutral-400 hover:text-[#FFB77B] transition-colors scale-95 duration-100 p-2">
+<span class="material-symbols-outlined">search</span>
+</button>
+<div class="h-8 w-8 rounded bg-surface-container-high border border-outline-variant/20 flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="close up professional headshot of a person looking forward slightly turned to side" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDo6gHPaj3I1TeHwBbDVjRt75uRnILXiKV5VtNgCGDnSQmKKIzZdwT-PDw7BGWTLvMwJ3PWqVij67etF-LMEC5Bfo8uo4BhXsiKthu0JlOcjjpC8WNYZwhagEGjUOcms9hjfMsI2AcsdEoCfZ-Xa3VMZ68D9xRnVrrXwUbe-DlDtLHzp8YZMBDJlT5_qKuJFa36hcjBj1NjtJhV0XhJHUQGZBx_bTtRMG483y_1z2smh2dztmqynmlZR1PVfIb5jtyfOwwZevjMDM33"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col p-8 md:p-12 lg:px-24 xl:px-32 max-w-[1600px] mx-auto w-full gap-12">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-outline-variant/20 pb-8">
+<div class="space-y-2">
+<h1 class="font-headline text-5xl md:text-6xl text-on-surface">Reports</h1>
+<p class="font-body text-on-surface-variant text-lg">Daily operations and financial summaries.</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-surface-container border border-outline-variant/20 text-on-surface px-6 py-3 rounded-sm font-label text-sm uppercase tracking-wider hover:bg-surface-bright transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                    Filter
+                </button>
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary-fixed px-6 py-3 rounded-sm font-label text-sm uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center gap-2 shadow-[0_4px_14px_rgba(184,115,51,0.2)]">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New Report
+                </button>
+</div>
+</div>
+<!-- Filters / Context Bar -->
+<div class="bg-surface-container px-6 py-4 rounded flex flex-wrap items-center gap-6 border border-outline-variant/10">
+<div class="flex items-center gap-3">
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Venue</span>
+<select class="bg-transparent border-b border-outline-variant/30 text-on-surface font-body text-sm py-1 focus:outline-none focus:border-primary focus:ring-0 w-48 rounded-none appearance-none">
+<option class="bg-surface text-on-surface">The Continental Lounge</option>
+<option class="bg-surface text-on-surface">Main Bar</option>
+<option class="bg-surface text-on-surface">Rooftop</option>
+</select>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Date Range</span>
+<button class="flex items-center gap-2 text-on-surface font-body text-sm py-1 border-b border-outline-variant/30 hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                    Today
+                </button>
+</div>
+<div class="flex items-center gap-3 ml-auto">
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Status</span>
+<div class="flex gap-2">
+<button class="px-3 py-1 rounded bg-surface-bright text-on-surface font-label text-xs uppercase tracking-wider border border-outline-variant/20">All</button>
+<button class="px-3 py-1 rounded bg-transparent text-on-surface-variant font-label text-xs uppercase tracking-wider hover:bg-surface-container-high border border-transparent transition-colors">Drafts</button>
+</div>
+</div>
+</div>
+<!-- Empty State Module -->
+<div class="flex-grow flex items-center justify-center min-h-[400px]">
+<div class="flex flex-col items-center text-center max-w-md space-y-6">
+<div class="w-24 h-24 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/10 shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant opacity-50 font-light" style="font-variation-settings: 'wght' 200;">description</span>
+</div>
+<div class="space-y-3">
+<h2 class="font-headline text-3xl text-on-surface">No Records Present</h2>
+<p class="font-body text-on-surface-variant text-sm leading-relaxed">
+                        No reports found for this venue context within the selected timeframe. Operations are nominal. Adjust filters to search archives.
+                    </p>
+</div>
+<button class="mt-4 text-primary font-label text-xs uppercase tracking-widest hover:text-primary-container transition-colors border-b border-primary/30 pb-1 hover:border-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+                    Reset Context
+                </button>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="flex justify-between items-center w-full px-8 py-6 border-t border-white/5 opacity-50 bg-[#0E0E0E] mt-auto">
+<div class="font-mono text-[10px] tracking-widest uppercase text-neutral-600">
+            © BARBACK OPERATIONAL SYSTEMS
+        </div>
+<div class="flex gap-6">
+<a class="font-mono text-[10px] tracking-widest uppercase text-neutral-600 hover:text-neutral-300 transition-colors" href="#">Status</a>
+<a class="font-mono text-[10px] tracking-widest uppercase text-neutral-600 hover:text-neutral-300 transition-colors" href="#">Documentation</a>
+<a class="font-mono text-[10px] tracking-widest uppercase text-neutral-600 hover:text-neutral-300 transition-colors" href="#">Support</a>
+</div>
+</footer>
+</body></html>

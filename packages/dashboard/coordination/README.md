@@ -23,6 +23,8 @@ Use this directory for:
 - `fixture-schema-strategy.md` — fixture and scenario validation strategy, including planned Zod usage
 - `testing-strategy.md` — testing layers, recommended tooling, and minimum test bar by implementation phase
 - `readiness.md` — implementation readiness gate and current go/no-go assessment
+- `stitch_handoff_selection.md` — canonical mockup winners, locked design decisions, and mockup defects to correct or ignore
+- `stitch_prompt_v4_3_handoff.md` — constrained Stitch prompt for a final handoff-oriented cleanup pass
 
 ## Working Agreement
 

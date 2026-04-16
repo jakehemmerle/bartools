@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Barback - Report Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#88d982",
+                      "outline-variant": "#524439",
+                      "tertiary-fixed": "#ffdad6",
+                      "error-container": "#93000a",
+                      "inverse-primary": "#8c4f10",
+                      "background": "#131313",
+                      "on-primary-container": "#432100",
+                      "outline": "#a08d80",
+                      "surface-container-lowest": "#0e0e0e",
+                      "on-surface-variant": "#d8c3b4",
+                      "surface-bright": "#393939",
+                      "on-tertiary-fixed": "#410003",
+                      "on-primary-fixed-variant": "#6d3a00",
+                      "on-primary": "#4d2700",
+                      "on-background": "#e5e2e1",
+                      "on-error": "#690005",
+                      "on-secondary": "#003909",
+                      "surface": "#131313",
+                      "tertiary-container": "#ff544d",
+                      "on-surface": "#e5e2e1",
+                      "tertiary": "#ffb4ac",
+                      "surface-container-highest": "#353534",
+                      "surface-container": "#201f1f",
+                      "on-tertiary-container": "#5c0005",
+                      "surface-container-low": "#1c1b1b",
+                      "on-tertiary-fixed-variant": "#93000e",
+                      "error": "#ffb4ab",
+                      "secondary-fixed-dim": "#88d982",
+                      "primary-fixed": "#ffdcc2",
+                      "surface-tint": "#ffb77b",
+                      "primary-fixed-dim": "#ffb77b",
+                      "tertiary-fixed-dim": "#ffb4ac",
+                      "on-primary-fixed": "#2e1500",
+                      "on-tertiary": "#690007",
+                      "secondary-fixed": "#a3f69c",
+                      "surface-variant": "#353534",
+                      "primary": "#ffb77b",
+                      "on-error-container": "#ffdad6",
+                      "primary-container": "#c8803f",
+                      "on-secondary-fixed": "#002204",
+                      "inverse-surface": "#e5e2e1",
+                      "on-secondary-fixed-variant": "#005312",
+                      "inverse-on-surface": "#313030",
+                      "surface-container-high": "#2a2a2a",
+                      "secondary-container": "#005b14",
+                      "surface-dim": "#131313",
+                      "on-secondary-container": "#81d27c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Newsreader", "serif"
+                      ],
+                      "body": [
+                              "Inter", "sans-serif"
+                      ],
+                      "label": [
+                              "Space Grotesk", "sans-serif"
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        /* Custom Gradient for Primary Button as per Design System */
+        .btn-primary-gradient {
+            background: linear-gradient(135deg, #FFB77B 0%, #C8803F 100%);
+        }
+        
+        /* Copper Glow Shadow for floating elements */
+        .copper-glow-shadow {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 4px rgba(184, 115, 51, 0.05);
+        }
+
+        /* Ghost Border fallback */
+        .ghost-border {
+            border: 1px solid rgba(82, 68, 57, 0.2);
+        }
+
+        /* Status Chip Ghost Border */
+        .status-chip-border {
+            border: 1px solid rgba(82, 68, 57, 0.2);
+        }
+
+        /* Input Bottom Border Focus */
+        .input-focus-border:focus {
+            border-bottom: 1px solid #FFB77B;
+            outline: none;
+            box-shadow: none;
+        }
+
+        /* Custom Scrollbar for a premium feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0e0e0e; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #393939; 
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-fixed">
+<!-- TopAppBar Component from JSON -->
+<header class="flex justify-between items-center w-full px-8 py-4 bg-[#131313] border-b border-white/5 top-0 z-50">
+<div class="flex items-center gap-6">
+<span class="font-headline text-2xl font-bold tracking-tight text-[#B87333]">BARBACK</span>
+<nav class="hidden md:flex items-center gap-6 ml-8">
+<a class="text-[#B87333] border-b border-[#B87333] pb-1 font-label text-sm uppercase tracking-widest hover:text-[#FFB77B] transition-colors scale-95 duration-100" href="#">Back</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<!-- Search bar hidden per JSON, omitted -->
+<button class="text-neutral-400 hover:text-[#FFB77B] transition-colors p-2 rounded-DEFAULT hover:bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="close up portrait of a serious bartender in a dimlit high end lounge" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnwMNTwnuxHUyLypj-I9tLFu-N1l9vKQM-r-eJcdEMV-FQJymYH7ad-lL95dOl33YUF3xqTDbHmGvzzvZyOazUWJmWSx6SGBpjurVcgu0RrkYSccVBo2H4Qs5HxHU2G_r7F6pPEZeGRbNgE11UyTsAeilp9_DbYWqXWAIWNetotUAk-rNPyIQ9l8c6dvkYyy7FNMvrehKVA79haA2FCT8stJVKjt5CclBChwUxfm00xUG_FXkFiD_kGIqquwQBjz48a5nCP8TYlMVT"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col px-4 md:px-12 lg:px-24 py-12 gap-12 bg-surface">
+<!-- Report Header Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
+<div class="flex flex-col gap-3 max-w-3xl">
+<!-- Status Chip -->
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-DEFAULT status-chip-border bg-transparent w-fit">
+<div class="w-1.5 h-1.5 rounded-full bg-error"></div>
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Processing • 4 Failed Records</span>
+</div>
+<h1 class="font-headline text-5xl md:text-6xl text-on-surface font-normal leading-tight">
+                    End of Shift Reconciliation
+                </h1>
+<div class="flex items-center gap-4 font-label text-sm text-outline uppercase tracking-wider mt-2">
+<span>ID: REC-2023-11-24-A</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>Nov 24, 2023</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>Operator: J. Doe</span>
+</div>
+</div>
+<div class="flex gap-4 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-6 py-3 rounded-sm ghost-border bg-surface-container text-on-surface font-label text-sm uppercase tracking-wider hover:bg-surface-bright transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0;">download</span>
+                    Export
+                </button>
+<button class="flex-1 md:flex-none px-6 py-3 rounded-sm btn-primary-gradient text-on-primary-fixed font-label text-sm uppercase tracking-wider font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">done_all</span>
+                    Resolve All
+                </button>
+</div>
+</section>
+<!-- Metric Blocks Row -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-1">
+<!-- Asymmetric layout: Using background shifts instead of borders -->
+<div class="bg-surface-container p-6 flex flex-col justify-between min-h-[140px]">
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Total Scanned</span>
+<span class="font-headline text-4xl text-on-surface mt-4">1,402</span>
+</div>
+<div class="bg-surface-container p-6 flex flex-col justify-between min-h-[140px]">
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Successful</span>
+<span class="font-headline text-4xl text-secondary mt-4">1,398</span>
+</div>
+<div class="bg-surface-container-highest p-6 flex flex-col justify-between min-h-[140px] border-l-2 border-error">
+<span class="font-label text-xs uppercase tracking-widest text-error">Failed Records</span>
+<span class="font-headline text-4xl text-error mt-4">4</span>
+</div>
+<div class="bg-surface-container p-6 flex flex-col justify-between min-h-[140px]">
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Variance</span>
+<span class="font-headline text-4xl text-on-surface mt-4">-$42.50</span>
+</div>
+</section>
+<!-- Failed Records Emphasis Section -->
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-white/5 pb-4">
+<h2 class="font-headline text-2xl text-error flex items-center gap-3">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+                    Attention Required
+                </h2>
+<span class="font-label text-xs uppercase tracking-widest text-on-surface-variant">4 Items</span>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Failed Record Card 1 -->
+<div class="bg-surface-container-low p-6 rounded-DEFAULT ghost-border relative overflow-hidden group">
+<!-- Subtle red accent glow for failure -->
+<div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<div class="font-label text-xs uppercase tracking-widest text-error mb-2">Error 401</div>
+<h3 class="font-headline text-xl text-on-surface">Label Unreadable</h3>
+</div>
+<span class="font-label text-xs uppercase tracking-widest text-outline-variant bg-surface-container px-2 py-1 rounded-sm">Bottle ID: Unk</span>
+</div>
+<div class="flex gap-4 mb-6">
+<div class="w-24 h-32 bg-surface-container-highest rounded-sm overflow-hidden flex-shrink-0 border border-error/30 relative">
+<!-- Overlay to indicate unreadable state -->
+<div class="absolute inset-0 bg-error/10 z-10 flex items-center justify-center backdrop-blur-[1px]">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 0;">blur_on</span>
+</div>
+<img alt="Unreadable Bottle Label" class="w-full h-full object-cover opacity-50 grayscale" data-alt="close up of a blurry liquor bottle label in a dark setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwRwK8ZgKRg1LLyzewvf0QrGKakgP4gFYqGAm2w6rTP6KAJSB-KUIU3LcFClajrTiK3GZgGudtunVSnQLbk9Fo8U7SsrxgtBNZdBeBedLm19Y-eS0wKzsbd51vrWCDe1qz84XHWOBcKd5YK6EeKV0ilKpkMuSsjOC6ouoI5qPisKW3zlUB06K28onr5E71XiI7jxsGGHmB069srTftytssqSGhieWxMItj8lL3rTwQzHT1_0wFaZTB7HprXm4zS2nzOkFQGfyMdzEq"/>
+</div>
+<div class="flex flex-col justify-center gap-2">
+<p class="font-body text-sm text-on-surface-variant">The optical scanner could not resolve the label text due to physical damage or glare. Manual intervention required to confirm inventory count.</p>
+<div class="font-label text-xs uppercase tracking-widest text-outline mt-2">Timestamp: 02:14 AM</div>
+</div>
+</div>
+<div class="flex gap-3 pt-4 border-t border-white/5">
+<button class="px-4 py-2 bg-surface text-on-surface font-label text-xs uppercase tracking-wider rounded-sm ghost-border hover:bg-surface-bright transition-colors flex-1">
+                            Ignore
+                        </button>
+<button class="px-4 py-2 bg-error text-on-error font-label text-xs uppercase tracking-wider rounded-sm hover:opacity-90 transition-opacity flex-[2]">
+                            Manual Entry
+                        </button>
+</div>
+</div>
+<!-- Failed Record Card 2 -->
+<div class="bg-surface-container-low p-6 rounded-DEFAULT ghost-border relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<div class="font-label text-xs uppercase tracking-widest text-error mb-2">Error 302</div>
+<h3 class="font-headline text-xl text-on-surface">Weight Variance Anomaly</h3>
+</div>
+<span class="font-label text-xs uppercase tracking-widest text-outline-variant bg-surface-container px-2 py-1 rounded-sm">Bottle ID: MAC-12</span>
+</div>
+<div class="flex gap-4 mb-6">
+<div class="w-24 h-32 bg-surface-container-highest rounded-sm overflow-hidden flex-shrink-0 ghost-border relative">
+<img alt="Macallan 12 Bottle" class="w-full h-full object-cover" data-alt="close up of a premium whiskey bottle on a dark wood bar counter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBb_mQFWUwOB-lbrf-zyN441cVO86fIWXpNzAnPtiWzJREpG46wZlR07FsNHYQBRw6B0Jem3FBLD4R6-WGp7b_AS7RYsHNEisfabMz1xEF7o9iI61fU_uFDOeuRy6PM_yniH4F8kfksJz9jeXaZsY8h-o96ClKcGzz69RZZR0SlWzXLIpi3TOWmHhjFnkp9DRfzZrLLjjvkT0UabajR9sGepRSwEydKqzKPU4bZxHG727CnOkP9frUGoxnPUhetmjJGyU_CGg1d4lva"/>
+</div>
+<div class="flex flex-col gap-3 w-full">
+<div class="flex justify-between items-end border-b border-white/5 pb-2">
+<span class="font-label text-xs uppercase tracking-widest text-outline">Expected Weight</span>
+<span class="font-body text-sm text-on-surface">850g</span>
+</div>
+<div class="flex justify-between items-end border-b border-white/5 pb-2">
+<span class="font-label text-xs uppercase tracking-widest text-error">Measured Weight</span>
+<span class="font-body text-sm text-error font-medium">420g</span>
+</div>
+<p class="font-body text-xs text-on-surface-variant mt-1">Variance exceeds 50% threshold for this sku.</p>
+</div>
+</div>
+<div class="flex gap-3 pt-4 border-t border-white/5">
+<button class="px-4 py-2 bg-surface text-on-surface font-label text-xs uppercase tracking-wider rounded-sm ghost-border hover:bg-surface-bright transition-colors flex-1">
+                            Flag for Review
+                        </button>
+<button class="px-4 py-2 bg-error text-on-error font-label text-xs uppercase tracking-wider rounded-sm hover:opacity-90 transition-opacity flex-[2]">
+                            Adjust Inventory
+                        </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Contextual Log (Editorial Style) -->
+<section class="mt-8 border-t border-white/5 pt-12">
+<h3 class="font-headline text-xl text-on-surface mb-8">System Activity Log</h3>
+<div class="flex flex-col gap-1 max-w-4xl">
+<!-- Log Entry 1 -->
+<div class="grid grid-cols-[100px_1fr] md:grid-cols-[150px_1fr_200px] gap-4 p-4 hover:bg-surface-container transition-colors rounded-sm group items-center">
+<span class="font-label text-xs uppercase tracking-widest text-outline-variant group-hover:text-primary transition-colors">02:15 AM</span>
+<span class="font-body text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Reconciliation scan initiated by Operator J. Doe.</span>
+<span class="font-label text-xs uppercase tracking-widest text-outline text-right hidden md:block">System</span>
+</div>
+<!-- Log Entry 2 -->
+<div class="grid grid-cols-[100px_1fr] md:grid-cols-[150px_1fr_200px] gap-4 p-4 hover:bg-surface-container transition-colors rounded-sm group items-center bg-surface-container-low">
+<span class="font-label text-xs uppercase tracking-widest text-error group-hover:text-error transition-colors">02:18 AM</span>
+<span class="font-body text-sm text-error group-hover:text-error transition-colors">Optical sensor failed to resolve 3 consecutive labels in Section B.</span>
+<span class="font-label text-xs uppercase tracking-widest text-outline text-right hidden md:block">Hardware</span>
+</div>
+<!-- Log Entry 3 -->
+<div class="grid grid-cols-[100px_1fr] md:grid-cols-[150px_1fr_200px] gap-4 p-4 hover:bg-surface-container transition-colors rounded-sm group items-center">
+<span class="font-label text-xs uppercase tracking-widest text-outline-variant group-hover:text-primary transition-colors">02:22 AM</span>
+<span class="font-body text-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Scan completed. Report compiled with 4 flagged exceptions.</span>
+<span class="font-label text-xs uppercase tracking-widest text-outline text-right hidden md:block">System</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component from JSON -->
+<footer class="flex justify-between items-center w-full px-8 py-6 border-t border-white/5 opacity-50 bg-[#0E0E0E] bottom-0 mt-12">
+<div class="text-[10px] font-mono tracking-widest uppercase text-neutral-600">
+            © BARBACK OPERATIONAL SYSTEMS
+        </div>
+<nav class="flex gap-6">
+<a class="text-[10px] font-mono tracking-widest uppercase text-neutral-600 hover:text-neutral-300 transition-colors" href="#">Status</a>
+<a class="text-[10px] font-mono tracking-widest uppercase text-neutral-600 hover:text-neutral-300 transition-colors" href="#">Documentation</a>
+<a class="text-[10px] font-mono tracking-widest uppercase text-neutral-600 hover:text-neutral-300 transition-colors" href="#">Support</a>
+</nav>
+</footer>
+</body></html>
