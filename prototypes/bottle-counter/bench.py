@@ -15,9 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import queue
 import statistics
-import threading
 import time
 from pathlib import Path
 
@@ -25,12 +23,9 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 
-from count import (
-    _PREVIEW_SENTINEL,
-    draw_overlay_lite,
-    parse_imgsz,
-    score_detection,
-)
+from pipeline import parse_imgsz
+from preview import PreviewSink
+from scoring import score_detection
 
 HERE = Path(__file__).parent
 DEFAULT_CLIP = HERE / "bench_clip.mp4"
@@ -49,10 +44,7 @@ def run_one_pass(model, clip, imgsz, device, half, do_io, do_annotate,
     t_infer, t_postproc, t_scoring, t_io, t_annotate = [], [], [], [], []
     finalize_ms = 0.0
 
-    writer = None
-    preview_q = None
-    preview_thread = None
-    ph = pw = 0
+    sink: PreviewSink | None = None
     if do_annotate:
         cap = cv2.VideoCapture(str(clip))
         W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -61,30 +53,7 @@ def run_one_pass(model, clip, imgsz, device, half, do_io, do_annotate,
         cap.release()
         pw, ph = 720, int(H * 720 / W)
         if ph % 2: ph += 1
-        out_path = io_dir / "_bench_preview.mp4"
-        writer = cv2.VideoWriter(
-            str(out_path), cv2.VideoWriter_fourcc(*"mp4v"), fps, (pw, ph)
-        )
-
-        preview_q = queue.Queue(maxsize=8)
-
-        def _worker():
-            while True:
-                item = preview_q.get()
-                if item is _PREVIEW_SENTINEL:
-                    break
-                annotated = draw_overlay_lite(
-                    item["frame"], item["xyxy"], item["ids"],
-                    item["confs"], item["masks"],
-                )
-                if annotated.shape[:2] != (ph, pw):
-                    annotated = cv2.resize(
-                        annotated, (pw, ph), interpolation=cv2.INTER_AREA
-                    )
-                writer.write(annotated)
-
-        preview_thread = threading.Thread(target=_worker, daemon=True)
-        preview_thread.start()
+        sink = PreviewSink(io_dir / "_bench_preview.mp4", fps, (pw, ph))
 
     common = dict(
         source=str(clip), stream=True, classes=[BOTTLE_CLASS_ID],
@@ -114,8 +83,8 @@ def run_one_pass(model, clip, imgsz, device, half, do_io, do_annotate,
         t1 = time.perf_counter()
 
         # --- ANNOTATE ---
-        if preview_q is not None:
-            preview_q.put({
+        if sink is not None:
+            sink.submit({
                 "frame": r.orig_img.copy(),
                 "xyxy":  xyxy if has_dets else np.zeros((0, 4), dtype=np.int32),
                 "ids":   ids,
@@ -178,13 +147,10 @@ def run_one_pass(model, clip, imgsz, device, half, do_io, do_annotate,
         t_io.append((t4 - t3) * 1000)
         t_prev_end = t4
 
-    if preview_q is not None:
+    if sink is not None:
         t_fin = time.perf_counter()
-        preview_q.put(_PREVIEW_SENTINEL)
-        preview_thread.join()
+        sink.close()
         finalize_ms = (time.perf_counter() - t_fin) * 1000
-    if writer is not None:
-        writer.release()
 
     return {
         "infer":    t_infer,
