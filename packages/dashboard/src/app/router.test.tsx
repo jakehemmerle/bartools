@@ -15,6 +15,6 @@ describe('app routing', () => {
   it('keeps reports detail routes active', async () => {
     renderAppRoutes({ initialEntries: ['/reports/report-1002'] })
 
-    expect(await screen.findByRole('heading', { name: 'Report report-1002' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Report 1002' })).toBeInTheDocument()
   })
 })
