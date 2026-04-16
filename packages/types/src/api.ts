@@ -14,7 +14,10 @@ export type ReportListItem = {
   completedAt?: string;
   userId?: string;
   userDisplayName?: string;
+  locationName?: string;
   bottleCount: number;
+  photoCount: number;
+  processedCount: number;
   status: ReportStatus;
 };
 
