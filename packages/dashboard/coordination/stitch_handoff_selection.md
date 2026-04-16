@@ -31,20 +31,20 @@ If a mockup conflicts with backend or mobile truth, the mockup loses.
 
 ## Handoff Verdict
 
-As of the `stitch 4-2d` pass, the selected comparison and failed-detail screens are now strong enough for cross-team handoff.
+The approved screen set has been consolidated into `golden-set-approved/`.
 
 The current recommendation is:
 
-- use the `4-2d` final screens as the preferred visual reference for failed and comparison-heavy detail states
-- keep this document, not Stitch-generated markdown, as the canonical handoff explanation
+- use `golden-set-approved/` as the preferred visual reference bundle
+- keep this document as the canonical handoff explanation
 
 Why this matters:
 
-- the `4-2d` screens are visually aligned with the dark-first BARBACK direction
+- the approved screens are visually aligned with the dark-first BARBACK direction
 - the worst fake-product copy has been removed
 - the per-record submit buttons are gone
 - the remaining action model is close enough to backend truth to implement carefully
-- the Stitch-generated handoff markdown still contains unresolved placeholder references and should not be treated as source of truth
+- the bundle now lives in one stable repo location instead of being scattered across multiple Stitch export passes
 
 ## Canonical Screen Winners
 
@@ -53,30 +53,30 @@ These are the screens we should treat as the current winners.
 ### Entry And List
 
 - Entry surface:
-  `stitch_reports_workbench 4-2/reports_workbench_entry`
+  `golden-set-approved/reports_workbench_entry`
 - Reports list:
-  `stitch_reports_workbench 4-2/reports_list`
+  `golden-set-approved/reports_list`
 - Reports list empty state:
-  `stitch 4-2a/reports_list_empty_state`
+  `golden-set-approved/reports_list_empty_state`
 - Blocked state:
-  `stitch_reports_workbench 4-2/report_detail_blocked_state`
+  `golden-set-approved/report_detail_blocked_state`
 - Not found state:
-  `stitch_reports_workbench 4-2/report_detail_not_found_state`
+  `golden-set-approved/report_detail_not_found_state`
 
 ### Detail States
 
 - Created:
-  `stitch_reports_workbench 4-2/report_detail_created`
+  `golden-set-approved/report_detail_created`
 - Processing:
-  `stitch 4-2a/report_detail_processing`
+  `golden-set-approved/report_detail_processing`
 - Unreviewed:
-  `stitch 4-2b/report_detail_unreviewed_revised`
+  `golden-set-approved/report_detail_unreviewed_revised`
 - Reviewed:
-  `stitch 4-2b/report_detail_reviewed_revised`
+  `golden-set-approved/report_detail_reviewed_revised`
 - Comparison emphasis:
-  `stitch 4-2d/report_detail_comparison_emphasis_final`
+  `golden-set-approved/report_detail_comparison_emphasis_final`
 - Failed emphasis:
-  `stitch 4-2d/report_detail_failed_emphasis_final`
+  `golden-set-approved/report_detail_failed_emphasis_final`
 
 ## Locked Design Decisions
 
@@ -159,7 +159,7 @@ These issues are still present in the selected exports and should not be mistake
 
 ### Failed Emphasis Screen
 
-In `stitch 4-2d/report_detail_failed_emphasis_final`:
+In `golden-set-approved/report_detail_failed_emphasis_final`:
 
 - the page now matches the dark-first BARBACK family much better
 - per-record submit buttons are gone, which is a major improvement
@@ -168,19 +168,11 @@ In `stitch 4-2d/report_detail_failed_emphasis_final`:
 
 ### Comparison Emphasis Screen
 
-In `stitch 4-2d/report_detail_comparison_emphasis_final`:
+In `golden-set-approved/report_detail_comparison_emphasis_final`:
 
 - visible UI is handoff-ready
 - the original-versus-corrected presentation is clear and restrained
 - internal HTML comments still say `fillPercent`, but that is not user-facing and should not drive product language
-
-### Stitch-Generated Markdown
-
-In `stitch 4-2d/barback_handoff_selection_design_decisions.md`:
-
-- the document contains unresolved `{{DATA:SCREEN:...}}` placeholders
-- treat it as generated project residue, not as a handoff artifact
-- use this repo-side coordination document when sharing rationale with the other team
 
 ## What The Other Team Should Be Able To See Immediately
 

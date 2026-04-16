@@ -47,17 +47,9 @@ The `images/` folder contains the same screens with stable filenames:
 
 ## Source Mapping
 
-- `reports_workbench_entry` came from `stitch_reports_workbench 4-2`
-- `reports_list` came from `stitch_reports_workbench 4-2`
-- `reports_list_empty_state` came from `stitch 4-2a`
-- `report_detail_created` came from `stitch_reports_workbench 4-2`
-- `report_detail_processing` came from `stitch 4-2a`
-- `report_detail_unreviewed_revised` came from `stitch 4-2b`
-- `report_detail_reviewed_revised` came from `stitch 4-2b`
-- `report_detail_comparison_emphasis_final` came from `stitch 4-2d`
-- `report_detail_failed_emphasis_final` came from `stitch 4-2d`
-- `report_detail_blocked_state` came from `stitch_reports_workbench 4-2`
-- `report_detail_not_found_state` came from `stitch_reports_workbench 4-2`
+These screens were selected from earlier Stitch exploration passes and consolidated here as the approved set.
+
+The historical export folders were intentionally removed after consolidation so this folder can act as the single reliable visual source.
 
 ## Note
 
