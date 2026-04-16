@@ -50,10 +50,10 @@ const readiness: ReportsIntegrationReadiness = {
   backendEnabled: false,
   blockedReason: 'venue_auth_context_required',
   message:
-    'Live report loading is waiting on venue and user context from the backend.',
+    'Live report access requires venue and user context. Review submission requires user context.',
 }
 
-const bottleSearchFixture: BottleSearchResult[] = [
+export const fixtureBottleSearchResults: BottleSearchResult[] = [
   {
     id: 'bottle-1',
     name: "Tito's Handmade Vodka",
@@ -84,7 +84,7 @@ const bottleSearchFixture: BottleSearchResult[] = [
   },
 ]
 
-const locationFixture: LocationListItem[] = [
+export const fixtureLocationListItems: LocationListItem[] = [
   { id: 'location-1', name: 'Main Bar', createdAt: '2026-04-01T12:00:00-05:00' },
   { id: 'location-2', name: 'Back Bar', createdAt: '2026-04-01T12:00:00-05:00' },
 ]
@@ -194,7 +194,7 @@ export function createFixtureReportsClient(): ReportsClient {
           throw new Error(`Missing review decision for record: ${record.id}`)
         }
 
-        const matchedBottle = bottleSearchFixture.find(
+        const matchedBottle = fixtureBottleSearchResults.find(
           (bottle) => bottle.id === reviewRecord.bottleId,
         )
 
@@ -262,14 +262,14 @@ export function createFixtureReportsClient(): ReportsClient {
       }
 
       return cloneValue(
-        bottleSearchFixture.filter((bottle) =>
+        fixtureBottleSearchResults.filter((bottle) =>
           `${bottle.name} ${bottle.upc ?? ''}`.toLowerCase().includes(normalizedQuery),
         ),
       )
     },
     async listVenueLocations(venueId) {
       void venueId
-      return cloneValue(locationFixture)
+      return cloneValue(fixtureLocationListItems)
     },
   }
 }
