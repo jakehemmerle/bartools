@@ -6,17 +6,23 @@ import { ReportsListRow } from './reports-list-row'
 import { buildReportListRows } from '../view-models/report-list-view'
 
 type ReportsListScreenProps = {
+  errorMessage?: string | null
   reports: ReportListItem[] | null
 }
 
-export function ReportsListScreen({ reports }: ReportsListScreenProps) {
+export function ReportsListScreen({ errorMessage = null, reports }: ReportsListScreenProps) {
   const rows = reports ? buildReportListRows(reports) : []
 
   return (
     <div className="bb-reports-screen">
       <ReportsListHeader />
 
-      {reports === null ? (
+      {errorMessage ? (
+        <SurfaceCard className="bb-loading-panel" tone="low">
+          <p className="bb-loading-panel__eyebrow">Reports Unavailable</p>
+          <p className="bb-loading-panel__body">{errorMessage}</p>
+        </SurfaceCard>
+      ) : reports === null ? (
         <SurfaceCard className="bb-loading-panel" tone="low">
           <p className="bb-loading-panel__eyebrow">Reports</p>
           <p className="bb-loading-panel__body">Loading recent reports.</p>

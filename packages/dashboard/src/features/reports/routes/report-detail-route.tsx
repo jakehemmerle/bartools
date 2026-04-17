@@ -11,6 +11,7 @@ import {
   createReportStreamViewState,
 } from '../../../lib/reports/stream'
 import { useReportsClient } from '../../../lib/reports/provider'
+import { ReportLoadErrorScreen } from '../components/report-load-error-screen'
 import { ReportDetailScreen } from '../components/report-detail-screen'
 import { ReportNotFoundScreen } from '../components/report-not-found-screen'
 
@@ -25,6 +26,7 @@ export function ReportDetailRoute() {
   const [detailState, setDetailState] = useState<{
     detail: ReportDetail | null
     reportId: string
+    status: 'error' | 'loaded'
   } | null>(null)
   const [reviewDraft, setReviewDraft] = useState<ReportReviewRecordDraft[]>([])
   const [searchState, setSearchState] = useState<Record<string, RecordSearchState>>({})
@@ -33,33 +35,49 @@ export function ReportDetailRoute() {
     let cancelled = false
     let unsubscribe: () => void = () => undefined
 
-    void client.getReport(reportId).then((detail) => {
-      if (cancelled) {
-        return
-      }
+    void client
+      .getReport(reportId)
+      .then((detail) => {
+        if (cancelled) {
+          return
+        }
 
-      setDetailState({ reportId, detail })
-      setReviewDraft(detail ? createReportReviewDraft(detail) : [])
-      setSearchState({})
-
-      if (detail) {
-        unsubscribe = client.streamReport(reportId, (event) => {
-          setDetailState((currentState) => {
-            if (!currentState?.detail) {
-              return currentState
-            }
-
-            return {
-              reportId: currentState.reportId,
-              detail: applyReportStreamEvent(
-                createReportStreamViewState(currentState.detail),
-                event,
-              ).detail,
-            }
-          })
+        setDetailState({
+          detail,
+          reportId,
+          status: 'loaded',
         })
-      }
-    })
+        setReviewDraft(detail ? createReportReviewDraft(detail) : [])
+        setSearchState({})
+
+        if (detail) {
+          unsubscribe = client.streamReport(reportId, (event) => {
+            setDetailState((currentState) => {
+              if (!currentState?.detail) {
+                return currentState
+              }
+
+              return {
+                reportId: currentState.reportId,
+                detail: applyReportStreamEvent(
+                  createReportStreamViewState(currentState.detail),
+                  event,
+                ).detail,
+                status: currentState.status,
+              }
+            })
+          })
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDetailState({
+            detail: null,
+            reportId,
+            status: 'error',
+          })
+        }
+      })
 
     return () => {
       cancelled = true
@@ -69,6 +87,10 @@ export function ReportDetailRoute() {
 
   if (!detailState || detailState.reportId !== reportId) {
     return <div className="bb-loading-route">Loading report.</div>
+  }
+
+  if (detailState.status === 'error') {
+    return <ReportLoadErrorScreen />
   }
 
   if (!detailState.detail) {

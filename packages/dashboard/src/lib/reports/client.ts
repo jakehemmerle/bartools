@@ -10,8 +10,10 @@ import { baseReportsScenario } from './base-scenario'
 import { sortReportsNewestFirst } from '../reports-view'
 
 export type ReportsIntegrationReadiness = {
-  backendEnabled: false
-  blockedReason: 'venue_auth_context_required'
+  backendEnabled: boolean
+  blockedReason:
+    | 'venue_auth_context_required'
+    | 'review_submission_requires_user_context'
   message: string
 }
 
