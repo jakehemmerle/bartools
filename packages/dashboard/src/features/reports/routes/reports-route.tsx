@@ -5,6 +5,7 @@ import { ReportsListScreen } from '../components/reports-list-screen'
 
 export function ReportsRoute() {
   const client = useReportsClient()
+  const [reloadToken, setReloadToken] = useState(0)
   const [loadState, setLoadState] = useState<{
     errorMessage: string | null
     reports: ReportListItem[] | null
@@ -38,11 +39,18 @@ export function ReportsRoute() {
     return () => {
       cancelled = true
     }
-  }, [client])
+  }, [client, reloadToken])
 
   return (
     <ReportsListScreen
       errorMessage={loadState.errorMessage}
+      onRetry={() => {
+        setLoadState({
+          errorMessage: null,
+          reports: null,
+        })
+        setReloadToken((current) => current + 1)
+      }}
       reports={loadState.reports}
     />
   )

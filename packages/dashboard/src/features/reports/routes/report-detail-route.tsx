@@ -23,6 +23,8 @@ type RecordSearchState = {
 export function ReportDetailRoute() {
   const client = useReportsClient()
   const { reportId = '' } = useParams()
+  const [reloadToken, setReloadToken] = useState(0)
+  const [streamMessage, setStreamMessage] = useState<string | null>(null)
   const [detailState, setDetailState] = useState<{
     detail: ReportDetail | null
     reportId: string
@@ -47,11 +49,18 @@ export function ReportDetailRoute() {
           reportId,
           status: 'loaded',
         })
+        setStreamMessage(null)
         setReviewDraft(detail ? createReportReviewDraft(detail) : [])
         setSearchState({})
 
         if (detail) {
           unsubscribe = client.streamReport(reportId, (event) => {
+            if (event.type === 'report.stream_disconnected') {
+              setStreamMessage(event.data.message)
+              return
+            }
+
+            setStreamMessage(null)
             setDetailState((currentState) => {
               if (!currentState?.detail) {
                 return currentState
@@ -83,14 +92,24 @@ export function ReportDetailRoute() {
       cancelled = true
       unsubscribe()
     }
-  }, [client, reportId])
+  }, [client, reloadToken, reportId])
 
   if (!detailState || detailState.reportId !== reportId) {
     return <div className="bb-loading-route">Loading report.</div>
   }
 
   if (detailState.status === 'error') {
-    return <ReportLoadErrorScreen />
+    return (
+      <ReportLoadErrorScreen
+        onRetry={() => {
+          setDetailState(null)
+          setReviewDraft([])
+          setSearchState({})
+          setStreamMessage(null)
+          setReloadToken((current) => current + 1)
+        }}
+      />
+    )
   }
 
   if (!detailState.detail) {
@@ -114,6 +133,7 @@ export function ReportDetailRoute() {
         }))
       }
       readinessMessage={client.readiness.message}
+      statusMessage={streamMessage}
       reviewActionMode="integration-blocked"
       reviewDraft={reviewDraft}
       searchState={searchState}

@@ -192,7 +192,7 @@ function registerStreamListeners(
   baseUrl: string,
   onEvent: (event: ReportStreamEvent) => void,
 ) {
-  const listeners: Array<[ReportStreamEvent['type'], EventListener]> = []
+  const listeners: Array<[string, EventListener]> = []
 
   for (const eventType of streamEventTypes) {
     const listener: EventListener = (event) => {
@@ -210,6 +210,19 @@ function registerStreamListeners(
     source.addEventListener(eventType, listener)
     listeners.push([eventType, listener])
   }
+
+  const errorListener: EventListener = () => {
+    onEvent({
+      type: 'report.stream_disconnected',
+      data: {
+        message: 'Live updates paused. Refresh or try again in a moment.',
+      },
+    })
+    source.close()
+  }
+
+  source.addEventListener('error', errorListener)
+  listeners.push(['error', errorListener])
 
   return listeners
 }

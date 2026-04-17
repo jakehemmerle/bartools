@@ -1,4 +1,5 @@
 import type { ReportListItem } from '@bartools/types'
+import { Button } from '../../../components/primitives/button'
 import { SurfaceCard } from '../../../components/primitives/surface-card'
 import { ReportsEmptyScreen } from './reports-empty-screen'
 import { ReportsListHeader } from './reports-list-header'
@@ -7,10 +8,15 @@ import { buildReportListRows } from '../view-models/report-list-view'
 
 type ReportsListScreenProps = {
   errorMessage?: string | null
+  onRetry?: () => void
   reports: ReportListItem[] | null
 }
 
-export function ReportsListScreen({ errorMessage = null, reports }: ReportsListScreenProps) {
+export function ReportsListScreen({
+  errorMessage = null,
+  onRetry,
+  reports,
+}: ReportsListScreenProps) {
   const rows = reports ? buildReportListRows(reports) : []
 
   return (
@@ -21,6 +27,13 @@ export function ReportsListScreen({ errorMessage = null, reports }: ReportsListS
         <SurfaceCard className="bb-loading-panel" tone="low">
           <p className="bb-loading-panel__eyebrow">Reports Unavailable</p>
           <p className="bb-loading-panel__body">{errorMessage}</p>
+          {onRetry ? (
+            <div className="bb-loading-panel__actions">
+              <Button onPress={onRetry} variant="secondary">
+                Retry
+              </Button>
+            </div>
+          ) : null}
         </SurfaceCard>
       ) : reports === null ? (
         <SurfaceCard className="bb-loading-panel" tone="low">
