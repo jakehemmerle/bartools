@@ -1,36 +1,48 @@
 import { useCallback } from 'react'
-import { View, Text, Pressable, StyleSheet } from 'react-native'
+import { View, Text, Pressable, StyleSheet, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { CameraCapture } from '../../../components/camera-capture'
 import { useTheme } from '../../../theme/useTheme'
+import { useScanContext } from '../../../lib/scan-context'
 
 export default function InventoryScanScreen() {
   const theme = useTheme()
   const router = useRouter()
+  const { setPhotoUri } = useScanContext()
 
   const handlePhotoTaken = useCallback((uri: string) => {
-    // Navigate to confirm with the photo URI and mock identified=true
+    setPhotoUri(uri)
     router.replace({
       pathname: '/inventory/confirm',
-      params: { photoUri: uri, identified: 'true' },
+      params: { identified: 'true' },
     })
-  }, [router])
+  }, [router, setPhotoUri])
 
   const pickFromLibrary = useCallback(async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.8,
-    })
-    if (!result.canceled && result.assets[0]) {
-      router.replace({
-        pathname: '/inventory/confirm',
-        params: { photoUri: result.assets[0].uri, identified: 'true' },
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Media library access is needed to select photos.')
+        return
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.8,
       })
+      if (!result.canceled && result.assets[0]) {
+        setPhotoUri(result.assets[0].uri)
+        router.replace({
+          pathname: '/inventory/confirm',
+          params: { identified: 'true' },
+        })
+      }
+    } catch {
+      Alert.alert('Error', 'Could not open photo library. Please try again.')
     }
-  }, [router])
+  }, [router, setPhotoUri])
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

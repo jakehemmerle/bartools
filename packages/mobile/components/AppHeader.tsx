@@ -1,7 +1,6 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../theme/useTheme'
-import { typography, spacing } from '../theme/tokens'
 
 interface AppHeaderProps {
   onProfilePress?: () => void

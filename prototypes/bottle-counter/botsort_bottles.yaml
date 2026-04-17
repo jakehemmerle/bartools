@@ -1,0 +1,18 @@
+# Tuned for handheld-pan, stationary-bottle capture.
+# Goal: maximize ID reuse across brief out-of-view / re-entry gaps.
+
+tracker_type: botsort
+track_high_thresh: 0.3        # slightly stricter first-stage assoc
+track_low_thresh: 0.1
+new_track_thresh: 0.6         # ↑ from 0.25 — only strong detections spawn new IDs
+track_buffer: 90              # ↑ from 30 — keep lost tracks alive 3s @ 30fps
+match_thresh: 0.75            # slight loosening for moving camera
+fuse_score: True
+
+gmc_method: sparseOptFlow     # critical for panning cam
+
+# ReID — the key change
+with_reid: True               # ↑ was False — enables appearance matching
+model: auto                   # reuse detector backbone features
+proximity_thresh: 0.3         # ↓ from 0.5 — allow ReID across larger spatial gaps (pans)
+appearance_thresh: 0.5        # ↓ from 0.8 — looser appearance match to re-acquire IDs

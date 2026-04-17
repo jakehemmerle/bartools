@@ -1,28 +1,52 @@
-import { useState } from 'react'
-import { View, Text, TextInput, ScrollView, Pressable, Image, StyleSheet } from 'react-native'
+import { useState, useEffect } from 'react'
+import { View, Text, TextInput, ScrollView, Pressable, Image, StyleSheet, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter, useLocalSearchParams } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { FillLevelSlider } from '../../../components/FillLevelSlider'
-import { ITEM_CATEGORIES } from '../../../types/enums'
+import type { LocationListItem } from '@bartools/types'
+import { getLocations } from '../../../lib/api'
+import { DEFAULT_VENUE_ID } from '../../../lib/config'
 import { MOCK_LOCATIONS } from '../../../data/mockData'
+import { useScanContext } from '../../../lib/scan-context'
 
 export default function AddManuallyScreen() {
   const theme = useTheme()
   const router = useRouter()
-  const { photoUri } = useLocalSearchParams<{ photoUri?: string }>()
+  const { photoUri } = useScanContext()
 
-  const [brand, setBrand] = useState('')
-  const [product, setProduct] = useState('')
-  const [category, setCategory] = useState('bourbon')
-  const [sizeMl, setSizeMl] = useState('750')
+  const [name, setName] = useState('')
+  const [category, _setCategory] = useState('bourbon')
+  const [sizeMl, _setSizeMl] = useState('750')
   const [fillLevel, setFillLevel] = useState(100)
-  const [location, setLocation] = useState(MOCK_LOCATIONS[0]?.name ?? 'Main Bar')
+  const [_locations, setLocations] = useState<LocationListItem[]>([])
+  const [location, setLocation] = useState('')
 
+  // Load locations from API with mock fallback
+  useEffect(() => {
+    getLocations(DEFAULT_VENUE_ID)
+      .then((res) => {
+        setLocations(res.locations)
+        if (res.locations.length > 0) setLocation(res.locations[0].name)
+      })
+      .catch(() => {
+        const fallback = MOCK_LOCATIONS.map((l) => ({ id: l.id, name: l.name }))
+        setLocations(fallback)
+        if (fallback.length > 0) setLocation(fallback[0].name)
+      })
+  }, [])
+
+  // TODO: wire to POST /inventory endpoint when backend supports manual entry
   const handleSubmit = () => {
-    console.log('Add to inventory:', { brand, product, category, sizeMl, fillLevel, location, photoUri })
-    router.back()
+    Alert.alert(
+      'Coming Soon',
+      'Manual bottle entry is not yet supported. Please use the photo capture flow to add bottles.',
+      [
+        { text: 'Go Back', onPress: () => router.back() },
+        { text: 'Stay', style: 'cancel' },
+      ],
+    )
   }
 
   return (
@@ -51,29 +75,18 @@ export default function AddManuallyScreen() {
           </View>
         ) : null}
 
-        {/* Brand + Product fields */}
+        {/* Bottle name */}
         <View style={styles.fieldGroup}>
           <View style={styles.field}>
-            <Text style={[styles.label, { color: theme.primary }]}>Brand</Text>
+            <Text style={[styles.label, { color: theme.primary }]}>Bottle Name</Text>
             <TextInput
               style={[styles.input, { color: theme.onSurface, borderBottomColor: theme.outline }]}
-              placeholder="e.g. Buffalo Trace"
+              placeholder="e.g. Buffalo Trace Kentucky Straight"
               placeholderTextColor={theme.surfaceVariant}
-              value={brand}
-              onChangeText={setBrand}
+              value={name}
+              onChangeText={setName}
             />
-            <Text style={[styles.hint, { color: theme.outline }]}>The house of origin</Text>
-          </View>
-
-          <View style={styles.field}>
-            <Text style={[styles.label, { color: theme.primary }]}>Product Name</Text>
-            <TextInput
-              style={[styles.input, { color: theme.onSurface, borderBottomColor: theme.outline }]}
-              placeholder="e.g. Kentucky Straight Bourbon"
-              placeholderTextColor={theme.surfaceVariant}
-              value={product}
-              onChangeText={setProduct}
-            />
+            <Text style={[styles.hint, { color: theme.outline }]}>Full name as shown on label</Text>
           </View>
         </View>
 

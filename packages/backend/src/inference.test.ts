@@ -62,10 +62,12 @@ describe('processQueuedInferenceJob', () => {
     if (testIds) {
       await cleanup({ ids: testIds, bottleIds });
     }
-    // LangSmith batches trace writes; flush before the process exits so the
-    // runBottleInference span gets its end event recorded (otherwise traces
-    // appear stuck in "running" forever).
-    await langsmithClient.awaitPendingTraceBatches();
+    if (LIVE) {
+      // LangSmith batches trace writes; flush before the process exits so the
+      // runBottleInference span gets its end event recorded (otherwise traces
+      // appear stuck in "running" forever).
+      await langsmithClient.awaitPendingTraceBatches();
+    }
     await pool.end();
   });
 

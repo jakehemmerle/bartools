@@ -3,14 +3,13 @@ import { useTheme } from '../theme/useTheme'
 import { FillLevelBar } from './FillLevelBar'
 
 interface BottleCardProps {
-  brand: string
-  product: string
+  name: string
   subcategory?: string
   sizeMl?: number
   fillPercent: number
 }
 
-export function BottleCard({ brand, product, subcategory, sizeMl, fillPercent }: Readonly<BottleCardProps>) {
+export function BottleCard({ name, subcategory, sizeMl, fillPercent }: Readonly<BottleCardProps>) {
   const theme = useTheme()
   const isUnopened = fillPercent >= 100
   const isLow = fillPercent <= 20
@@ -24,7 +23,7 @@ export function BottleCard({ brand, product, subcategory, sizeMl, fillPercent }:
         {/* Text content */}
         <View style={styles.info}>
           <Text style={[styles.productName, { color: theme.onSurface }]} numberOfLines={1}>
-            {brand} {product}
+            {name}
           </Text>
           <View style={styles.meta}>
             {subcategory ? (
