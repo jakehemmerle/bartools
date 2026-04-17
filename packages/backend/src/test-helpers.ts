@@ -17,7 +17,17 @@ import {
 
 const REPO_ROOT = resolve(import.meta.dir, '../../..');
 const ASSETS_DIR = resolve(REPO_ROOT, 'assets');
-const UPLOAD_DIR = resolve(import.meta.dir, '../data/uploads');
+const TEST_UPLOAD_DIR = resolve(import.meta.dir, '../data/test-uploads');
+
+// Tests that use copyTestPhoto pair with a `./storage` module mock that reads
+// the file at `diskPathForObject(object)`. Keep the basename of the object
+// key stable between the two so the mock doesn't need a registry.
+export const TEST_BUCKET = 'bartools-test-uploads';
+
+export function diskPathForObject(object: string): string {
+  const basename = object.split('/').pop() ?? object;
+  return resolve(TEST_UPLOAD_DIR, basename);
+}
 
 // ─── CSV parsing ────────────────────────────────────────────────────
 
@@ -92,12 +102,12 @@ export async function seedBottleCatalog() {
 export async function copyTestPhoto(
   reportId: string,
   srcFilename: string
-): Promise<{ photoUrl: string; diskPath: string }> {
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  const filename = `${reportId}-${crypto.randomUUID()}.jpg`;
-  const diskPath = resolve(UPLOAD_DIR, filename);
+): Promise<{ object: string; bucket: string; diskPath: string }> {
+  await mkdir(TEST_UPLOAD_DIR, { recursive: true });
+  const object = `reports/${reportId}/${crypto.randomUUID()}.jpg`;
+  const diskPath = diskPathForObject(object);
   await copyFile(resolve(ASSETS_DIR, 'photos', srcFilename), diskPath);
-  return { photoUrl: `/uploads/${filename}`, diskPath };
+  return { object, bucket: TEST_BUCKET, diskPath };
 }
 
 // ─── Seed scenario ──────────────────────────────────────────────────
@@ -114,7 +124,8 @@ export type TestIds = {
 };
 
 export async function seedTestScenario(opts: {
-  photoUrl: string;
+  object: string;
+  bucket: string;
   diskPath: string;
 }): Promise<TestIds> {
   const [user] = await db
@@ -156,7 +167,8 @@ export async function seedTestScenario(opts: {
       userId: user.id,
       venueId: venue.id,
       locationId: location.id,
-      photoUrl: opts.photoUrl,
+      photoGcsBucket: opts.bucket,
+      photoGcsObject: opts.object,
       sortOrder: 0,
     })
     .returning();

@@ -1,4 +1,5 @@
 import { mock } from 'bun:test';
+import { readFile } from 'node:fs/promises';
 
 // Set TESTING_E2E_CALLS_REAL_VLM_API=true to hit the real Claude/LangSmith
 // stack instead of the in-test mock. Requires CLAUDE_CODE_OAUTH_TOKEN (or
@@ -21,6 +22,24 @@ if (!LIVE) {
     },
   }));
 }
+
+// Mock GCS storage so inference reads bytes from the local test-uploads dir
+// (populated by copyTestPhoto) instead of a live bucket.
+mock.module('./storage', async () => {
+  const { TEST_BUCKET, diskPathForObject } = await import('./test-helpers');
+  return {
+    getBucketName: () => TEST_BUCKET,
+    getTtlSeconds: () => 300,
+    presignPut: async (object: string) => ({
+      putUrl: `http://test.invalid/${object}`,
+      expiresAt: new Date(Date.now() + 300_000),
+    }),
+    getObjectBytes: async (object: string): Promise<Uint8Array> => {
+      const buf = await readFile(diskPathForObject(object));
+      return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+    },
+  };
+});
 
 import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
 import { eq } from 'drizzle-orm';
@@ -53,7 +72,8 @@ describe('processQueuedInferenceJob', () => {
 
     const photo = await copyTestPhoto('test-report', 'IMG_3982.jpg');
     testIds = await seedTestScenario({
-      photoUrl: photo.photoUrl,
+      object: photo.object,
+      bucket: photo.bucket,
       diskPath: photo.diskPath,
     });
   });
