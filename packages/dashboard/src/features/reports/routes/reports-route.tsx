@@ -5,21 +5,45 @@ import { ReportsListScreen } from '../components/reports-list-screen'
 
 export function ReportsRoute() {
   const client = useReportsClient()
-  const [reports, setReports] = useState<ReportListItem[] | null>(null)
+  const [loadState, setLoadState] = useState<{
+    errorMessage: string | null
+    reports: ReportListItem[] | null
+  }>({
+    errorMessage: null,
+    reports: null,
+  })
 
   useEffect(() => {
     let cancelled = false
 
-    void client.listReports().then((nextReports) => {
-      if (!cancelled) {
-        setReports(nextReports)
-      }
-    })
+    void client
+      .listReports()
+      .then((nextReports) => {
+        if (!cancelled) {
+          setLoadState({
+            errorMessage: null,
+            reports: nextReports,
+          })
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setLoadState({
+            errorMessage: 'Reports could not be loaded right now. Try again in a moment.',
+            reports: null,
+          })
+        }
+      })
 
     return () => {
       cancelled = true
     }
   }, [client])
 
-  return <ReportsListScreen reports={reports} />
+  return (
+    <ReportsListScreen
+      errorMessage={loadState.errorMessage}
+      reports={loadState.reports}
+    />
+  )
 }

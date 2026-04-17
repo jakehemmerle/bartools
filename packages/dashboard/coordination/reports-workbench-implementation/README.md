@@ -110,4 +110,14 @@ For this implementation track:
 - use `react-aria-components` for accessible interaction primitives
 - use dashboard-local CSS and components for the visible design language
 
+## Backend Activation Gate
+
+The reports workbench now supports a narrow backend activation gate:
+
+- if `VITE_BARTOOLS_API_BASE_URL` is unset, the app uses fixture-backed reports data
+- if `VITE_BARTOOLS_API_BASE_URL` is set, `/reports` and `/reports/:reportId` may read live backend data through the reports client boundary
+- a relative value such as `/api` is allowed for local Vite proxying when staging CORS is not ready yet
+- review submission stays blocked in the real UI until user context exists
+- this gate is meant to make backend connection a wiring task, not a redesign task
+
 Older coordination/spec docs that still mention Mantine should be treated as historical unless they are updated to match this folder.
