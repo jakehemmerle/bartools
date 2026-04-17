@@ -163,19 +163,21 @@ export default function CaptureScreen() {
       edges={['top']}
       style={[styles.container, { backgroundColor: theme.background }]}
     >
-      {/* Full-screen background — bundled local asset (no external URL) */}
-      <Image
-        source={require('../../assets/bar-background.png')}
-        style={[styles.backgroundImage, { opacity: 0.35 }]}
-        resizeMode="cover"
-        accessible={false}
-      />
+      {/* Full-screen background — bundled local asset (no external URL).
+           Image is square (512×512) so we stretch height to 120% and pin to
+           top so the bottles fill the entire visible area on tall screens. */}
+      <View style={styles.backgroundImage} pointerEvents="none">
+        <Image
+          source={require('../../assets/bar-background.png')}
+          style={{ width: '100%', height: '120%' }}
+          resizeMode="cover"
+          accessible={false}
+        />
+      </View>
       {/* Heavy gray overlay to wash out color — simulates grayscale */}
-      <View style={[styles.backgroundImage, { backgroundColor: '#1a1a1a', opacity: 0.7 }]} />
-      {/* Top gradient darkening */}
+      <View style={[styles.backgroundImage, { backgroundColor: '#1a1a1a', opacity: 0.8 }]} />
+      {/* Top gradient darkening for header legibility */}
       <View style={[styles.bgGradientTop, { backgroundColor: theme.background }]} />
-      {/* Bottom gradient darkening — reduced so bar image shows through */}
-      <View style={[styles.bgGradientBottom, { backgroundColor: theme.background, opacity: 0.5 }]} />
 
       <AppHeader />
 
@@ -212,7 +214,7 @@ export default function CaptureScreen() {
       </View>
 
       {/* Bottom controls — semi-transparent so bar background bleeds through */}
-      <View style={[styles.bottomPanel, { backgroundColor: `${theme.surfaceContainerLow}E6` }]}>
+      <View style={[styles.bottomPanel, { backgroundColor: `${theme.surfaceContainerLow}CC` }]}>
         {/* Controls row: Gallery | Capture | Settings */}
         <View style={styles.controlsRow}>
           {/* Gallery preview thumbnail */}
@@ -348,6 +350,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    overflow: 'hidden',
   },
   bgGradientTop: {
     position: 'absolute',
