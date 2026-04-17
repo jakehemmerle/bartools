@@ -3,6 +3,8 @@
 
 #if __has_include("BarBack-Swift.h")
 #import "BarBack-Swift.h"
+#elif __has_include("BarBackStaging-Swift.h")
+#import "BarBackStaging-Swift.h"
 #else
 @class BottleSegFrameProcessor;
 #endif
