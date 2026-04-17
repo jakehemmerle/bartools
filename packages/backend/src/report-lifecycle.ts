@@ -2,7 +2,12 @@ import { count, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from './db';
 import { inferenceJobs, reportRecords, reports, scans } from './schema';
-import { saveUploadedPhoto } from './uploads';
+import { getBucketName } from './storage';
+
+export type ReportPhotoUpload = {
+  object: string;
+  sortOrder: number;
+};
 
 export const createReportSchema = z.object({
   userId: z.string().uuid(),
@@ -25,7 +30,10 @@ export async function createReport(input: z.infer<typeof createReportSchema>) {
   return report;
 }
 
-export async function addReportPhotos(reportId: string, files: File[]) {
+export async function addReportPhotos(
+  reportId: string,
+  uploads: ReportPhotoUpload[]
+) {
   const [report] = await db
     .select({
       id: reports.id,
@@ -46,32 +54,31 @@ export async function addReportPhotos(reportId: string, files: File[]) {
     throw new Error('report_not_editable');
   }
 
-  const [{ existingCount }] = await db
-    .select({ existingCount: count(scans.id) })
-    .from(scans)
-    .where(eq(scans.reportId, reportId));
+  if (uploads.length === 0) {
+    return [];
+  }
 
-  const offset = Number(existingCount);
-  const photoUrls = await Promise.all(
-    files.map((file) => saveUploadedPhoto(reportId, file))
-  );
-  const uploaded = photoUrls.map((photoUrl, index) => ({
+  const bucket = getBucketName();
+  const rows = uploads.map((upload) => ({
     reportId,
     userId: report.userId,
     venueId: report.venueId,
     locationId: report.locationId,
-    photoUrl,
-    sortOrder: offset + index,
+    photoGcsBucket: bucket,
+    photoGcsObject: upload.object,
+    sortOrder: upload.sortOrder,
   }));
 
-  const created = uploaded.length
-    ? await db.insert(scans).values(uploaded).returning()
-    : [];
+  const created = await db.insert(scans).values(rows).returning();
 
-  const nextPhotoCount = offset + created.length;
+  const [{ totalCount }] = await db
+    .select({ totalCount: count(scans.id) })
+    .from(scans)
+    .where(eq(scans.reportId, reportId));
+
   await db
     .update(reports)
-    .set({ photoCount: nextPhotoCount })
+    .set({ photoCount: Number(totalCount) })
     .where(eq(reports.id, reportId));
 
   return created;

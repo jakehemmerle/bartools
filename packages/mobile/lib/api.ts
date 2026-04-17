@@ -90,25 +90,114 @@ export function createReport(
   })
 }
 
-type UploadPhotosResponse = {
-  reportId: string
-  photos: { id: string; photoUrl: string; sortOrder: number }[]
+// ---------------------------------------------------------------------------
+// Photo upload: presign → PUT to GCS → complete
+// ---------------------------------------------------------------------------
+
+// Content-Type used for every photo upload. MUST match what presign requested,
+// or GCS V4 signature verification will reject the PUT.
+const PHOTO_CONTENT_TYPE = 'image/jpeg'
+
+export type PresignedUpload = {
+  object: string
+  putUrl: string
+  expiresAt: string // ISO timestamp
 }
 
-export function uploadPhotos(
+export type PresignResponse = {
+  uploads: PresignedUpload[]
+}
+
+export type CompleteUploadInput = {
+  object: string
+  sortOrder: number
+}
+
+export type CompletedScan = {
+  id: string
+  object: string
+  sortOrder: number
+}
+
+export type CompleteResponse = {
+  scans: CompletedScan[]
+}
+
+export function presignUploads(
+  reportId: string,
+  count: number,
+): Promise<PresignResponse> {
+  return fetchJson(`/reports/${encodePath(reportId)}/photos/presign`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ count, contentType: PHOTO_CONTENT_TYPE }),
+  })
+}
+
+export function completeUploads(
+  reportId: string,
+  uploads: CompleteUploadInput[],
+): Promise<CompleteResponse> {
+  return fetchJson(`/reports/${encodePath(reportId)}/photos/complete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ uploads }),
+  })
+}
+
+/**
+ * PUT a local file directly to a GCS V4-signed URL.
+ *
+ * Implementation note: uses `expo-file-system`'s new `File` API (v55+) to read
+ * the file as an `ArrayBuffer` and send it as the raw request body. This avoids
+ * multipart encoding — GCS rejects multipart bodies when it expects raw bytes —
+ * and avoids the base64→bytes round-trip.
+ *
+ * The `Content-Type` header MUST exactly match the value passed at presign time
+ * (currently hardcoded to `image/jpeg` on both sides) or GCS will reject the
+ * request with a signature-mismatch error.
+ */
+export async function uploadToGcs(
+  putUrl: string,
+  fileUri: string,
+  contentType: string,
+): Promise<void> {
+  // Dynamic import so the native `expo-file-system` module isn't loaded at
+  // module-evaluation time — keeps unit tests (and any non-RN import graph)
+  // from having to resolve the native chain up front.
+  const { File } = await import('expo-file-system')
+  const file = new File(fileUri)
+  const body = await file.arrayBuffer()
+  const res = await fetch(putUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': contentType },
+    body,
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new ApiError(res.status, `GCS PUT failed: ${text.slice(0, 200)}`)
+  }
+}
+
+export async function uploadPhotos(
   reportId: string,
   photoUris: string[],
-): Promise<UploadPhotosResponse> {
-  const formData = new FormData()
-  for (const [i, uri] of photoUris.entries()) {
-    // React Native's FormData accepts {uri,type,name} objects for file uploads
-    formData.append(`photo_${i}`, { uri, type: 'image/jpeg', name: `photo_${i}.jpg` })
+): Promise<CompleteResponse> {
+  const { uploads } = await presignUploads(reportId, photoUris.length)
+  if (uploads.length !== photoUris.length) {
+    throw new Error(
+      `presign returned ${uploads.length} URLs for ${photoUris.length} photos`,
+    )
   }
-  return fetchJson(`/reports/${encodePath(reportId)}/photos`, {
-    method: 'POST',
-    body: formData,
-    // Do NOT set Content-Type — RN sets the multipart boundary automatically
-  })
+  await Promise.all(
+    photoUris.map((uri, i) =>
+      uploadToGcs(uploads[i]!.putUrl, uri, PHOTO_CONTENT_TYPE),
+    ),
+  )
+  return completeUploads(
+    reportId,
+    photoUris.map((_, i) => ({ object: uploads[i]!.object, sortOrder: i })),
+  )
 }
 
 type SubmitReportResponse = {

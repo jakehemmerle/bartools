@@ -17,7 +17,7 @@ import {
   reportRecords,
   scans,
 } from './schema';
-import { resolveUploadPathFromUrl } from './uploads';
+import { getObjectBytes } from './storage';
 
 export const reportScanInferenceTopic = 'report.scan.inference';
 
@@ -168,7 +168,8 @@ export async function processQueuedInferenceJob(
   const [scan] = await db
     .select({
       id: scans.id,
-      photoUrl: scans.photoUrl,
+      photoGcsBucket: scans.photoGcsBucket,
+      photoGcsObject: scans.photoGcsObject,
       reportId: scans.reportId,
     })
     .from(scans)
@@ -218,26 +219,27 @@ export async function processQueuedInferenceJob(
     return;
   }
 
-  const filePath = resolveUploadPathFromUrl(scan.photoUrl);
-  const imageFile = Bun.file(filePath);
-
-  if (!(await imageFile.exists())) {
+  let imageBytes: Uint8Array;
+  try {
+    imageBytes = await getObjectBytes(scan.photoGcsObject);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const errorMessage = `Uploaded object gs://${scan.photoGcsBucket}/${scan.photoGcsObject} is unreadable: ${message}`;
     await markAttemptFailure({
       attemptId: attempt.id,
       errorCode: 'photo_missing',
-      errorMessage: `Uploaded file is missing at ${scan.photoUrl}.`,
+      errorMessage,
     });
     await failJob({
       jobId: payload.jobId,
       reportId: payload.reportId,
       scanId: payload.scanId,
       errorCode: 'photo_missing',
-      errorMessage: `Uploaded file is missing at ${scan.photoUrl}.`,
+      errorMessage,
     });
     return;
   }
 
-  const imageBytes = new Uint8Array(await imageFile.arrayBuffer());
   const possibleBottleNames = catalog.map((b) => b.name);
   const rendered = await renderPromptTemplate(prompt.prompt, {
     possible_bottle_names_text: possibleBottleNames.join('\n'),

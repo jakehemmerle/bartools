@@ -42,6 +42,7 @@ gcloud run services describe bartools-backend-<env> \
 | Secret Manager secret     | `database-url-staging`                               | `database-url-prod`                         |
 | Artifact Registry repo    | `us-east1-docker.pkg.dev/bartools-staging/bartools`  | `us-east1-docker.pkg.dev/bartools-prod/bartools` |
 | Image name                | `backend:<git-short-sha>`                            | `backend:<git-short-sha>`                   |
+| GCS uploads bucket        | `bartools-uploads-staging`                           | `bartools-uploads-prod`                     |
 
 ### GCP consoles
 
@@ -92,6 +93,50 @@ gcloud secrets versions access latest \
   --secret=database-url-<env> --project=bartools-<env>
 ```
 
+## GCS uploads buckets
+
+One regional bucket per env, used by the backend for pre-signed PUT uploads. Auth to GCS is via the attached Cloud Run service account; there are no HMAC keys or JSON credentials to rotate.
+
+| Field                      | staging                        | prod                         |
+| -------------------------- | ------------------------------ | ---------------------------- |
+| Bucket name                | `bartools-uploads-staging`     | `bartools-uploads-prod`      |
+| Location                   | `us-east1`                     | `us-east1`                   |
+| Uniform bucket-level access| enabled                        | enabled                      |
+| Public access prevention   | `enforced`                     | `enforced`                   |
+| Versioning                 | disabled                       | disabled                     |
+| `forceDestroy`             | `true` (iterate freely)        | `false` (destroy-locked)     |
+| Lifecycle                  | abort incomplete multipart uploads after 1 day | same       |
+| CORS                       | `PUT,GET` from `*`, `Content-Type` header, maxAge 3600s | same (tighten before GA) |
+
+### IAM bindings (bucket-scoped, not project-scoped)
+
+- `roles/storage.objectAdmin` on the bucket → `serviceAccount:bartools-backend-<env>@bartools-<env>.iam.gserviceaccount.com`
+- `roles/iam.serviceAccountTokenCreator` on the SA itself → the same SA as member. Required so the backend can call the IAM Credentials API's `signBlob` to mint V4 pre-signed URLs without a downloaded private key.
+
+### Required Google APIs (enabled per project)
+
+- `iamcredentials.googleapis.com` — needed for `signBlob` self-signing
+- `storage.googleapis.com` — bucket CRUD + object ops
+
+Both are in `infra/src/apis.ts` alongside the other enabled APIs.
+
+### Env vars delivered to the backend container
+
+Plain env vars on the Cloud Run service (NOT Secret Manager):
+
+- `GCS_BUCKET` ← `bartools-uploads-<env>` (wired from `bucket.name`)
+- `GCS_PRESIGNED_PUT_TTL_SECONDS` ← `"300"`
+
+### Re-derive bucket name
+
+```bash
+pulumi -C infra stack output uploadsBucketName --stack <env>
+
+# or via gcloud
+gcloud storage buckets list --project bartools-<env> --format='value(name)' \
+  | grep bartools-uploads
+```
+
 ## Pulumi
 
 | Field                 | Value                                                         |
@@ -115,6 +160,7 @@ pulumi -C infra stack output serviceUrl --stack <env>
 pulumi -C infra stack output healthUrl --stack <env>
 pulumi -C infra stack output imageUri --stack <env>
 pulumi -C infra stack output serviceName --stack <env>
+pulumi -C infra stack output uploadsBucketName --stack <env>
 ```
 
 ## CLI tools quick reference
@@ -129,6 +175,7 @@ pulumi -C infra stack output serviceName --stack <env>
 | List GCP projects              | `gcloud projects list`                                                  |
 | List Cloud Run services        | `gcloud run services list --project bartools-<env>`                     |
 | List Artifact Registry images  | `gcloud artifacts docker images list us-east1-docker.pkg.dev/bartools-<env>/bartools` |
+| List uploads bucket contents   | `gcloud storage ls gs://bartools-uploads-<env>/`                        |
 
 ## Infra file map
 
@@ -145,6 +192,7 @@ infra/
 │   ├── registry.ts         # gcp.artifactregistry.Repository
 │   ├── service-account.ts  # gcp.serviceaccount.Account
 │   ├── secret.ts           # Secret Manager secret + IAM member
+│   ├── storage.ts          # gcp.storage.Bucket + bucket IAM + SA tokenCreator
 │   ├── image.ts            # docker-build.Image (build context = repo root)
 │   └── run.ts              # gcp.cloudrunv2.Service + public invoker binding
 ├── scripts/
