@@ -196,7 +196,8 @@ export const scans = pgTable(
     venueId: uuid('venue_id').notNull().references(() => venues.id),
     locationId: uuid('location_id').references(() => locations.id), // which sub-area was being counted
     bottleId: uuid('bottle_id').references(() => bottles.id), // null if unrecognized
-    photoUrl: text('photo_url').notNull(),
+    photoGcsBucket: text('photo_gcs_bucket').notNull(),
+    photoGcsObject: text('photo_gcs_object').notNull(),
     sortOrder: integer('sort_order').notNull().default(0),
     vlmFillTenths: integer('vlm_fill_tenths'), // 0..10, the VLM's fill estimate at scan time
     confidenceScore: numeric('confidence_score', { precision: 4, scale: 3 }), // 0.000–1.000

@@ -1,6 +1,11 @@
 import * as gcp from '@pulumi/gcp';
 import * as pulumi from '@pulumi/pulumi';
 
+const secretEnv = (name: string, secret: pulumi.Output<string>) => ({
+  name,
+  valueSource: { secretKeyRef: { secret, version: 'latest' } },
+});
+
 export function createCloudRunService(opts: {
   project: string;
   region: string;
@@ -8,6 +13,9 @@ export function createCloudRunService(opts: {
   serviceAccountEmail: pulumi.Output<string>;
   imageUri: pulumi.Output<string>;
   databaseUrlSecretId: pulumi.Output<string>;
+  claudeCodeOauthTokenSecretId: pulumi.Output<string>;
+  langsmithApiKeySecretId: pulumi.Output<string>;
+  gcsBucketName: pulumi.Input<string>;
   minInstances: number;
   maxInstances: number;
   cpu: string;
@@ -39,15 +47,11 @@ export function createCloudRunService(opts: {
             },
             envs: [
               { name: 'BARTOOLS_ENV', value: opts.env },
-              {
-                name: 'DATABASE_URL',
-                valueSource: {
-                  secretKeyRef: {
-                    secret: opts.databaseUrlSecretId,
-                    version: 'latest',
-                  },
-                },
-              },
+              { name: 'GCS_BUCKET', value: pulumi.output(opts.gcsBucketName) },
+              { name: 'GCS_PRESIGNED_PUT_TTL_SECONDS', value: '300' },
+              secretEnv('DATABASE_URL', opts.databaseUrlSecretId),
+              secretEnv('CLAUDE_CODE_OAUTH_TOKEN', opts.claudeCodeOauthTokenSecretId),
+              secretEnv('LANGSMITH_API_KEY', opts.langsmithApiKeySecretId),
             ],
             startupProbe: {
               httpGet: { path: '/health', port: 3000 },

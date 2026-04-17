@@ -17,6 +17,9 @@
       },
     },
   },
+  "trustedDependencies": [
+    "@pulumi/docker-build",
+  ],
   "packages": {
     "@gar/promise-retry": ["@gar/promise-retry@1.0.3", "", {}, "sha512-GmzA9ckNokPypTg10pgpeHNQe7ph+iIKKmhKu3Ob9ANkswreCx7R3cKmY781K8QK3AqVL3xVh9A42JvIAbkkSA=="],
 

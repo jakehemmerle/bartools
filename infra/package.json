@@ -12,5 +12,8 @@
     "@pulumi/docker-build": "^0.0.15",
     "@pulumi/gcp": "^9.20.0",
     "@pulumi/pulumi": "^3.231.0"
-  }
+  },
+  "trustedDependencies": [
+    "@pulumi/docker-build"
+  ]
 }

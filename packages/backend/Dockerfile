@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1-labs
 # Build context: monorepo root (see infra/src/image.ts).
 
 FROM oven/bun:1-alpine AS deps
