@@ -16,6 +16,7 @@ export const baseReportsScenario = reportsScenarioSchema.parse({
       startedAt: '2026-04-09T21:44:00-05:00',
       completedAt: '2026-04-09T22:15:00-05:00',
       bottleCount: 18,
+      locationName: 'Main Bar',
       status: 'reviewed',
     }),
     makeReportListItem({
@@ -24,6 +25,7 @@ export const baseReportsScenario = reportsScenarioSchema.parse({
       startedAt: '2026-04-10T18:04:00-05:00',
       completedAt: '2026-04-10T18:29:00-05:00',
       bottleCount: 11,
+      locationName: 'Patio Bar',
       userId: 'user-staff-1',
       userDisplayName: 'Morgan Lee',
     }),
@@ -33,6 +35,7 @@ export const baseReportsScenario = reportsScenarioSchema.parse({
       startedAt: '2026-04-11T16:12:00-05:00',
       completedAt: undefined,
       bottleCount: 9,
+      locationName: 'Back Bar',
     }),
     makeReportListItem({
       id: 'report-1000',
@@ -40,6 +43,7 @@ export const baseReportsScenario = reportsScenarioSchema.parse({
       startedAt: '2026-04-11T18:44:00-05:00',
       completedAt: undefined,
       bottleCount: 6,
+      locationName: 'Private Room',
     }),
   ],
   details: {
@@ -49,6 +53,7 @@ export const baseReportsScenario = reportsScenarioSchema.parse({
       bottleRecords: [
         {
           id: 'record-reviewed-1',
+          bottleId: 'bottle-1',
           imageUrl: '/fixtures/report-bottle-clear.svg',
           bottleName: "Tito's Handmade Vodka",
           category: 'Vodka',
@@ -60,6 +65,7 @@ export const baseReportsScenario = reportsScenarioSchema.parse({
         },
         {
           id: 'record-reviewed-2',
+          bottleId: 'bottle-2',
           imageUrl: '/fixtures/report-bottle-amber.svg',
           bottleName: 'Espolòn Blanco',
           category: 'Tequila',
@@ -89,6 +95,7 @@ export const baseReportsScenario = reportsScenarioSchema.parse({
       bottleRecords: [
         {
           id: 'record-unreviewed-1',
+          bottleId: 'bottle-3',
           imageUrl: '/fixtures/report-bottle-clear.svg',
           bottleName: 'Montelobos Mezcal',
           category: 'Mezcal',
@@ -125,6 +132,7 @@ export const baseReportsScenario = reportsScenarioSchema.parse({
       bottleRecords: [
         {
           id: 'record-processing-1',
+          bottleId: 'bottle-4',
           imageUrl: '/fixtures/report-bottle-amber.svg',
           bottleName: 'Wild Turkey 101',
           category: 'Bourbon',

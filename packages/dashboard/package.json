@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:staging": "sh ./scripts/dev-staging.sh",
     "build": "tsc -b && vite build",
     "build-storybook": "storybook build",
     "lint": "eslint . && bun ./scripts/enforce-code-quality.mjs",

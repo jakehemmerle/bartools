@@ -1,57 +1,50 @@
-import { useEffect, useState } from 'react'
-import type { ReportListItem } from '@bartools/types'
-import { useReportsClient } from '../../../lib/reports/provider'
+import { startTransition, Suspense } from 'react'
+import { Await, useLoaderData, useRevalidator } from 'react-router-dom'
+import { DelayedFallback } from '../../../components/primitives/delayed-fallback'
 import { ReportsListScreen } from '../components/reports-list-screen'
+import type {
+  ReportsListLoadResult,
+  ReportsListRouteData,
+} from '../../../lib/reports/route-loaders'
 
 export function ReportsRoute() {
-  const client = useReportsClient()
-  const [reloadToken, setReloadToken] = useState(0)
-  const [loadState, setLoadState] = useState<{
-    errorMessage: string | null
-    reports: ReportListItem[] | null
-  }>({
-    errorMessage: null,
-    reports: null,
-  })
-
-  useEffect(() => {
-    let cancelled = false
-
-    void client
-      .listReports()
-      .then((nextReports) => {
-        if (!cancelled) {
-          setLoadState({
-            errorMessage: null,
-            reports: nextReports,
-          })
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setLoadState({
-            errorMessage: 'Reports could not be loaded right now. Try again in a moment.',
-            reports: null,
-          })
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [client, reloadToken])
+  const { loadResult } = useLoaderData() as ReportsListRouteData
 
   return (
-    <ReportsListScreen
-      errorMessage={loadState.errorMessage}
-      onRetry={() => {
-        setLoadState({
-          errorMessage: null,
-          reports: null,
-        })
-        setReloadToken((current) => current + 1)
-      }}
-      reports={loadState.reports}
-    />
+    <Suspense
+      fallback={
+        <DelayedFallback>
+          <ReportsListScreen reports={null} />
+        </DelayedFallback>
+      }
+    >
+      <Await resolve={loadResult}>
+        {(result: ReportsListLoadResult) => <ResolvedReportsRoute loadResult={result} />}
+      </Await>
+    </Suspense>
   )
+}
+
+function ResolvedReportsRoute({
+  loadResult,
+}: {
+  loadResult: ReportsListLoadResult
+}) {
+  const revalidator = useRevalidator()
+
+  if (loadResult.status === 'error') {
+    return (
+      <ReportsListScreen
+        errorMessage={loadResult.errorMessage}
+        onRetry={() => {
+          startTransition(() => {
+            revalidator.revalidate()
+          })
+        }}
+        reports={null}
+      />
+    )
+  }
+
+  return <ReportsListScreen reports={loadResult.reports} />
 }

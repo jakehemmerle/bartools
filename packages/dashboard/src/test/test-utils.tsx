@@ -6,8 +6,9 @@ import {
   RouterProvider,
 } from 'react-router-dom'
 import { AppProviders } from '../app/providers'
-import { appRoutes } from '../app/router'
+import { createAppRoutes } from '../app/router'
 import type { ReportsClient } from '../lib/reports/client'
+import { createDefaultReportsClient } from '../lib/reports/provider'
 
 export function renderWithProviders(
   ui: ReactNode,
@@ -34,10 +35,11 @@ export function renderAppRoutes({
   initialEntries?: string[]
   reportsClient?: ReportsClient
 } = {}) {
-  const router = createMemoryRouter(appRoutes, { initialEntries })
+  const resolvedClient = reportsClient ?? createDefaultReportsClient()
+  const router = createMemoryRouter(createAppRoutes(resolvedClient), { initialEntries })
 
   return render(
-    <AppProviders reportsClient={reportsClient}>
+    <AppProviders reportsClient={resolvedClient}>
       <RouterProvider router={router} />
     </AppProviders>,
   )

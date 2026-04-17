@@ -29,6 +29,8 @@ export function ReportBottleMatchField({
   selectedBottleId,
 }: ReportBottleMatchFieldProps) {
   const showManualMatchHint = search.query.trim().length > 0 && search.results.length === 0
+  const showCurrentMatchHint =
+    Boolean(selectedBottleId) && search.results.length === 0 && search.query.trim().length > 0
 
   return (
     <div className="bb-bottle-match">
@@ -75,7 +77,13 @@ export function ReportBottleMatchField({
         </div>
       ) : null}
 
-      {showManualMatchHint ? <p className="bb-field__hint">{emptyHint}</p> : null}
+      {showCurrentMatchHint ? (
+        <p className="bb-field__hint">Current match: {search.query}.</p>
+      ) : null}
+
+      {showManualMatchHint && !showCurrentMatchHint ? (
+        <p className="bb-field__hint">{emptyHint}</p>
+      ) : null}
     </div>
   )
 }

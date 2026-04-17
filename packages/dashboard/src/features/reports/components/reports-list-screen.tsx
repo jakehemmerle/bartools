@@ -45,12 +45,12 @@ export function ReportsListScreen({
       ) : (
         <section className="bb-reports-list">
           <div className="bb-reports-columns" aria-hidden="true">
-            <div>Report ID</div>
+            <div>Report</div>
             <div>Status</div>
             <div>Operator</div>
             <div>Started</div>
             <div>Completed</div>
-            <div>Bottle Count</div>
+            <div>Progress</div>
           </div>
           <div className="bb-reports-rows">
             {rows.map((report) => (

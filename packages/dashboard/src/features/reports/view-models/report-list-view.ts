@@ -6,9 +6,11 @@ export type ReportListRowView = {
   id: string
   status: ReportListItem['status']
   operator: string
+  location: string
   startedAt: string
   completedAt: string
-  bottleCount: string
+  progressLabel: string
+  bottleCountLabel: string
 }
 
 export function buildReportListRows(reports: ReportListItem[]): ReportListRowView[] {
@@ -16,8 +18,10 @@ export function buildReportListRows(reports: ReportListItem[]): ReportListRowVie
     id: report.id,
     status: report.status,
     operator: report.userDisplayName ?? 'Unknown operator',
+    location: report.locationName ?? 'Location not set',
     startedAt: formatReportTimestamp(report.startedAt) ?? 'Not started',
     completedAt: formatReportTimestamp(report.completedAt) ?? '--',
-    bottleCount: String(report.bottleCount),
+    progressLabel: `${report.processedCount} / ${report.photoCount} photos`,
+    bottleCountLabel: `${report.bottleCount} ${report.bottleCount === 1 ? 'bottle' : 'bottles'}`,
   }))
 }

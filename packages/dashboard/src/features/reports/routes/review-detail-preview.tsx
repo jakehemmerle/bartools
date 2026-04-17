@@ -19,7 +19,7 @@ export function ReviewDetailPreview({
   const [reviewDraft, setReviewDraft] = useState(() =>
     createReportReviewDraft(detail).map((draft) => ({
       ...draft,
-      bottleId: findBottleMatch(detail, draft.id)?.id ?? null,
+      bottleId: draft.bottleId ?? findBottleMatch(detail, draft.id)?.id ?? null,
     })),
   )
   const [searchState, setSearchState] = useState<Record<string, RecordSearchState>>(() =>
@@ -98,6 +98,14 @@ function findBottleMatch(detail: ReportDetail, recordId: string) {
 
   if (!record) {
     return null
+  }
+
+  if (record.bottleId) {
+    const directMatch = reviewBottleSearchResults.find((result) => result.id === record.bottleId)
+
+    if (directMatch) {
+      return directMatch
+    }
   }
 
   const normalizedName = record.bottleName.toLowerCase()

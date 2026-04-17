@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { createFixtureReportsClient } from '../../../lib/reports/client'
 import { renderAppRoutes } from '../../../test/test-utils'
 
-describe('Reports workbench routes', () => {
+describe('Reports workbench routes: baseline states', () => {
   it('renders all backend lifecycle statuses on the reports list', async () => {
     renderAppRoutes({ initialEntries: ['/reports'] })
 
@@ -12,6 +12,10 @@ describe('Reports workbench routes', () => {
     expect(screen.getByText('processing')).toBeInTheDocument()
     expect(screen.getByText('unreviewed')).toBeInTheDocument()
     expect(screen.getByText('reviewed')).toBeInTheDocument()
+    expect(screen.getByText('Private Room')).toBeInTheDocument()
+    expect(screen.getByText('Back Bar')).toBeInTheDocument()
+    expect(screen.getByText('7 / 9 photos')).toBeInTheDocument()
+    expect(screen.getByText('18 bottles')).toBeInTheDocument()
   })
 
   it('keeps reviewed record details visible even when media is unavailable', async () => {
@@ -38,11 +42,15 @@ describe('Reports workbench routes', () => {
       initialEntries: ['/reports/report-1002'],
     })
 
+    expect(await screen.findByDisplayValue('Montelobos Mezcal')).toBeInTheDocument()
+    expect(screen.getByText('Current match: Montelobos Mezcal.')).toBeInTheDocument()
     expect(await screen.findByText('Fill Level (Tenths)')).toBeInTheDocument()
     expect(screen.getByText(/catalog_no_match/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Submit Review' })).toBeDisabled()
   })
+})
 
+describe('Reports workbench routes: resilience', () => {
   it('shows a calm reports unavailable state when the reports request fails', async () => {
     const baseClient = createFixtureReportsClient()
     const user = userEvent.setup()
@@ -106,7 +114,9 @@ describe('Reports workbench routes', () => {
     expect(await screen.findByRole('heading', { name: 'Report 1002' })).toBeInTheDocument()
     expect(attempts).toBe(2)
   })
+})
 
+describe('Reports workbench routes: live transitions', () => {
   it('shows a calm stream notice when live updates disconnect', async () => {
     const baseClient = createFixtureReportsClient()
     const detail = await baseClient.getReport('report-1001')
@@ -137,5 +147,58 @@ describe('Reports workbench routes', () => {
     expect(
       await screen.findByText('Live updates paused. Refresh or try again in a moment.'),
     ).toBeInTheDocument()
+  })
+
+  it('hydrates review draft state from streamed records before processing becomes reviewable', async () => {
+    const baseClient = createFixtureReportsClient()
+    const detail = await baseClient.getReport('report-1001')
+    const reportsClient = {
+      ...baseClient,
+      async getReport() {
+        return detail
+      },
+      streamReport(_reportId: string, onEvent: Parameters<typeof baseClient.streamReport>[1]) {
+        queueMicrotask(() => {
+          onEvent({
+            type: 'record.inferred',
+            data: {
+              id: 'record-processing-2',
+              bottleId: 'bottle-3',
+              imageUrl: '/fixtures/report-bottle-clear.svg',
+              bottleName: 'Montelobos Mezcal',
+              category: 'Mezcal',
+              upc: '618115630028',
+              volumeMl: 750,
+              fillPercent: 40,
+              corrected: false,
+              status: 'inferred',
+              originalModelOutput: {
+                bottleName: 'Montelobos Mezcal',
+                fillPercent: 40,
+              },
+            },
+          })
+          onEvent({
+            type: 'report.ready_for_review',
+            data: {
+              id: 'report-1001',
+              status: 'unreviewed',
+              photoCount: 3,
+              processedCount: 3,
+            },
+          })
+        })
+
+        return () => undefined
+      },
+    }
+
+    renderAppRoutes({
+      initialEntries: ['/reports/report-1001'],
+      reportsClient,
+    })
+
+    expect(await screen.findByDisplayValue('Montelobos Mezcal')).toBeInTheDocument()
+    expect(screen.getByText('Current match: Montelobos Mezcal.')).toBeInTheDocument()
   })
 })

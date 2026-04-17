@@ -10,7 +10,7 @@ export type ReportReviewRecordDraft = {
 export function createReportReviewDraft(detail: ReportDetail): ReportReviewRecordDraft[] {
   return detail.bottleRecords.map((record) => ({
     id: record.id,
-    bottleId: null,
+    bottleId: record.bottleId ?? null,
     fillTenths: clampFillTenths(Math.round(record.fillPercent / 10)),
   }))
 }

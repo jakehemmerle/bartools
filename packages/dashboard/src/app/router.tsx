@@ -15,54 +15,71 @@ import { ReviewReportReviewedRoute } from '../features/reports/routes/review-rep
 import { ReviewReportUnreviewedRoute } from '../features/reports/routes/review-report-unreviewed-route'
 import { ReviewReportsEmptyRoute } from '../features/reports/routes/review-reports-empty-route'
 import { ReviewReportsListRoute } from '../features/reports/routes/review-reports-list-route'
+import type { ReportsClient } from '../lib/reports/client'
+import {
+  createReportDetailLoader,
+  createReportsListLoader,
+} from '../lib/reports/route-loaders'
 
-export const appRoutes: RouteObject[] = [
-  {
-    path: '/',
-    element: (
-      <PublicShell>
-        <EntryRoute />
-      </PublicShell>
-    ),
-  },
-  {
-    path: '/__review/entry',
-    element: (
-      <PublicShell>
-        <ReviewEntryRoute />
-      </PublicShell>
-    ),
-  },
-  {
-    element: (
-      <WorkbenchShell>
-        <Outlet />
-      </WorkbenchShell>
-    ),
-    children: [
-      { path: '/reports', element: <ReportsRoute /> },
-      { path: '/reports/:reportId', element: <ReportDetailRoute /> },
-      { path: '/__review/reports/list', element: <ReviewReportsListRoute /> },
-      { path: '/__review/reports/empty', element: <ReviewReportsEmptyRoute /> },
-      { path: '/__review/report/created', element: <ReviewReportCreatedRoute /> },
-      { path: '/__review/report/processing', element: <ReviewReportProcessingRoute /> },
-      { path: '/__review/report/unreviewed', element: <ReviewReportUnreviewedRoute /> },
-      { path: '/__review/report/reviewed', element: <ReviewReportReviewedRoute /> },
-      { path: '/__review/report/comparison', element: <ReviewReportComparisonRoute /> },
-      { path: '/__review/report/failed', element: <ReviewReportFailedRoute /> },
-      { path: '/__review/report/blocked', element: <ReviewReportBlockedRoute /> },
-      { path: '/__review/report/not-found', element: <ReviewReportNotFoundRoute /> },
-    ],
-  },
-  { path: '/inventory', element: <Navigate replace to="/reports" /> },
-  { path: '/low-stock', element: <Navigate replace to="/reports" /> },
-  { path: '/settings', element: <Navigate replace to="/reports" /> },
-  { path: '/sign-in', element: <Navigate replace to="/reports" /> },
-  { path: '/sign-up', element: <Navigate replace to="/reports" /> },
-  { path: '/reset-password', element: <Navigate replace to="/reports" /> },
-  { path: '/onboarding/create', element: <Navigate replace to="/reports" /> },
-  { path: '/onboarding/join', element: <Navigate replace to="/reports" /> },
-  { path: '*', element: <Navigate replace to="/reports" /> },
-]
+export function createAppRoutes(reportsClient: ReportsClient): RouteObject[] {
+  return [
+    {
+      path: '/',
+      element: (
+        <PublicShell>
+          <EntryRoute />
+        </PublicShell>
+      ),
+    },
+    {
+      path: '/__review/entry',
+      element: (
+        <PublicShell>
+          <ReviewEntryRoute />
+        </PublicShell>
+      ),
+    },
+    {
+      element: (
+        <WorkbenchShell>
+          <Outlet />
+        </WorkbenchShell>
+      ),
+      children: [
+        {
+          path: '/reports',
+          loader: createReportsListLoader(reportsClient),
+          element: <ReportsRoute />,
+        },
+        {
+          path: '/reports/:reportId',
+          loader: createReportDetailLoader(reportsClient),
+          element: <ReportDetailRoute />,
+        },
+        { path: '/__review/reports/list', element: <ReviewReportsListRoute /> },
+        { path: '/__review/reports/empty', element: <ReviewReportsEmptyRoute /> },
+        { path: '/__review/report/created', element: <ReviewReportCreatedRoute /> },
+        { path: '/__review/report/processing', element: <ReviewReportProcessingRoute /> },
+        { path: '/__review/report/unreviewed', element: <ReviewReportUnreviewedRoute /> },
+        { path: '/__review/report/reviewed', element: <ReviewReportReviewedRoute /> },
+        { path: '/__review/report/comparison', element: <ReviewReportComparisonRoute /> },
+        { path: '/__review/report/failed', element: <ReviewReportFailedRoute /> },
+        { path: '/__review/report/blocked', element: <ReviewReportBlockedRoute /> },
+        { path: '/__review/report/not-found', element: <ReviewReportNotFoundRoute /> },
+      ],
+    },
+    { path: '/inventory', element: <Navigate replace to="/reports" /> },
+    { path: '/low-stock', element: <Navigate replace to="/reports" /> },
+    { path: '/settings', element: <Navigate replace to="/reports" /> },
+    { path: '/sign-in', element: <Navigate replace to="/reports" /> },
+    { path: '/sign-up', element: <Navigate replace to="/reports" /> },
+    { path: '/reset-password', element: <Navigate replace to="/reports" /> },
+    { path: '/onboarding/create', element: <Navigate replace to="/reports" /> },
+    { path: '/onboarding/join', element: <Navigate replace to="/reports" /> },
+    { path: '*', element: <Navigate replace to="/reports" /> },
+  ]
+}
 
-export const appRouter = createBrowserRouter(appRoutes)
+export function createAppRouter(reportsClient: ReportsClient) {
+  return createBrowserRouter(createAppRoutes(reportsClient))
+}
