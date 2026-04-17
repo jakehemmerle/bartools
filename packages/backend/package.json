@@ -9,11 +9,13 @@
     "lint": "eslint .",
     "test": "bun --env-file=../../.env test",
     "db:push": "drizzle-kit push",
+    "db:seed": "bun --env-file=../../.env run src/seed.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@bartools/inference": "workspace:*",
     "@bartools/types": "workspace:*",
+    "@google-cloud/storage": "^7.19.0",
     "drizzle-orm": "^0.45.2",
     "hono": "^4.12.12",
     "motia": "^1.0.4-rc.1",
