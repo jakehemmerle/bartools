@@ -1,0 +1,16 @@
+{
+  "name": "infra",
+  "main": "index.ts",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@pulumi/docker-build": "^0.0.15",
+    "@pulumi/gcp": "^9.20.0",
+    "@pulumi/pulumi": "^3.231.0"
+  }
+}

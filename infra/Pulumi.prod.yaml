@@ -1,0 +1,11 @@
+config:
+  gcp:project: bartools-prod
+  gcp:region: us-east1
+  bartools:env: prod
+  bartools:minInstances: "0"
+  bartools:maxInstances: "3"
+  bartools:cpu: "1"
+  bartools:memory: 512Mi
+  bartools:databaseUrl:
+    secure: v1:ZlY3vNNqk33w8q+V:K+xa4ZklTU4G5oo/CdTl9NkFswhQOfJQTQGhnPXnBZwbSEBKFVsR8G9hSWDsHEdgRMcbG8rXejBoA3lBM/YKNZ3RJ8q6p0jYAI5RLr6YB7SV7pEn3x3DrwoW6s6YH1VqchA2u3SZ/yN6QSwbYQVnVOJ4IPEzAy/gB9gX6lQdajeUEp24zHCzWHfD6H3ZyX2mgMXOGSn5AHLbHTNvk4dMmVf3Ww==
+encryptionsalt: v1:PP6V2+xP1hA=:v1:9U5fn0Tpw+2hWD1l:/dzKsBHnweZuDXwxhED0GSbaSNx3pw==
