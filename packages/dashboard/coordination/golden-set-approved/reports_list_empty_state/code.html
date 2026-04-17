@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Barback - Reports</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#ffb782",
+                        "tertiary-fixed-dim": "#c8c6c6",
+                        "background": "#131313",
+                        "tertiary": "#e4e2e2",
+                        "surface-dim": "#131313",
+                        "outline-variant": "#52443b",
+                        "primary-container": "#ffb782",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-bright": "#393939",
+                        "primary-fixed-dim": "#ffb782",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "on-background": "#e5e2e1",
+                        "outline": "#9f8d82",
+                        "surface-variant": "#353534",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed": "#ffdcc5",
+                        "surface": "#131313",
+                        "on-secondary-container": "#f1a46a",
+                        "surface-container-high": "#2a2a2a",
+                        "on-primary-container": "#79461b",
+                        "on-primary-fixed-variant": "#6b3a10",
+                        "tertiary-container": "#c8c6c6",
+                        "inverse-on-surface": "#313030",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#e4e2e1",
+                        "inverse-primary": "#875125",
+                        "on-surface-variant": "#d7c3b6",
+                        "on-error": "#690005",
+                        "secondary": "#ffb783",
+                        "on-secondary": "#4f2500",
+                        "on-tertiary-container": "#535252",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#6f3806",
+                        "surface-container-highest": "#353534",
+                        "primary-fixed": "#ffdcc5",
+                        "on-primary": "#4f2500",
+                        "on-secondary-fixed-variant": "#6f3806",
+                        "on-tertiary": "#303030",
+                        "surface-container": "#201f1f",
+                        "on-secondary-fixed": "#301400",
+                        "on-tertiary-fixed-variant": "#474747",
+                        "primary": "#ffdcc5",
+                        "on-surface": "#e5e2e1",
+                        "on-primary-fixed": "#301400",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#ffb783",
+                        "inverse-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Newsreader"],
+                        "body": ["Manrope"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            font-family: theme('fontFamily.body');
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-[#131313] dark:bg-[#131313] text-[#FFDCC5] dark:text-[#FFDCC5] docked full-width top-0 bg-[#1C1B1B] border-none flex justify-between items-center w-full px-8 py-4 h-16 sticky z-50">
+<div class="flex items-center gap-4">
+<button aria-label="Go back" class="hover:bg-[#353535] transition-colors duration-200 p-2 rounded-sm active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-['Newsreader'] text-2xl tracking-[0.2em] uppercase text-[#FFDCC5] dark:text-[#FFDCC5] font-bold">BARBACK</h1>
+</div>
+<div class="hidden md:block w-10"></div> <!-- Placeholder to balance flex-between -->
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col px-4 md:px-8 py-8 md:py-12 max-w-7xl mx-auto w-full">
+<!-- Editorial Header -->
+<div class="mb-12">
+<p class="font-label text-sm text-outline-variant uppercase tracking-widest mb-2">Workspace</p>
+<h2 class="font-headline text-4xl md:text-5xl lg:text-6xl text-primary tracking-wide">Reports</h2>
+</div>
+<!-- Empty State Panel -->
+<div class="flex-grow flex items-center justify-center">
+<div class="bg-surface-container-low rounded-lg p-12 md:p-24 text-center max-w-2xl w-full flex flex-col items-center shadow-[0px_24px_48px_rgba(0,0,0,0.5)] border border-outline-variant/15">
+<span class="material-symbols-outlined text-5xl md:text-6xl text-outline-variant mb-6" data-icon="assignment" style="font-variation-settings: 'FILL' 0;">assignment</span>
+<h3 class="font-headline text-2xl md:text-3xl text-on-surface mb-4">Reports</h3>
+<p class="font-body text-on-surface-variant text-base md:text-lg max-w-md mx-auto">No reports found. Recent reports will appear here once they are available.</p>
+</div>
+</div>
+</main>
+</body></html>

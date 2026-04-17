@@ -1,0 +1,207 @@
+.bb-reports-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.bb-reports-columns,
+.bb-reports-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 2fr 1.4fr 1.4fr 1fr;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.bb-reports-columns {
+  padding: 0 var(--space-2xl) var(--space-sm);
+  font-family: var(--font-label);
+  font-size: var(--type-label-size);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.bb-reports-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bb-reports-row {
+  position: relative;
+  padding: var(--space-xl) var(--space-2xl);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-low);
+  overflow: hidden;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.bb-reports-row:hover {
+  background: var(--color-surface-base);
+}
+
+.bb-reports-row__field-label {
+  display: none;
+}
+
+.bb-reports-row__field-value {
+  display: inline;
+}
+
+.bb-reports-row__field-detail {
+  display: inline;
+  color: var(--color-text-secondary);
+}
+
+.bb-reports-row__hoverrail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  opacity: 0;
+  background: var(--color-accent);
+  transition: opacity 180ms ease;
+}
+
+.bb-reports-row:hover .bb-reports-row__hoverrail {
+  opacity: 1;
+}
+
+.bb-reports-row__id,
+.bb-reports-row__started,
+.bb-reports-row__completed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-family: var(--font-label);
+  font-size: var(--type-label-size);
+  color: var(--color-text-muted);
+}
+
+.bb-reports-row__operator {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: var(--type-body-size);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.bb-reports-row__count {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-family: var(--font-label);
+  align-items: flex-end;
+  justify-self: end;
+}
+
+.bb-reports-row__count-value {
+  font-size: 18px;
+  color: var(--color-accent);
+}
+
+.bb-reports-row__count-detail {
+  color: var(--color-text-muted);
+  font-size: var(--type-label-size);
+}
+
+.bb-status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  font-family: var(--font-label);
+  font-size: var(--type-label-compact-size);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.bb-status-chip--created,
+.bb-status-chip--pending {
+  background: var(--color-surface-highest);
+  color: var(--color-text-muted);
+}
+
+.bb-status-chip--processing,
+.bb-status-chip--inferred {
+  background: var(--color-surface-high);
+  color: var(--color-text-secondary);
+}
+
+.bb-status-chip--unreviewed {
+  background: var(--color-surface-highest);
+  color: var(--color-text-secondary);
+}
+
+.bb-status-chip--reviewed {
+  background: var(--color-success-wash);
+  color: var(--color-success);
+}
+
+.bb-status-chip--failed {
+  background: var(--color-error-wash);
+  color: var(--color-error);
+}
+
+.bb-surface-card {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.bb-surface-card--canvas {
+  background: var(--color-bg-canvas);
+}
+
+.bb-surface-card--low {
+  background: var(--color-surface-low);
+}
+
+.bb-surface-card--base {
+  background: var(--color-surface-base);
+}
+
+.bb-surface-card--high {
+  background: var(--color-surface-high);
+}
+
+.bb-loading-panel,
+.bb-empty-state {
+  padding: var(--space-5xl);
+  text-align: center;
+  box-shadow: var(--shadow-ambient);
+}
+
+.bb-loading-panel__eyebrow,
+.bb-empty-state__title {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-display);
+  font-size: var(--type-section-title-size);
+  color: var(--color-text-primary);
+}
+
+.bb-loading-panel__body,
+.bb-empty-state__body {
+  margin: 0;
+  font-size: var(--type-body-size);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.bb-loading-panel__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-xl);
+}
+
+.bb-empty-state__icon {
+  margin-bottom: var(--space-2xl);
+  font-size: 48px;
+  color: var(--color-text-muted);
+}

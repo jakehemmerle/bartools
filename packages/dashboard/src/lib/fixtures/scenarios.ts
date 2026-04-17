@@ -1,10 +1,8 @@
 import {
   inventoryScenarioSchema,
   settingsScenarioSchema,
-  reportsScenarioSchema,
   type InventoryScenario,
   type SettingsScenario,
-  type ReportsScenario,
 } from './schemas'
 import {
   makeBarMember,
@@ -12,8 +10,6 @@ import {
   makeInviteLink,
   makeInventoryRow,
   makeProductParOverride,
-  makeReportDetail,
-  makeReportListItem,
   makeUser,
 } from './builders'
 
@@ -136,70 +132,3 @@ export const settingsScenarios = {
     ],
   }),
 } satisfies Record<string, SettingsScenario>
-
-export const reportsScenario = reportsScenarioSchema.parse({
-  user: makeUser(),
-  reports: [
-    makeReportListItem(),
-    makeReportListItem({
-      id: 'report-1000',
-      completedAt: '2026-04-08T22:09:00-05:00',
-      bottleCount: 22,
-    }),
-    makeReportListItem({
-      id: 'report-0999',
-      status: 'unreviewed',
-      completedAt: '2026-04-07T21:17:00-05:00',
-      bottleCount: 11,
-    }),
-  ],
-  details: {
-    'report-1001': makeReportDetail({
-      bottleRecords: [
-        {
-          id: 'record-1',
-          imageUrl: '/favicon.svg',
-          bottleName: "Tito's Handmade Vodka",
-          category: 'Vodka',
-          upc: '619947000013',
-          volumeMl: 750,
-          fillPercent: 62,
-          corrected: false,
-        },
-        {
-          id: 'record-2',
-          imageUrl: '/favicon.svg',
-          bottleName: 'Espolòn Blanco',
-          category: 'Tequila',
-          upc: '080686834203',
-          volumeMl: 750,
-          fillPercent: 28,
-          corrected: true,
-          originalModelOutput: {
-            bottleName: 'Espolon Silver',
-            fillPercent: 41,
-          },
-          correctedValues: {
-            bottleName: 'Espolòn Blanco',
-            fillPercent: 28,
-          },
-        },
-      ],
-    }),
-    'report-missing-media': makeReportDetail({
-      id: 'report-missing-media',
-      bottleRecords: [
-        {
-          id: 'record-missing',
-          imageUrl: '',
-          bottleName: 'Campari',
-          category: 'Aperitif',
-          upc: '721059000101',
-          volumeMl: 750,
-          fillPercent: 16,
-          corrected: false,
-        },
-      ],
-    }),
-  },
-}) satisfies ReportsScenario

@@ -25,6 +25,7 @@ import { useTheme } from '../../theme/useTheme'
 import { typography, spacing, radii } from '../../theme/tokens'
 import { MOCK_LOCATIONS } from '../../data/mockData'
 import type { LocationListItem } from '@bartools/types'
+import barBackground from '../../assets/bar-background.png'
 
 type CaptureMode = 'queue' | 'camera'
 
@@ -168,7 +169,7 @@ export default function CaptureScreen() {
            top so the bottles fill the entire visible area on tall screens. */}
       <View style={styles.backgroundImage} pointerEvents="none">
         <Image
-          source={require('../../assets/bar-background.png')}
+          source={barBackground}
           style={{ width: '100%', height: '120%' }}
           resizeMode="cover"
           accessible={false}

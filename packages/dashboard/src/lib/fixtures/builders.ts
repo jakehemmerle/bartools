@@ -76,14 +76,23 @@ export function makeProductParOverride(
 export function makeReportListItem(
   overrides: Partial<ReportListItem> = {},
 ) {
+  const status = overrides.status ?? 'reviewed'
+  const bottleCount = overrides.bottleCount ?? 18
+  const processedCount =
+    overrides.processedCount ??
+    (status === 'created' ? 0 : status === 'processing' ? Math.max(0, bottleCount - 2) : bottleCount)
+
   return reportListItemSchema.parse({
     id: 'report-1001',
     startedAt: '2026-04-09T21:44:00-05:00',
     completedAt: '2026-04-09T22:15:00-05:00',
     userId: 'user-manager-1',
     userDisplayName: 'Avery Quinn',
-    bottleCount: 18,
-    status: 'reviewed',
+    locationName: 'Main Bar',
+    bottleCount,
+    photoCount: overrides.photoCount ?? bottleCount,
+    processedCount,
+    status,
     ...overrides,
   })
 }
@@ -101,6 +110,7 @@ export function makeReportDetail(
     bottleRecords: [
       reportBottleRecordSchema.parse({
         id: 'record-1',
+        bottleId: 'bottle-1',
         imageUrl: '/favicon.svg',
         bottleName: 'Tito’s Handmade Vodka',
         category: 'Vodka',
@@ -108,6 +118,7 @@ export function makeReportDetail(
         volumeMl: 750,
         fillPercent: 62,
         corrected: false,
+        status: 'reviewed',
       }),
     ],
     ...overrides,

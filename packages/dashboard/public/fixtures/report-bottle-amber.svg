@@ -1,0 +1,31 @@
+<svg width="320" height="440" viewBox="0 0 320 440" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="440" rx="28" fill="#120E0C"/>
+  <g filter="url(#blurGlow)">
+    <circle cx="240" cy="346" r="94" fill="#B86D1C" fill-opacity="0.34"/>
+    <circle cx="90" cy="116" r="72" fill="#F3BE74" fill-opacity="0.18"/>
+  </g>
+  <rect x="118" y="42" width="84" height="72" rx="24" fill="url(#neck)"/>
+  <path d="M86 136C86 118.327 100.327 104 118 104H202C219.673 104 234 118.327 234 136V326C234 367.974 199.974 402 158 402C116.026 402 82 367.974 82 326V168C82 150.327 96.3269 136 114 136H86Z" fill="url(#glass)"/>
+  <path d="M118 128H202C213.046 128 222 136.954 222 148V320C222 355.346 193.346 384 158 384C122.654 384 94 355.346 94 320V148C94 136.954 102.954 128 114 128H118Z" fill="url(#liquid)"/>
+  <rect x="96" y="192" width="124" height="98" rx="18" fill="#D9C4A6" fill-opacity="0.24"/>
+  <rect x="108" y="208" width="100" height="18" rx="9" fill="#F2E1C7" fill-opacity="0.32"/>
+  <rect x="108" y="236" width="76" height="10" rx="5" fill="#F2E1C7" fill-opacity="0.16"/>
+  <rect x="108" y="252" width="88" height="10" rx="5" fill="#F2E1C7" fill-opacity="0.12"/>
+  <defs>
+    <filter id="blurGlow" x="2" y="28" width="332" height="412" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="34"/>
+    </filter>
+    <linearGradient id="neck" x1="160" y1="42" x2="160" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5C4636"/>
+      <stop offset="1" stop-color="#8A684A"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="96" y1="104" x2="246" y2="390" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8E6E4C" stop-opacity="0.76"/>
+      <stop offset="1" stop-color="#3E2B1E" stop-opacity="0.94"/>
+    </linearGradient>
+    <linearGradient id="liquid" x1="158" y1="128" x2="158" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D48A2E" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#6B310F" stop-opacity="0.94"/>
+    </linearGradient>
+  </defs>
+</svg>
