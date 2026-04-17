@@ -6,15 +6,20 @@ import {
   RouterProvider,
 } from 'react-router-dom'
 import { AppProviders } from '../app/providers'
-import { appRoutes } from '../app/router'
+import { createAppRoutes } from '../app/router'
+import type { ReportsClient } from '../lib/reports/client'
+import { createDefaultReportsClient } from '../lib/reports/provider'
 
 export function renderWithProviders(
   ui: ReactNode,
-  { initialEntries = ['/'] }: { initialEntries?: string[] } = {},
+  {
+    initialEntries = ['/'],
+    reportsClient,
+  }: { initialEntries?: string[]; reportsClient?: ReportsClient } = {},
 ) {
   function Wrapper({ children }: PropsWithChildren) {
     return (
-      <AppProviders>
+      <AppProviders reportsClient={reportsClient}>
         <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
       </AppProviders>
     )
@@ -25,13 +30,16 @@ export function renderWithProviders(
 
 export function renderAppRoutes({
   initialEntries = ['/'],
+  reportsClient,
 }: {
   initialEntries?: string[]
+  reportsClient?: ReportsClient
 } = {}) {
-  const router = createMemoryRouter(appRoutes, { initialEntries })
+  const resolvedClient = reportsClient ?? createDefaultReportsClient()
+  const router = createMemoryRouter(createAppRoutes(resolvedClient), { initialEntries })
 
   return render(
-    <AppProviders>
+    <AppProviders reportsClient={resolvedClient}>
       <RouterProvider router={router} />
     </AppProviders>,
   )

@@ -60,7 +60,8 @@
           "photosPermission": "BarBack accesses your photo library to import bottle photos for inventory."
         }
       ],
-      "./plugins/with-privacy-manifest"
+      "./plugins/with-privacy-manifest.cjs",
+      "./plugins/with-bottle-seg-plugin.cjs"
     ],
     "extra": {
       "router": {},

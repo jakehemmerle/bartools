@@ -1,16 +1,12 @@
 import type { PropsWithChildren } from 'react'
-import { MantineProvider } from '@mantine/core'
-import { Notifications } from '@mantine/notifications'
-import { FixtureSessionProvider } from '../lib/fixture-session'
-import { dashboardTheme } from './theme'
+import type { ReportsClient } from '../lib/reports/client'
+import { ReportsClientProvider } from '../lib/reports/provider'
 
-export function AppProviders({ children }: PropsWithChildren) {
+export function AppProviders({
+  children,
+  reportsClient,
+}: PropsWithChildren<{ reportsClient?: ReportsClient }>) {
   return (
-    <FixtureSessionProvider>
-      <MantineProvider defaultColorScheme="light" theme={dashboardTheme}>
-        <Notifications position="top-right" />
-        {children}
-      </MantineProvider>
-    </FixtureSessionProvider>
+    <ReportsClientProvider client={reportsClient}>{children}</ReportsClientProvider>
   )
 }

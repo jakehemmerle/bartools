@@ -1,5 +1,11 @@
 import { z } from 'zod'
-import { REPORT_STATUSES } from '@bartools/types'
+import {
+  REPORT_RECORD_STATUSES,
+  REPORT_STATUSES,
+  type ReportBottleRecord as SharedReportBottleRecord,
+  type ReportDetail as SharedReportDetail,
+  type ReportListItem as SharedReportListItem,
+} from '@bartools/types'
 
 export const userSchema = z.object({
   id: z.string(),
@@ -55,18 +61,30 @@ export const inventoryProductRowSchema = z.object({
   sourceReportStatus: z.literal('reviewed'),
 })
 
-export const reportListItemSchema = z.object({
+const modelOutputSchema = z.object({
+  bottleName: z.string().optional(),
+  category: z.string().optional(),
+  upc: z.string().optional(),
+  volumeMl: z.number().optional(),
+  fillPercent: z.number().min(0).max(100).optional(),
+})
+
+export const reportListItemSchema: z.ZodType<SharedReportListItem> = z.object({
   id: z.string(),
   startedAt: z.string().optional(),
   completedAt: z.string().optional(),
   userId: z.string().optional(),
   userDisplayName: z.string().optional(),
+  locationName: z.string().optional(),
   bottleCount: z.number().int().nonnegative(),
+  photoCount: z.number().int().nonnegative(),
+  processedCount: z.number().int().nonnegative(),
   status: z.enum(REPORT_STATUSES),
 })
 
-export const reportBottleRecordSchema = z.object({
+export const reportBottleRecordSchema: z.ZodType<SharedReportBottleRecord> = z.object({
   id: z.string(),
+  bottleId: z.string().optional(),
   imageUrl: z.string(),
   bottleName: z.string(),
   category: z.string().optional(),
@@ -74,27 +92,14 @@ export const reportBottleRecordSchema = z.object({
   volumeMl: z.number().optional(),
   fillPercent: z.number().min(0).max(100),
   corrected: z.boolean(),
-  originalModelOutput: z
-    .object({
-      bottleName: z.string().optional(),
-      category: z.string().optional(),
-      upc: z.string().optional(),
-      volumeMl: z.number().optional(),
-      fillPercent: z.number().min(0).max(100).optional(),
-    })
-    .optional(),
-  correctedValues: z
-    .object({
-      bottleName: z.string().optional(),
-      category: z.string().optional(),
-      upc: z.string().optional(),
-      volumeMl: z.number().optional(),
-      fillPercent: z.number().min(0).max(100).optional(),
-    })
-    .optional(),
+  status: z.enum(REPORT_RECORD_STATUSES),
+  errorCode: z.string().optional(),
+  errorMessage: z.string().optional(),
+  originalModelOutput: modelOutputSchema.optional(),
+  correctedValues: modelOutputSchema.optional(),
 })
 
-export const reportDetailSchema = z.object({
+export const reportDetailSchema: z.ZodType<SharedReportDetail> = z.object({
   id: z.string(),
   startedAt: z.string().optional(),
   completedAt: z.string().optional(),
@@ -129,8 +134,8 @@ export type BarMember = z.infer<typeof barMemberSchema>
 export type BarSettings = z.infer<typeof barSettingsSchema>
 export type ProductParOverride = z.infer<typeof productParOverrideSchema>
 export type InventoryProductRow = z.infer<typeof inventoryProductRowSchema>
-export type ReportListItem = z.infer<typeof reportListItemSchema>
-export type ReportDetail = z.infer<typeof reportDetailSchema>
+export type ReportListItem = SharedReportListItem
+export type ReportDetail = SharedReportDetail
 export type InventoryScenario = z.infer<typeof inventoryScenarioSchema>
 export type SettingsScenario = z.infer<typeof settingsScenarioSchema>
 export type ReportsScenario = z.infer<typeof reportsScenarioSchema>

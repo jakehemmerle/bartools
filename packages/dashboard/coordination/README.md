@@ -22,7 +22,12 @@ Use this directory for:
 - `ticket-backlog.md` — ticket-sized implementation backlog derived from the phase plan and execution backlog
 - `fixture-schema-strategy.md` — fixture and scenario validation strategy, including planned Zod usage
 - `testing-strategy.md` — testing layers, recommended tooling, and minimum test bar by implementation phase
+- `live-backend-smoke.md` — exact staging-proxy launch path and current live smoke checklist
 - `readiness.md` — implementation readiness gate and current go/no-go assessment
+- `stitch_handoff_selection.md` — canonical mockup winners, locked design decisions, and mockup defects to correct or ignore
+- `stitch_prompt_v4_3_handoff.md` — constrained Stitch prompt for a final handoff-oriented cleanup pass
+- `golden-set-approved/` — consolidated approved screen bundle with upload-ready images and copied source folders
+- `reports-workbench-implementation/` — detailed execution plan for turning the approved mockups into the real reports-first web app
 
 ## Working Agreement
 

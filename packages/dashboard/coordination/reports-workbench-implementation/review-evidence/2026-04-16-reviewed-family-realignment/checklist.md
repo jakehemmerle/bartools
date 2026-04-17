@@ -1,0 +1,4 @@
+| Screen | Route | Golden Reference | Screenshot | Visual Verdict | Semantic Verdict | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| Report Reviewed | `/__review/report/reviewed` | `golden-set-approved/report_detail_reviewed_revised` | `screens/07-report-reviewed.png` | `pass-with-notes` | `pass` | Every reviewed record now uses the comparison-card language, which removes the prior mixed-card drift; spacing and metadata placement still need a later polish pass. |
+| Report Comparison | `/__review/report/comparison` | `golden-set-approved/report_detail_comparison_emphasis_final` | `screens/08-report-comparison.png` | `pass-with-notes` | `pass` | The route now gets a dedicated hero comparison card with media token, fill-rail emphasis, and a quieter shell; the remaining drift is mostly in the heading treatment and placeholder imagery. |

@@ -78,3 +78,43 @@ Or target a workspace directly:
 ```sh
 bun --filter @bartools/backend dev
 ```
+
+## Running the mobile app on iOS Simulator
+
+### Prerequisites
+
+- **Xcode** installed (with iOS Simulator runtime matching your SDK — check Xcode > Settings > Components)
+- **Bun** installed (see above)
+
+### Option A: Expo Go (fastest, no native build)
+
+```sh
+cd packages/mobile
+bunx expo start --go --ios
+```
+
+This installs Expo Go on the simulator and loads the app. Note: native modules like `react-native-vision-camera` won't work in Expo Go — camera features will be unavailable.
+
+### Option B: Development build (full native features)
+
+```sh
+cd packages/mobile
+bunx expo run:ios
+```
+
+This generates the native Xcode project under `ios/`, compiles, and installs on the simulator. The first build takes several minutes. Subsequent builds are incremental.
+
+If xcodebuild fails with a destination error, ensure your simulator runtime version matches the installed Xcode SDK:
+
+```sh
+xcodebuild -showsdks | grep -i simulator   # check SDK version
+xcrun simctl list runtimes                  # check installed runtimes
+```
+
+If they don't match, install the correct simulator runtime from Xcode > Settings > Components.
+
+## Cola Sample Pack
+
+Download the sample pack here:
+
+https://dyuie4zgfxmt6.cloudfront.net/samples/cola-sample-pack-v1.zip

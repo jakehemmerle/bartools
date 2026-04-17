@@ -26,7 +26,12 @@ export function useReportStream(reportId: string | null) {
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reset state on subscription change
-    setState({ status: reportId ? 'connecting' : 'closed', progress: null, records: [], error: null })
+    setState({
+      status: reportId ? 'connecting' : 'closed',
+      progress: null,
+      records: [],
+      error: null,
+    })
     if (!reportId) return
 
     const url = getReportStreamUrl(reportId)
