@@ -38,12 +38,16 @@ const reportListItemSchema = z.object({
   completedAt: z.string().optional(),
   userId: z.string().optional(),
   userDisplayName: z.string().optional(),
+  locationName: z.string().optional(),
   bottleCount: z.number().nonnegative(),
+  photoCount: z.number().nonnegative(),
+  processedCount: z.number().nonnegative(),
   status: z.enum(REPORT_STATUSES),
 }) satisfies z.ZodType<ReportListItem>
 
 const reportBottleRecordSchema = z.object({
   id: z.string(),
+  bottleId: z.string().optional(),
   imageUrl: z.string(),
   bottleName: z.string(),
   category: z.string().optional(),
