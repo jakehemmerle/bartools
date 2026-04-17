@@ -75,12 +75,16 @@ export const reportListItemSchema: z.ZodType<SharedReportListItem> = z.object({
   completedAt: z.string().optional(),
   userId: z.string().optional(),
   userDisplayName: z.string().optional(),
+  locationName: z.string().optional(),
   bottleCount: z.number().int().nonnegative(),
+  photoCount: z.number().int().nonnegative(),
+  processedCount: z.number().int().nonnegative(),
   status: z.enum(REPORT_STATUSES),
 })
 
 export const reportBottleRecordSchema: z.ZodType<SharedReportBottleRecord> = z.object({
   id: z.string(),
+  bottleId: z.string().optional(),
   imageUrl: z.string(),
   bottleName: z.string(),
   category: z.string().optional(),
