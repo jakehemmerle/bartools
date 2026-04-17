@@ -10,7 +10,9 @@ describe('report review draft helpers', () => {
     const drafts = createReportReviewDraft(baseReportsScenario.details['report-1002'])
 
     expect(drafts).toHaveLength(2)
+    expect(drafts[0]?.bottleId).toBe('bottle-3')
     expect(drafts[0]?.fillTenths).toBe(5)
+    expect(drafts[1]?.bottleId).toBeNull()
   })
 
   it('builds the exact backend review payload shape once every record is decided', () => {

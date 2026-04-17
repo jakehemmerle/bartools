@@ -11,8 +11,9 @@ export function ReportsListRow({ report }: ReportsListRowProps) {
     <Link className="bb-reports-row" to={`/reports/${report.id}`}>
       <span className="bb-reports-row__hoverrail" aria-hidden="true" />
       <div className="bb-reports-row__id">
-        <span className="bb-reports-row__field-label">Report ID</span>
+        <span className="bb-reports-row__field-label">Report</span>
         <span className="bb-reports-row__field-value">{report.id}</span>
+        <span className="bb-reports-row__field-detail">{report.location}</span>
       </div>
       <div className="bb-reports-row__status">
         <StatusChip status={report.status} />
@@ -30,8 +31,9 @@ export function ReportsListRow({ report }: ReportsListRowProps) {
         <span className="bb-reports-row__field-value">{report.completedAt}</span>
       </div>
       <div className="bb-reports-row__count">
-        <span className="bb-reports-row__field-label">Bottles</span>
-        <span className="bb-reports-row__count-value">{report.bottleCount}</span>
+        <span className="bb-reports-row__field-label">Progress</span>
+        <span className="bb-reports-row__count-value">{report.progressLabel}</span>
+        <span className="bb-reports-row__count-detail">{report.bottleCountLabel}</span>
       </div>
     </Link>
   )

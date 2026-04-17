@@ -51,6 +51,11 @@
   display: inline;
 }
 
+.bb-reports-row__field-detail {
+  display: inline;
+  color: var(--color-text-secondary);
+}
+
 .bb-reports-row__hoverrail {
   position: absolute;
   left: 0;
@@ -98,6 +103,11 @@
 .bb-reports-row__count-value {
   font-size: 18px;
   color: var(--color-accent);
+}
+
+.bb-reports-row__count-detail {
+  color: var(--color-text-muted);
+  font-size: var(--type-label-size);
 }
 
 .bb-status-chip {

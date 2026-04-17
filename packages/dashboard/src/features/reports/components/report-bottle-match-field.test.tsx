@@ -63,6 +63,21 @@ describe('ReportBottleMatchField', () => {
 
     expect(onSelectResult).toHaveBeenCalledWith(fixtureResults[1])
   })
+
+  it('shows a calm current-match hint when a bottle is already selected but no results are loaded', () => {
+    renderField(
+      {
+        query: 'Montelobos Mezcal',
+        results: [],
+      },
+      {
+        selectedBottleId: 'bottle-1',
+      },
+    )
+
+    expect(screen.getByText('Current match: Montelobos Mezcal.')).toBeInTheDocument()
+    expect(screen.queryByText('Needs manual matching.')).not.toBeInTheDocument()
+  })
 })
 
 function renderField(

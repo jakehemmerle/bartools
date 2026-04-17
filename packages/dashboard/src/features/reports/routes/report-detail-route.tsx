@@ -1,18 +1,18 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useEffect, useState } from 'react'
+import { startTransition, Suspense, useEffect, useRef, useState } from 'react'
 import type { BottleSearchResult, ReportDetail } from '@bartools/types'
-import { useParams } from 'react-router-dom'
-import {
-  createReportReviewDraft,
-  type ReportReviewRecordDraft,
-} from '../../../lib/reports/review-draft'
-import {
-  applyReportStreamEvent,
-  createReportStreamViewState,
-} from '../../../lib/reports/stream'
+import { Await, useLoaderData, useParams, useRevalidator } from 'react-router-dom'
+import { DelayedFallback } from '../../../components/primitives/delayed-fallback'
+import { createReportReviewDraft, type ReportReviewRecordDraft } from '../../../lib/reports/review-draft'
+import { applyReportStreamEvent, createReportStreamViewState } from '../../../lib/reports/stream'
 import { useReportsClient } from '../../../lib/reports/provider'
-import { ReportLoadErrorScreen } from '../components/report-load-error-screen'
+import type {
+  ReportDetailLoadResult,
+  ReportDetailRouteData,
+} from '../../../lib/reports/route-loaders'
 import { ReportDetailScreen } from '../components/report-detail-screen'
+import { ReportLoadErrorScreen } from '../components/report-load-error-screen'
+import { ReportLoadingScreen } from '../components/report-loading-screen'
 import { ReportNotFoundScreen } from '../components/report-not-found-screen'
 
 type RecordSearchState = {
@@ -21,107 +21,105 @@ type RecordSearchState = {
 }
 
 export function ReportDetailRoute() {
-  const client = useReportsClient()
-  const { reportId = '' } = useParams()
-  const [reloadToken, setReloadToken] = useState(0)
-  const [streamMessage, setStreamMessage] = useState<string | null>(null)
-  const [detailState, setDetailState] = useState<{
-    detail: ReportDetail | null
-    reportId: string
-    status: 'error' | 'loaded'
-  } | null>(null)
-  const [reviewDraft, setReviewDraft] = useState<ReportReviewRecordDraft[]>([])
-  const [searchState, setSearchState] = useState<Record<string, RecordSearchState>>({})
+  const { loadResult } = useLoaderData() as ReportDetailRouteData
 
-  useEffect(() => {
-    let cancelled = false
-    let unsubscribe: () => void = () => undefined
+  return (
+    <Suspense
+      fallback={
+        <DelayedFallback>
+          <ReportLoadingScreen />
+        </DelayedFallback>
+      }
+    >
+      <Await resolve={loadResult}>
+        {(result: ReportDetailLoadResult) => (
+          <ResolvedReportDetailRoute loadResult={result} />
+        )}
+      </Await>
+    </Suspense>
+  )
+}
 
-    void client
-      .getReport(reportId)
-      .then((detail) => {
-        if (cancelled) {
-          return
-        }
+function ResolvedReportDetailRoute({
+  loadResult,
+}: {
+  loadResult: ReportDetailLoadResult
+}) {
+  const revalidator = useRevalidator()
 
-        setDetailState({
-          detail,
-          reportId,
-          status: 'loaded',
-        })
-        setStreamMessage(null)
-        setReviewDraft(detail ? createReportReviewDraft(detail) : [])
-        setSearchState({})
-
-        if (detail) {
-          unsubscribe = client.streamReport(reportId, (event) => {
-            if (event.type === 'report.stream_disconnected') {
-              setStreamMessage(event.data.message)
-              return
-            }
-
-            setStreamMessage(null)
-            setDetailState((currentState) => {
-              if (!currentState?.detail) {
-                return currentState
-              }
-
-              return {
-                reportId: currentState.reportId,
-                detail: applyReportStreamEvent(
-                  createReportStreamViewState(currentState.detail),
-                  event,
-                ).detail,
-                status: currentState.status,
-              }
-            })
-          })
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setDetailState({
-            detail: null,
-            reportId,
-            status: 'error',
-          })
-        }
-      })
-
-    return () => {
-      cancelled = true
-      unsubscribe()
-    }
-  }, [client, reloadToken, reportId])
-
-  if (!detailState || detailState.reportId !== reportId) {
-    return <div className="bb-loading-route">Loading report.</div>
-  }
-
-  if (detailState.status === 'error') {
+  if (loadResult.status === 'error') {
     return (
       <ReportLoadErrorScreen
         onRetry={() => {
-          setDetailState(null)
-          setReviewDraft([])
-          setSearchState({})
-          setStreamMessage(null)
-          setReloadToken((current) => current + 1)
+          startTransition(() => {
+            revalidator.revalidate()
+          })
         }}
       />
     )
   }
 
-  if (!detailState.detail) {
+  if (!loadResult.detail) {
     return <ReportNotFoundScreen />
   }
 
   return (
+    <LoadedReportDetailRoute
+      key={buildLoadedReportDetailKey(loadResult.detail)}
+      initialDetail={loadResult.detail}
+    />
+  )
+}
+
+function LoadedReportDetailRoute({
+  initialDetail,
+}: {
+  initialDetail: ReportDetail
+}) {
+  const client = useReportsClient()
+  const { reportId = '' } = useParams()
+  const [streamMessage, setStreamMessage] = useState<string | null>(null)
+  const [detail, setDetail] = useState(initialDetail)
+  const detailRef = useRef<ReportDetail>(initialDetail)
+  const [reviewDraft, setReviewDraft] = useState<ReportReviewRecordDraft[]>(() =>
+    createReportReviewDraft(initialDetail),
+  )
+  const [searchState, setSearchState] = useState<Record<string, RecordSearchState>>(() =>
+    createInitialSearchState(initialDetail),
+  )
+
+  useEffect(() => {
+    return client.streamReport(reportId, (event) => {
+      if (event.type === 'report.stream_disconnected') {
+        setStreamMessage(event.data.message)
+        return
+      }
+
+      setStreamMessage(null)
+      const currentDetail = detailRef.current
+      const nextDetail = applyReportStreamEvent(
+        createReportStreamViewState(currentDetail),
+        event,
+      ).detail
+
+      detailRef.current = nextDetail
+      setDetail(nextDetail)
+
+      if (currentDetail.status === 'processing') {
+        setReviewDraft(createReportReviewDraft(nextDetail))
+        setSearchState(createInitialSearchState(nextDetail))
+      }
+    })
+  }, [client, reportId])
+
+  return (
     <ReportDetailScreen
-      detail={detailState.detail}
+      detail={detail}
       onFillTenthsChange={handleFillTenthsChange(setReviewDraft)}
       onReviewBottleChange={handleBottleChange(setReviewDraft)}
-      onReviewSearch={(recordId, query) => void handleBottleSearch(recordId, query, client, setSearchState)}
+      onReviewSearch={(recordId, query) =>
+        void handleBottleSearch(recordId, query, client, setSearchState)
+      }
       onReviewSearchQueryChange={(recordId, query) =>
         setSearchState((current) => ({
           ...current,
@@ -133,11 +131,33 @@ export function ReportDetailRoute() {
         }))
       }
       readinessMessage={client.readiness.message}
-      statusMessage={streamMessage}
       reviewActionMode="integration-blocked"
       reviewDraft={reviewDraft}
       searchState={searchState}
+      statusMessage={streamMessage}
     />
+  )
+}
+
+function buildLoadedReportDetailKey(detail: ReportDetail) {
+  return [
+    detail.id,
+    detail.status,
+    detail.startedAt ?? '',
+    detail.completedAt ?? '',
+    detail.bottleRecords.length,
+  ].join(':')
+}
+
+function createInitialSearchState(detail: ReportDetail): Record<string, RecordSearchState> {
+  return Object.fromEntries(
+    detail.bottleRecords.map((record) => [
+      record.id,
+      {
+        query: record.bottleId ? record.bottleName : '',
+        results: [],
+      },
+    ]),
   )
 }
 
