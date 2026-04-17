@@ -9,9 +9,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
-    "runtimeVersion": {
-      "policy": "fingerprint"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/7596766c-99a3-48ad-9735-efbd235130b0"
     },
@@ -52,7 +50,8 @@
       [
         "react-native-vision-camera",
         {
-          "cameraPermissionText": "BarBack uses the camera to photograph bottles for inventory identification."
+          "cameraPermissionText": "BarBack uses the camera to photograph bottles for inventory identification.",
+          "enableMicrophonePermission": false
         }
       ],
       [
