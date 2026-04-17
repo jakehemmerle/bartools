@@ -6,28 +6,10 @@ import {
   useCameraPermission,
   type PhotoFile,
 } from 'react-native-vision-camera';
-import { Linking } from 'react-native';
 
 type CameraCaptureProps = {
   onPhotoTaken: (uri: string) => void;
 };
-
-function PermissionDenied() {
-  return (
-    <View style={styles.centered}>
-      <Text style={styles.title}>Camera Access Required</Text>
-      <Text style={styles.subtitle}>
-        BarBack needs camera access to photograph bottles for identification.
-      </Text>
-      <TouchableOpacity
-        style={styles.settingsButton}
-        onPress={() => Linking.openSettings()}
-      >
-        <Text style={styles.settingsButtonText}>Open Settings</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 function NoCameraDevice() {
   return (

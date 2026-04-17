@@ -42,3 +42,20 @@ Docs/context.md
 # SkillShed (subfolder tooling)
 SkillShed/
 .gstack/
+
+# Local-only research reference docs (not for repo)
+thoughts/shared/research/references/deployment-*.md
+
+# Office temp/lock files
+~$*
+
+# Local data / runtime uploads
+assets/*.jsonl
+packages/backend/data/
+
+# EAS submission credentials (never commit)
+packages/mobile/google-service-account.json
+packages/mobile/AuthKey.p8
+
+# Large local-only assets
+assets/videos/

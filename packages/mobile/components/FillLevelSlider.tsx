@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useRef, useCallback } from 'react'
 import { View, Text, PanResponder, StyleSheet, LayoutChangeEvent } from 'react-native'
 import { useTheme } from '../theme/useTheme'
 
@@ -18,7 +18,6 @@ export function FillLevelSlider({
   label,
 }: Readonly<FillLevelSliderProps>) {
   const theme = useTheme()
-  const [trackLength, setTrackLength] = useState(0)
   const trackRef = useRef<View>(null)
 
   const clampedValue = Math.max(0, Math.min(100, value))
@@ -28,14 +27,12 @@ export function FillLevelSlider({
   const onValueChangeRef = useRef(onValueChange)
   onValueChangeRef.current = onValueChange
 
-  const handleLayout = useCallback((e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout
-    setTrackLength(orientation === 'horizontal' ? width : height)
-    // Also measure absolute position on screen
+  const handleLayout = useCallback((_e: LayoutChangeEvent) => {
+    // Measure absolute position on screen
     trackRef.current?.measure((_x, _y, w, h, pageX, pageY) => {
       layoutRef.current = { x: pageX, y: pageY, width: w, height: h }
     })
-  }, [orientation])
+  }, [])
 
   const panResponder = useRef(
     PanResponder.create({

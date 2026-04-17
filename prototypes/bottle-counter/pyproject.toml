@@ -1,0 +1,22 @@
+[project]
+name = "bottle-counter"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "coremltools>=9.0",
+    "lap>=0.5.13",
+    "numpy<2.4",
+    "opencv-python>=4.13.0.92",
+    "ultralytics>=8.4.37",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

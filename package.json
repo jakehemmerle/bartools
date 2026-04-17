@@ -5,7 +5,7 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "bun test packages/ui/src/greet.test.ts && bun --filter @bartools/dashboard test",
+    "test": "bun test packages/ui/src/greet.test.ts && bun --filter @bartools/dashboard test && bun test packages/mobile/lib/__tests__/",
     "dev:backend": "bun --filter @bartools/backend dev",
     "dev:dashboard": "bun --filter @bartools/dashboard dev",
     "dev:mobile": "bun --filter @bartools/mobile start"

@@ -1,0 +1,11 @@
+config:
+  gcp:project: bartools-staging
+  gcp:region: us-east1
+  bartools:env: staging
+  bartools:minInstances: "0"
+  bartools:maxInstances: "1"
+  bartools:cpu: "1"
+  bartools:memory: 512Mi
+  bartools:databaseUrl:
+    secure: v1:GufiGGvqP4dCATO+:R064hj1ZDZdQBV6J9PCHZm1kioJuGzXEjpoXiUQxxxowH3tU3YZxntTkAaUHqPXr23GN3XlBIA49omRiREX6RCdT7AxbMsnwxKGXyVjf4hrY+8ahKj95ps/vn3SRKTSX4kuhhuF37UP25DQWn/Ev1/YMqKJ8TErv7W9hFWSuierNgVDW6KR+9UKXMa4fmxXBY7IT98Z3DBfdNHsO+w4PdDDRFLY=
+encryptionsalt: v1:mSpTjxC1/UQ=:v1:rSnlWSg3quqxuZbk:F1mpag5lqxqNKuzdTJ2E2CZqvH1deA==

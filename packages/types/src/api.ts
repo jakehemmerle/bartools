@@ -14,12 +14,16 @@ export type ReportListItem = {
   completedAt?: string;
   userId?: string;
   userDisplayName?: string;
+  locationName?: string;
   bottleCount: number;
+  photoCount: number;
+  processedCount: number;
   status: ReportStatus;
 };
 
 export type ReportBottleRecord = {
   id: string;
+  bottleId?: string;
   imageUrl: string;
   bottleName: string;
   category?: string;

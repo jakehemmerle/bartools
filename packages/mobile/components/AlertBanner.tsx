@@ -63,7 +63,7 @@ export function AlertBanner() {
               {MOCK_LOW_STOCK_ALERTS.map(alert => (
                 <AlertCard
                   key={`${alert.bottle.id}-${alert.location.id}`}
-                  bottleName={alert.bottle.brand}
+                  bottleName={alert.bottle.name}
                   location={alert.location.name}
                   fillPercent={alert.fillPercent}
                   parThreshold={alert.parThreshold}
