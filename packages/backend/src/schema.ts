@@ -213,6 +213,9 @@ export const scans = pgTable(
     index('scans_location_idx').on(table.locationId),
     index('scans_bottle_idx').on(table.bottleId),
     index('scans_scanned_at_idx').on(table.scannedAt),
+    // Lets POST /photos/complete be idempotent: a retried complete call with
+    // the same object key lands on the existing row instead of duplicating.
+    unique('scans_photo_gcs_object_uniq').on(table.photoGcsObject),
   ]
 );
 

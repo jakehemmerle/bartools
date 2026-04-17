@@ -1,4 +1,4 @@
-import { count, eq, sql } from 'drizzle-orm';
+import { count, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from './db';
 import { inferenceJobs, reportRecords, reports, scans } from './schema';
@@ -64,7 +64,18 @@ export async function addReportPhotos(
     sortOrder: upload.sortOrder,
   }));
 
-  const created = await db.insert(scans).values(rows).returning();
+  // Idempotent on scans.photoGcsObject: a retried /complete (flaky network,
+  // app resume, etc.) lands on the existing row instead of duplicating.
+  // onConflictDoNothing skips returning existing rows, so we select by the
+  // full object list below.
+  await db
+    .insert(scans)
+    .values(rows)
+    .onConflictDoNothing({ target: scans.photoGcsObject });
+
+  const objects = uploads.map((u) => u.object);
+  const resolved = await db.select().from(scans).where(inArray(scans.photoGcsObject, objects));
+  const byObject = new Map(resolved.map((scan) => [scan.photoGcsObject, scan]));
 
   const [{ totalCount }] = await db
     .select({ totalCount: count(scans.id) })
@@ -76,7 +87,8 @@ export async function addReportPhotos(
     .set({ photoCount: Number(totalCount) })
     .where(eq(reports.id, reportId));
 
-  return created;
+  // Preserve request order so response[i] corresponds to uploads[i].
+  return uploads.map((u) => byObject.get(u.object)!);
 }
 
 export async function submitReport(reportId: string): Promise<ReportScanInferencePayload[]> {
