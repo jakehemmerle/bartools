@@ -32,11 +32,15 @@ yarn-error.log*
 coverage
 
 # Claude Code (ephemeral)
-.claude/worktrees/
-.claude/mcp.json
+.claude/
 thoughts/scratchpad/
+thoughts/trace/
+
+# Accidental Expo stub at repo root (real config lives at packages/mobile/app.json)
+/app.json
 
 # Session state (ephemeral)
+docs/context.md
 Docs/context.md
 
 # SkillShed (subfolder tooling)

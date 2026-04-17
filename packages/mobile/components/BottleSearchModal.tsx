@@ -53,6 +53,7 @@ export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<Bot
 
   useEffect(() => {
     if (visible) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- debounced search triggered by query/visible changes
       doSearch(query)
     }
     return () => {
@@ -63,6 +64,7 @@ export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<Bot
   // Reset on close
   useEffect(() => {
     if (!visible) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset modal state when it closes
       setQuery('')
       setResults([])
     }
