@@ -6,20 +6,16 @@ export function buildAndPushImage(opts: {
   project: string;
   region: string;
   imageTag: string;
-  repositoryName: pulumi.Output<string>;
-  dependsOn: pulumi.Resource[];
+  repositoryName: pulumi.Input<string>;
 }) {
+  const repoRoot = resolve(__dirname, '../..');
   const tag = pulumi.interpolate`${opts.region}-docker.pkg.dev/${opts.project}/${opts.repositoryName}/backend:${opts.imageTag}`;
 
-  return new docker.Image(
-    `backend-image`,
-    {
-      tags: [tag],
-      context: { location: resolve(__dirname, '../..') },
-      dockerfile: { location: resolve(__dirname, '../../packages/backend/Dockerfile') },
-      platforms: ['linux/amd64'],
-      push: true,
-    },
-    { dependsOn: opts.dependsOn }
-  );
+  return new docker.Image(`backend-image`, {
+    tags: [tag],
+    context: { location: repoRoot },
+    dockerfile: { location: `${repoRoot}/packages/backend/Dockerfile` },
+    platforms: ['linux/amd64'],
+    push: true,
+  });
 }

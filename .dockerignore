@@ -38,3 +38,9 @@ thoughts
 Docs
 SkillShed
 assets/videos
+prototypes
+**/*.mp4
+**/*.mov
+**/*.pt
+**/*.onnx
+**/*.tsbuildinfo

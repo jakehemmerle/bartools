@@ -4,19 +4,12 @@
 FROM oven/bun:1-alpine AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
-COPY packages/backend/package.json packages/backend/
-COPY packages/inference/package.json packages/inference/
-COPY packages/types/package.json packages/types/
-COPY packages/dashboard/package.json packages/dashboard/
-COPY packages/mobile/package.json packages/mobile/
-COPY packages/ui/package.json packages/ui/
-COPY packages/eval/package.json packages/eval/
+COPY --parents packages/*/package.json ./
 RUN bun install --frozen-lockfile --production
 
 FROM oven/bun:1-alpine AS runtime
 WORKDIR /app
-# Copy entire install tree (root + per-workspace node_modules) first,
-# then overlay real source so Bun's hoisted deps aren't shadowed.
+# Overlay source on top of the install tree so Bun's hoisted node_modules survive.
 COPY --from=deps /app /app
 COPY packages/backend ./packages/backend
 COPY packages/inference ./packages/inference

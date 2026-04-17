@@ -38,7 +38,6 @@ export function createCloudRunService(opts: {
               startupCpuBoost: true,
             },
             envs: [
-              { name: 'NODE_ENV', value: 'production' },
               { name: 'BARTOOLS_ENV', value: opts.env },
               {
                 name: 'DATABASE_URL',

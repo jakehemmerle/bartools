@@ -7,7 +7,6 @@ import { buildAndPushImage } from './src/image';
 import { createCloudRunService } from './src/run';
 import { execSync } from 'node:child_process';
 
-const stack = pulumi.getStack();
 const gcpConfig = new pulumi.Config('gcp');
 const bartoolsConfig = new pulumi.Config('bartools');
 
@@ -21,12 +20,7 @@ const memory = bartoolsConfig.require('memory');
 
 const databaseUrl = bartoolsConfig.requireSecret('databaseUrl');
 
-let imageTag: string;
-try {
-  imageTag = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-} catch {
-  imageTag = 'dev';
-}
+const imageTag = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
 
 const apiServices = enableApis(project);
 
@@ -56,7 +50,6 @@ const image = buildAndPushImage({
   region,
   imageTag,
   repositoryName: registry.repositoryId,
-  dependsOn: [registry],
 });
 
 const runService = createCloudRunService({
@@ -70,10 +63,9 @@ const runService = createCloudRunService({
   maxInstances,
   cpu,
   memory,
-  dependsOn: [secretResources.version, image],
+  dependsOn: [secretResources.version],
 });
 
-export const stackName = stack;
 export const serviceName = runService.name;
 export const serviceUrl = runService.uri;
 export const healthUrl = pulumi.interpolate`${runService.uri}/health`;
