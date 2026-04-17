@@ -18,7 +18,10 @@
       "android": {
         "buildType": "apk"
       },
-      "channel": "development"
+      "channel": "development",
+      "env": {
+        "EXPO_PUBLIC_BARTOOLS_API_URL": "https://bartools-backend-staging-zjausnxoyq-ue.a.run.app"
+      }
     },
     "development-simulator": {
       "extends": "development",
@@ -38,7 +41,10 @@
       "android": {
         "buildType": "apk"
       },
-      "channel": "staging"
+      "channel": "staging",
+      "env": {
+        "EXPO_PUBLIC_BARTOOLS_API_URL": "https://bartools-backend-staging-zjausnxoyq-ue.a.run.app"
+      }
     },
     "production": {
       "extends": "base",
