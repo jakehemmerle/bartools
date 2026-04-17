@@ -19,8 +19,8 @@ We are staying all-GCP (no new AWS surface area), and the staging environment ca
 
 Replace the single multipart endpoint with a **two-step presigned flow**:
 
-1. `POST /reports/:reportId/photos/presign` — backend generates a GCS V4 pre-signed PUT URL and returns `{ url, bucket, object, expiresAt }`. Object key format: `reports/{reportId}/{uuid}.jpg`.
-2. Mobile PUTs the JPEG bytes directly to the returned URL with `Content-Type: image/jpeg` (V4 signing binds the header — client and signer must agree).
+1. `POST /reports/:reportId/photos/presign` — client sends `{ uploads: [{ contentType }, ...] }`; backend returns one V4 pre-signed PUT URL per entry as `{ uploads: [{ object, putUrl, contentType, expiresAt }] }`. `contentType` is validated against an allowlist (`image/jpeg`, `image/png`, `image/heic`, `image/heif`, `image/webp`). Object keys are `reports/{reportId}/{uuid}.{ext}`, where `{ext}` is picked by the server to match `contentType`.
+2. Mobile infers `contentType` from each photo's URI extension, PUTs the bytes to the returned URL, and sends the *same* `Content-Type` header the server signed with (V4 binds the header).
 3. `POST /reports/:reportId/photos/complete` — backend writes a `scans` row recording `photoGcsBucket` + `photoGcsObject`. Inference then reads the bytes via the Node SDK (`bucket.file(object).download()`) — no presigned GET needed.
 
 Hard cut on staging: the old multipart endpoint and `GET /uploads/:filename` are deleted in the same PR. No dual-write, no migration.
@@ -41,7 +41,7 @@ Improves:
 
 Trade-offs:
 - Two round-trips before the upload (presign, then PUT) vs. one today. Acceptable — presign is a cheap signed-URL generation.
-- V4 signing binds `Content-Type`; a client mismatch is a 403. Mitigated by pinning `image/jpeg` in both the signer and the mobile PUT.
+- V4 signing binds `Content-Type`; a client mismatch is a 403. Mitigated by having the server echo the signed `contentType` back in the presign response so the client PUTs the exact string it was signed with.
 - Orphaned objects if a client presigns but never completes. Accepted for MVP (see follow-ups).
 
 Out of scope for this ADR:

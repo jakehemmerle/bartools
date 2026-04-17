@@ -4,11 +4,6 @@ import { db } from './db';
 import { inferenceJobs, reportRecords, reports, scans } from './schema';
 import { getBucketName } from './storage';
 
-export type ReportPhotoUpload = {
-  object: string;
-  sortOrder: number;
-};
-
 export const createReportSchema = z.object({
   userId: z.string().uuid(),
   venueId: z.string().uuid(),
@@ -32,7 +27,7 @@ export async function createReport(input: z.infer<typeof createReportSchema>) {
 
 export async function addReportPhotos(
   reportId: string,
-  uploads: ReportPhotoUpload[]
+  uploads: Array<{ object: string; sortOrder: number }>
 ) {
   const [report] = await db
     .select({

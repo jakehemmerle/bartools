@@ -51,9 +51,38 @@ app.post('/reports', async (c) => {
   return c.json(report, 201);
 });
 
+// Allowlist of photo MIME types mobile/web clients may upload. Keep in sync
+// with EXT_FOR_CONTENT_TYPE below so object keys carry the matching extension.
+const ALLOWED_PHOTO_CONTENT_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/heic',
+  'image/heif',
+  'image/webp',
+] as const;
+type PhotoContentType = (typeof ALLOWED_PHOTO_CONTENT_TYPES)[number];
+
+const EXT_FOR_CONTENT_TYPE: Record<PhotoContentType, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
+  'image/webp': 'webp',
+};
+
+function buildPhotoObjectKey(reportId: string, contentType: PhotoContentType): string {
+  return `reports/${reportId}/${crypto.randomUUID()}.${EXT_FOR_CONTENT_TYPE[contentType]}`;
+}
+
 const presignRequestSchema = z.object({
-  count: z.number().int().min(1).max(50),
-  contentType: z.string().min(1).optional(),
+  uploads: z
+    .array(
+      z.object({
+        contentType: z.enum(ALLOWED_PHOTO_CONTENT_TYPES).default('image/jpeg'),
+      })
+    )
+    .min(1)
+    .max(50),
 });
 
 app.post('/reports/:reportId/photos/presign', async (c) => {
@@ -63,16 +92,16 @@ app.post('/reports/:reportId/photos/presign', async (c) => {
     throw jsonError(400, 'invalid_presign_payload');
   }
 
-  const contentType = parsed.data.contentType ?? 'image/jpeg';
   const ttlSeconds = getTtlSeconds();
 
   const signed = await Promise.all(
-    Array.from({ length: parsed.data.count }, async () => {
-      const object = `reports/${reportId}/${crypto.randomUUID()}.jpg`;
+    parsed.data.uploads.map(async ({ contentType }) => {
+      const object = buildPhotoObjectKey(reportId, contentType);
       const { putUrl, expiresAt } = await presignPut(object, contentType, ttlSeconds);
       return {
         object,
         putUrl,
+        contentType,
         expiresAt: expiresAt.toISOString(),
       };
     })

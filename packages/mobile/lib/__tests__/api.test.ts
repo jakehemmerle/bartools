@@ -144,12 +144,22 @@ describe('api client', () => {
     expect(lastCall().url).toContain('/venues/v-1/locations')
   })
 
-  it('uploadPhotos runs presign → parallel PUTs → complete with image/jpeg', async () => {
-    // 1) presign response
+  it('uploadPhotos infers per-photo Content-Type and threads it through presign + PUT', async () => {
+    // 1) presign response (backend echoes contentType back)
     queueResponse({
       uploads: [
-        { object: 'obj-a', putUrl: 'https://gcs.example.com/a?sig=1', expiresAt: '2030-01-01T00:00:00Z' },
-        { object: 'obj-b', putUrl: 'https://gcs.example.com/b?sig=2', expiresAt: '2030-01-01T00:00:00Z' },
+        {
+          object: 'obj-a',
+          putUrl: 'https://gcs.example.com/a?sig=1',
+          contentType: 'image/jpeg',
+          expiresAt: '2030-01-01T00:00:00Z',
+        },
+        {
+          object: 'obj-b',
+          putUrl: 'https://gcs.example.com/b?sig=2',
+          contentType: 'image/heic',
+          expiresAt: '2030-01-01T00:00:00Z',
+        },
       ],
     })
     // 2) two GCS PUTs
@@ -163,23 +173,37 @@ describe('api client', () => {
       ],
     })
 
-    const result = await uploadPhotos('r-1', ['file:///a.jpg', 'file:///b.jpg'])
+    const result = await uploadPhotos('r-1', ['file:///a.jpg', 'file:///b.heic'])
 
-    // Presign call
+    // Presign call: per-photo contentType derived from URI extension.
     expect(fetchCalls[0]!.url).toContain('/reports/r-1/photos/presign')
     expect(fetchCalls[0]!.init?.method).toBe('POST')
     const presignBody = JSON.parse(fetchCalls[0]!.init?.body as string)
-    expect(presignBody).toEqual({ count: 2, contentType: 'image/jpeg' })
+    expect(presignBody).toEqual({
+      uploads: [
+        { contentType: 'image/jpeg' },
+        { contentType: 'image/heic' },
+      ],
+    })
 
-    // GCS PUT calls — order may vary (Promise.all), but both must be PUTs with image/jpeg
+    // GCS PUT calls — each must use the contentType the server signed for.
     const gcsCalls = fetchCalls.slice(1, 3)
-    const gcsUrls = gcsCalls.map((c) => c.url).sort()
-    expect(gcsUrls).toEqual(['https://gcs.example.com/a?sig=1', 'https://gcs.example.com/b?sig=2'])
-    for (const call of gcsCalls) {
-      expect(call.init?.method).toBe('PUT')
-      const headers = call.init?.headers as Record<string, string> | undefined
-      expect(headers?.['Content-Type']).toBe('image/jpeg')
-    }
+    const byUrl = Object.fromEntries(gcsCalls.map((c) => [c.url, c]))
+    expect(Object.keys(byUrl).sort()).toEqual([
+      'https://gcs.example.com/a?sig=1',
+      'https://gcs.example.com/b?sig=2',
+    ])
+    expect(byUrl['https://gcs.example.com/a?sig=1']!.init?.method).toBe('PUT')
+    expect(
+      (byUrl['https://gcs.example.com/a?sig=1']!.init?.headers as Record<string, string>)[
+        'Content-Type'
+      ],
+    ).toBe('image/jpeg')
+    expect(
+      (byUrl['https://gcs.example.com/b?sig=2']!.init?.headers as Record<string, string>)[
+        'Content-Type'
+      ],
+    ).toBe('image/heic')
 
     // Complete call
     expect(fetchCalls[3]!.url).toContain('/reports/r-1/photos/complete')

@@ -94,13 +94,38 @@ export function createReport(
 // Photo upload: presign → PUT to GCS → complete
 // ---------------------------------------------------------------------------
 
-// Content-Type used for every photo upload. MUST match what presign requested,
-// or GCS V4 signature verification will reject the PUT.
-const PHOTO_CONTENT_TYPE = 'image/jpeg'
+// MIME types the backend presign endpoint accepts. Keep in sync with the
+// allowlist in packages/backend/src/index.ts.
+export type PhotoContentType =
+  | 'image/jpeg'
+  | 'image/png'
+  | 'image/heic'
+  | 'image/heif'
+  | 'image/webp'
+
+// Extension → MIME, covering what vision-camera and expo-image-picker emit on
+// iOS/Android. Anything we can't match falls back to jpeg, which is also what
+// both libraries default to.
+export function inferPhotoContentType(uri: string): PhotoContentType {
+  const ext = uri.split('.').pop()?.toLowerCase() ?? ''
+  switch (ext) {
+    case 'png':
+      return 'image/png'
+    case 'heic':
+      return 'image/heic'
+    case 'heif':
+      return 'image/heif'
+    case 'webp':
+      return 'image/webp'
+    default:
+      return 'image/jpeg'
+  }
+}
 
 export type PresignedUpload = {
   object: string
   putUrl: string
+  contentType: PhotoContentType
   expiresAt: string // ISO timestamp
 }
 
@@ -125,12 +150,12 @@ export type CompleteResponse = {
 
 export function presignUploads(
   reportId: string,
-  count: number,
+  uploads: Array<{ contentType: PhotoContentType }>,
 ): Promise<PresignResponse> {
   return fetchJson(`/reports/${encodePath(reportId)}/photos/presign`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ count, contentType: PHOTO_CONTENT_TYPE }),
+    body: JSON.stringify({ uploads }),
   })
 }
 
@@ -146,16 +171,12 @@ export function completeUploads(
 }
 
 /**
- * PUT a local file directly to a GCS V4-signed URL.
+ * PUT a local file directly to a GCS V4-signed URL. Uses the `File` API from
+ * `expo-file-system` to read raw bytes so we avoid multipart encoding (GCS
+ * rejects multipart bodies on a signed PUT) and the base64→bytes round-trip.
  *
- * Implementation note: uses `expo-file-system`'s new `File` API (v55+) to read
- * the file as an `ArrayBuffer` and send it as the raw request body. This avoids
- * multipart encoding — GCS rejects multipart bodies when it expects raw bytes —
- * and avoids the base64→bytes round-trip.
- *
- * The `Content-Type` header MUST exactly match the value passed at presign time
- * (currently hardcoded to `image/jpeg` on both sides) or GCS will reject the
- * request with a signature-mismatch error.
+ * `contentType` MUST equal the value the presign step was signed with, or GCS
+ * returns a signature mismatch.
  */
 export async function uploadToGcs(
   putUrl: string,
@@ -183,7 +204,8 @@ export async function uploadPhotos(
   reportId: string,
   photoUris: string[],
 ): Promise<CompleteResponse> {
-  const { uploads } = await presignUploads(reportId, photoUris.length)
+  const requested = photoUris.map((uri) => ({ contentType: inferPhotoContentType(uri) }))
+  const { uploads } = await presignUploads(reportId, requested)
   if (uploads.length !== photoUris.length) {
     throw new Error(
       `presign returned ${uploads.length} URLs for ${photoUris.length} photos`,
@@ -191,7 +213,7 @@ export async function uploadPhotos(
   }
   await Promise.all(
     photoUris.map((uri, i) =>
-      uploadToGcs(uploads[i]!.putUrl, uri, PHOTO_CONTENT_TYPE),
+      uploadToGcs(uploads[i]!.putUrl, uri, uploads[i]!.contentType),
     ),
   )
   return completeUploads(
