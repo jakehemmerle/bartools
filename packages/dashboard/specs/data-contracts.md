@@ -192,6 +192,84 @@ An acceptable MVP alternative is client-side CSV generation from fetched JSON if
 
 Session export is deferred from MVP unless the team explicitly re-promotes it later.
 
+## Backstock Reports
+
+```ts
+type BackstockReportLineItem = {
+  productId: string
+  productName: string
+  category?: string
+  upc?: string
+  volumeMl?: number
+  quantityFullBottles: number
+}
+
+type BackstockSourcePhoto = {
+  id: string
+  imageUrl: string
+  uploadedAt?: string
+}
+
+type BackstockReportListItem = {
+  id: string
+  locationId: string
+  locationName: string
+  userId?: string
+  userDisplayName?: string
+  createdAt?: string
+  submittedAt?: string
+  skuCount: number
+  totalBottleCount: number
+  status: 'draft' | 'submitted'
+  reportMode: 'backstock'
+}
+
+type BackstockReportDetail = {
+  id: string
+  locationId: string
+  locationName: string
+  userId?: string
+  userDisplayName?: string
+  createdAt?: string
+  submittedAt?: string
+  status: 'draft' | 'submitted'
+  reportMode: 'backstock'
+  lineItems: BackstockReportLineItem[]
+  sourcePhotos: BackstockSourcePhoto[]
+}
+```
+
+MVP backstock assumptions:
+
+- Backstock reports are product-level reports, not bottle-level review records
+- Line items represent integer counts of full bottles
+- Backstock reports do not use fill sliders in MVP
+- Source photos are optional input for generated draft line items in MVP
+- When source photos are used, they are provided up front to create the initial draft rather than attached later as evidence
+- The operator must be able to edit generated products and counts before submit
+- The dashboard must not invent quantity inference locally from attached photos
+- Backstock reports are scoped to one location
+- This draft assumes snapshot semantics by default rather than delta semantics
+- The editable draft can remain frontend-local in MVP after generation returns
+
+Example resource capabilities:
+
+- request presigned upload targets for backstock source photos
+- optionally generate backstock draft from source photos supplied at creation time
+- submit backstock report
+- list backstock reports
+- get backstock report detail
+
+Open contract questions:
+
+- whether submitted detail always retains the source photos or allows later pruning
+- whether backstock report history shares a collection with scan reports or uses a dedicated resource
+- how low-confidence or partial-coverage warnings are represented in the generated draft
+
+Implementation note:
+
+- Photo-assisted backstock should assume direct-to-storage uploads via presigned URLs because the backend is expected to run in a serverless shape.
+
 ## Notes
 
 - Session detail assumes thumbnail images are available for confirmed bottle records in MVP.
