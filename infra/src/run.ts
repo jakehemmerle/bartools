@@ -16,7 +16,6 @@ export function createCloudRunService(opts: {
   claudeCodeOauthTokenSecretId: pulumi.Output<string>;
   langsmithApiKeySecretId: pulumi.Output<string>;
   gcsBucketName: pulumi.Input<string>;
-  gcsPresignedPutTtlSeconds: string;
   minInstances: number;
   maxInstances: number;
   cpu: string;
@@ -49,7 +48,7 @@ export function createCloudRunService(opts: {
             envs: [
               { name: 'BARTOOLS_ENV', value: opts.env },
               { name: 'GCS_BUCKET', value: pulumi.output(opts.gcsBucketName) },
-              { name: 'GCS_PRESIGNED_PUT_TTL_SECONDS', value: opts.gcsPresignedPutTtlSeconds },
+              { name: 'GCS_PRESIGNED_PUT_TTL_SECONDS', value: '300' },
               secretEnv('DATABASE_URL', opts.databaseUrlSecretId),
               secretEnv('CLAUDE_CODE_OAUTH_TOKEN', opts.claudeCodeOauthTokenSecretId),
               secretEnv('LANGSMITH_API_KEY', opts.langsmithApiKeySecretId),

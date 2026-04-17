@@ -151,7 +151,7 @@ export const bottles = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    unique('bottles_name_uniq').on(table.name),
+    index('bottles_name_idx').on(table.name),
     index('bottles_category_idx').on(table.category),
   ]
 );

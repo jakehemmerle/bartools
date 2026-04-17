@@ -94,7 +94,6 @@ const runService = createCloudRunService({
   claudeCodeOauthTokenSecretId: claudeCodeOauthTokenSecret.secretId,
   langsmithApiKeySecretId: langsmithApiKeySecret.secretId,
   gcsBucketName: uploadsBucket.name,
-  gcsPresignedPutTtlSeconds: '300',
   minInstances,
   maxInstances,
   cpu,
