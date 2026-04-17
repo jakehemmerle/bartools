@@ -54,10 +54,10 @@
         "track": "internal"
       },
       "ios": {
-        "ascAppId": "YOUR_APP_STORE_CONNECT_APP_ID",
+        "ascAppId": "6762476579",
         "ascApiKeyPath": "./AuthKey.p8",
-        "ascApiKeyIssuerId": "YOUR_ISSUER_ID",
-        "ascApiKeyId": "YOUR_KEY_ID"
+        "ascApiKeyIssuerId": "38efbc62-e5f6-4f50-9adf-d04d8b188130",
+        "ascApiKeyId": "BXUN39KMTG"
       }
     }
   }
