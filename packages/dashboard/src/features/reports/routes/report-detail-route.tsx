@@ -40,6 +40,7 @@ export function ReportDetailRoute() {
 
       setDetailState({ reportId, detail })
       setReviewDraft(detail ? createReportReviewDraft(detail) : [])
+      setSearchState({})
 
       if (detail) {
         unsubscribe = client.streamReport(reportId, (event) => {

@@ -6,7 +6,7 @@ import type {
   ReportListItem,
   ReportProgress,
 } from '@bartools/types'
-import { reportsScenario } from '../fixtures/scenarios'
+import { baseReportsScenario } from './base-scenario'
 import { sortReportsNewestFirst } from '../reports-view'
 
 export type ReportsIntegrationReadiness = {
@@ -95,183 +95,244 @@ type FixtureState = {
 }
 
 export function createFixtureReportsClient(): ReportsClient {
-  const state = cloneValue<FixtureState>({
-    reports: reportsScenario.reports,
-    details: reportsScenario.details,
-  })
+  const state = createFixtureState()
 
   return {
     readiness,
     async listReports() {
-      return cloneValue(sortReportsNewestFirst(state.reports))
+      return listFixtureReports(state)
     },
     async getReport(reportId) {
-      return state.details[reportId] ? cloneValue(state.details[reportId]) : null
+      return getFixtureReport(state, reportId)
     },
     streamReport(reportId, onEvent) {
-      const detail = state.details[reportId]
-
-      if (!detail) {
-        return () => undefined
-      }
-
-      const timers: number[] = []
-
-      if (detail.status === 'created') {
-        timers.push(
-          globalThis.setTimeout(() => {
-            onEvent({
-              type: 'report.progress',
-              data: {
-                id: detail.id,
-                status: 'processing',
-                photoCount: detail.bottleRecords.length,
-                processedCount: 0,
-              },
-            })
-          }, 120),
-        )
-      }
-
-      if (detail.status === 'processing') {
-        const inferredRecord = detail.bottleRecords.find((record) => record.status === 'pending')
-
-        if (inferredRecord) {
-          timers.push(
-            globalThis.setTimeout(() => {
-              onEvent({
-                type: 'record.inferred',
-                data: {
-                  ...inferredRecord,
-                  bottleName: 'Wild Turkey 101',
-                  category: 'Bourbon',
-                  upc: '072105900151',
-                  volumeMl: 1000,
-                  fillPercent: 40,
-                  status: 'inferred',
-                  originalModelOutput: {
-                    bottleName: 'Wild Turkey 101',
-                    fillPercent: 40,
-                  },
-                },
-              })
-            }, 120),
-          )
-        }
-
-        timers.push(
-          globalThis.setTimeout(() => {
-            onEvent({
-              type: 'report.ready_for_review',
-              data: {
-                id: detail.id,
-                status: 'unreviewed',
-                photoCount: detail.bottleRecords.length,
-                processedCount: detail.bottleRecords.length,
-              },
-            })
-          }, 240),
-        )
-      }
-
-      return () => {
-        for (const timer of timers) {
-          globalThis.clearTimeout(timer)
-        }
-      }
+      return streamFixtureReport(state.details[reportId], onEvent)
     },
     async reviewReport(reportId, payload) {
-      const detail = state.details[reportId]
+      return reviewFixtureReport(state, reportId, payload)
+    },
+    searchBottles: searchFixtureBottles,
+    listVenueLocations: listFixtureVenueLocations,
+  }
+}
 
-      if (!detail) {
-        throw new Error(`Unknown report: ${reportId}`)
-      }
+function createFixtureState(): FixtureState {
+  return cloneValue<FixtureState>({
+    reports: baseReportsScenario.reports,
+    details: baseReportsScenario.details,
+  })
+}
 
-      const nextRecords = detail.bottleRecords.map((record) => {
-        const reviewRecord = payload.records.find((item) => item.id === record.id)
+function listFixtureReports(state: FixtureState): ReportListItem[] {
+  return cloneValue(sortReportsNewestFirst(state.reports))
+}
 
-        if (!reviewRecord) {
-          throw new Error(`Missing review decision for record: ${record.id}`)
-        }
+function getFixtureReport(state: FixtureState, reportId: string): ReportDetail | null {
+  return state.details[reportId] ? cloneValue(state.details[reportId]) : null
+}
 
-        const matchedBottle = fixtureBottleSearchResults.find(
-          (bottle) => bottle.id === reviewRecord.bottleId,
-        )
+function streamFixtureReport(
+  detail: ReportDetail | undefined,
+  onEvent: (event: ReportStreamEvent) => void,
+): () => void {
+  if (!detail) {
+    return () => undefined
+  }
 
-        if (!matchedBottle) {
-          throw new Error(`Unknown bottle: ${reviewRecord.bottleId}`)
-        }
+  const timers: Array<ReturnType<typeof globalThis.setTimeout>> = []
 
-        const nextFillPercent = reviewRecord.fillTenths * 10
-        const originalModelOutput =
-          record.originalModelOutput ??
-          {
-            bottleName: record.bottleName,
-            category: record.category,
-            upc: record.upc,
-            volumeMl: record.volumeMl,
-            fillPercent: record.fillPercent,
-          }
+  queueCreatedProgressEvent(detail, onEvent, timers)
+  queueProcessingEvents(detail, onEvent, timers)
 
-        const corrected =
-          record.bottleName !== matchedBottle.name || record.fillPercent !== nextFillPercent
+  return () => {
+    for (const timer of timers) {
+      globalThis.clearTimeout(timer)
+    }
+  }
+}
 
-        return {
-          ...record,
+function queueCreatedProgressEvent(
+  detail: ReportDetail,
+  onEvent: (event: ReportStreamEvent) => void,
+  timers: Array<ReturnType<typeof globalThis.setTimeout>>,
+) {
+  if (detail.status !== 'created') {
+    return
+  }
+
+  timers.push(
+    globalThis.setTimeout(() => {
+      onEvent({
+        type: 'report.progress',
+        data: {
+          id: detail.id,
+          status: 'processing',
+          photoCount: detail.bottleRecords.length,
+          processedCount: 0,
+        },
+      })
+    }, 120),
+  )
+}
+
+function queueProcessingEvents(
+  detail: ReportDetail,
+  onEvent: (event: ReportStreamEvent) => void,
+  timers: Array<ReturnType<typeof globalThis.setTimeout>>,
+) {
+  if (detail.status !== 'processing') {
+    return
+  }
+
+  const inferredRecord = detail.bottleRecords.find((record) => record.status === 'pending')
+
+  if (inferredRecord) {
+    timers.push(
+      globalThis.setTimeout(() => {
+        onEvent({
+          type: 'record.inferred',
+          data: {
+            ...inferredRecord,
+            bottleName: 'Wild Turkey 101',
+            category: 'Bourbon',
+            upc: '072105900151',
+            volumeMl: 1000,
+            fillPercent: 40,
+            status: 'inferred',
+            originalModelOutput: {
+              bottleName: 'Wild Turkey 101',
+              fillPercent: 40,
+            },
+          },
+        })
+      }, 120),
+    )
+  }
+
+  timers.push(
+    globalThis.setTimeout(() => {
+      onEvent({
+        type: 'report.ready_for_review',
+        data: {
+          id: detail.id,
+          status: 'unreviewed',
+          photoCount: detail.bottleRecords.length,
+          processedCount: detail.bottleRecords.length,
+        },
+      })
+    }, 240),
+  )
+}
+
+function reviewFixtureReport(
+  state: FixtureState,
+  reportId: string,
+  payload: ReportReviewInput,
+): ReportDetail {
+  const detail = state.details[reportId]
+
+  if (!detail) {
+    throw new Error(`Unknown report: ${reportId}`)
+  }
+
+  const nextRecords = detail.bottleRecords.map((record) => {
+    const reviewRecord = payload.records.find((item) => item.id === record.id)
+
+    return buildReviewedRecord(record, reviewRecord)
+  })
+
+  const nextDetail: ReportDetail = {
+    ...detail,
+    userId: payload.userId,
+    status: 'reviewed',
+    bottleRecords: nextRecords,
+  }
+
+  state.details[reportId] = nextDetail
+  state.reports = updateFixtureReports(state.reports, reportId, payload.userId)
+
+  return cloneValue(nextDetail)
+}
+
+function buildReviewedRecord(
+  record: ReportBottleRecord,
+  reviewRecord: ReportReviewRecordInput | undefined,
+): ReportBottleRecord {
+  if (!reviewRecord) {
+    throw new Error(`Missing review decision for record: ${record.id}`)
+  }
+
+  const matchedBottle = fixtureBottleSearchResults.find(
+    (bottle) => bottle.id === reviewRecord.bottleId,
+  )
+
+  if (!matchedBottle) {
+    throw new Error(`Unknown bottle: ${reviewRecord.bottleId}`)
+  }
+
+  const nextFillPercent = reviewRecord.fillTenths * 10
+  const originalModelOutput =
+    record.originalModelOutput ?? {
+      bottleName: record.bottleName,
+      category: record.category,
+      upc: record.upc,
+      volumeMl: record.volumeMl,
+      fillPercent: record.fillPercent,
+    }
+  const corrected =
+    record.bottleName !== matchedBottle.name || record.fillPercent !== nextFillPercent
+
+  return {
+    ...record,
+    bottleName: matchedBottle.name,
+    category: matchedBottle.category,
+    upc: matchedBottle.upc,
+    volumeMl: matchedBottle.volumeMl,
+    fillPercent: nextFillPercent,
+    corrected,
+    status: 'reviewed',
+    errorCode: undefined,
+    errorMessage: undefined,
+    originalModelOutput,
+    correctedValues: corrected
+      ? {
           bottleName: matchedBottle.name,
           category: matchedBottle.category,
           upc: matchedBottle.upc,
           volumeMl: matchedBottle.volumeMl,
           fillPercent: nextFillPercent,
-          corrected,
-          status: 'reviewed' as const,
-          errorCode: undefined,
-          errorMessage: undefined,
-          originalModelOutput,
-          correctedValues: corrected
-            ? {
-                bottleName: matchedBottle.name,
-                category: matchedBottle.category,
-                upc: matchedBottle.upc,
-                volumeMl: matchedBottle.volumeMl,
-                fillPercent: nextFillPercent,
-              }
-            : undefined,
         }
-      })
-
-      const nextDetail: ReportDetail = {
-        ...detail,
-        userId: payload.userId,
-        status: 'reviewed',
-        bottleRecords: nextRecords,
-      }
-
-      state.details[reportId] = nextDetail
-      state.reports = state.reports.map((report) =>
-        report.id === reportId ? { ...report, userId: payload.userId, status: 'reviewed' } : report,
-      )
-
-      return cloneValue(nextDetail)
-    },
-    async searchBottles(query) {
-      const normalizedQuery = query.trim().toLowerCase()
-
-      if (!normalizedQuery) {
-        return []
-      }
-
-      return cloneValue(
-        fixtureBottleSearchResults.filter((bottle) =>
-          `${bottle.name} ${bottle.upc ?? ''}`.toLowerCase().includes(normalizedQuery),
-        ),
-      )
-    },
-    async listVenueLocations(venueId) {
-      void venueId
-      return cloneValue(fixtureLocationListItems)
-    },
+      : undefined,
   }
+}
+
+function updateFixtureReports(
+  reports: ReportListItem[],
+  reportId: string,
+  userId: string,
+): ReportListItem[] {
+  return reports.map((report) =>
+    report.id === reportId ? { ...report, userId, status: 'reviewed' } : report,
+  )
+}
+
+async function searchFixtureBottles(query: string): Promise<BottleSearchResult[]> {
+  const normalizedQuery = query.trim().toLowerCase()
+
+  if (!normalizedQuery) {
+    return []
+  }
+
+  return cloneValue(
+    fixtureBottleSearchResults.filter((bottle) =>
+      `${bottle.name} ${bottle.upc ?? ''}`.toLowerCase().includes(normalizedQuery),
+    ),
+  )
+}
+
+async function listFixtureVenueLocations(venueId: string): Promise<LocationListItem[]> {
+  void venueId
+  return cloneValue(fixtureLocationListItems)
 }
 
 function cloneValue<T>(value: T): T {

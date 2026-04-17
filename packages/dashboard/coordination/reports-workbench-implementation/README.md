@@ -46,6 +46,9 @@ Make it possible to build the web frontend in a way that is:
 - `review-evidence-protocol.md`
   The required proof bundle for visual review, semantic review, and per-pass verification.
 
+- `code-quality-gates.md`
+  Anti-slop code-quality policy for React + TypeScript structure, Storybook scope, and testing discipline.
+
 - `architecture-renegotiation-protocol.md`
   The process for consciously changing architecture instead of drifting into it.
 
@@ -60,6 +63,30 @@ Make it possible to build the web frontend in a way that is:
 
 - `backpressure-and-review-gates.md`
   Explicit drift checks and pass/fail gates that every implementation phase should satisfy.
+
+- `planning-status.md`
+  Explicit statement of what is authoritative now, what is historical, and what planning still remains.
+
+- `ticket-backlog.md`
+  The live ticket-sized execution backlog for the current reports-workbench build.
+
+- `implementation-kickoff-checklist.md`
+  The brutally practical first-pass checklist for starting implementation without reinterpreting older docs.
+
+- `autonomy-envelope.md`
+  Defines what implementation may decide alone and what must stop the run.
+
+- `dependency-decision-policy.md`
+  Defines the current dependency posture and dependency-related stop conditions.
+
+- `architecture-defaults.md`
+  Defines the default architectural choices to make when the code presents multiple paths.
+
+- `visual-deviation-policy.md`
+  Defines which visual deviations are acceptable without asking and which should stop the run.
+
+- `evidence-runbook.md`
+  Defines the operational evidence discipline for long-running implementation passes.
 
 - `decisions/README.md`
   Decision-log rules and template for any conscious architecture renegotiation.
