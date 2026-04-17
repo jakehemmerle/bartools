@@ -40,6 +40,8 @@ On new session, read context in this priority order (stop if you have enough con
 
 Only read individual `thoughts/shared/decisions/*.md` files if SUMMARY.md doesn't exist or you need detail on a specific decision.
 
+For anything infra/deploy related (Cloud Run, Neon, Pulumi, URLs, secrets), read `infra/RESOURCES.md` first, then `infra/RUNBOOK.md` for day-2 ops.
+
 ## Commands
 - `/research` — interactive research dialogue loop (start here for greenfield)
 - `/plan` — synthesize research into implementation plan

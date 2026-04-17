@@ -1,0 +1,8 @@
+name: bartools
+description: BarBack backend infra — Cloud Run + Neon Postgres
+runtime:
+  name: nodejs
+  options:
+    packagemanager: bun
+    typescript: true
+main: index.ts
