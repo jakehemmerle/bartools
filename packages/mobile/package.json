@@ -7,7 +7,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "eas-build-post-install": "bunx install-skia"
   },
   "dependencies": {
     "@bartools/types": "workspace:*",
