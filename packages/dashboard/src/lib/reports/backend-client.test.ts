@@ -112,7 +112,9 @@ describe('backend reports client', () => {
     })
     expect(detail.bottleRecords[0]?.imageUrl).toBe(`${backendBaseUrl}/uploads/record-1.jpg`)
   })
+})
 
+describe('backend reports client stream handling', () => {
   it('maps server-sent events into typed report stream events', () => {
     const eventSources: MockEventSource[] = []
     vi.stubGlobal(
@@ -166,6 +168,34 @@ describe('backend reports client', () => {
     })
 
     unsubscribe()
+    expect(source?.closed).toBe(true)
+  })
+
+  it('emits a calm disconnect event when the stream fails', () => {
+    const eventSources: MockEventSource[] = []
+    vi.stubGlobal(
+      'EventSource',
+      class EventSourceStub extends MockEventSource {
+        constructor(url: string) {
+          super(url)
+          eventSources.push(this)
+        }
+      },
+    )
+
+    const client = createBackendReportsClient({ baseUrl: backendBaseUrl })
+    const onEvent = vi.fn()
+    client.streamReport('report-1001', onEvent)
+    const source = eventSources[0]
+
+    source?.emitError()
+
+    expect(onEvent).toHaveBeenCalledWith({
+      type: 'report.stream_disconnected',
+      data: {
+        message: 'Live updates paused. Refresh or try again in a moment.',
+      },
+    })
     expect(source?.closed).toBe(true)
   })
 })
@@ -258,7 +288,7 @@ function jsonResponse(body: unknown, init: ResponseInit = {}) {
 }
 
 class MockEventSource {
-  readonly listeners = new Map<string, Set<(event: MessageEvent<string>) => void>>()
+  readonly listeners = new Map<string, Set<(event: Event | MessageEvent<string>) => void>>()
   closed = false
   readonly url: string
 
@@ -266,19 +296,26 @@ class MockEventSource {
     this.url = url
   }
 
-  addEventListener(type: string, listener: (event: MessageEvent<string>) => void) {
+  addEventListener(type: string, listener: (event: Event | MessageEvent<string>) => void) {
     const listeners = this.listeners.get(type) ?? new Set()
     listeners.add(listener)
     this.listeners.set(type, listeners)
   }
 
-  removeEventListener(type: string, listener: (event: MessageEvent<string>) => void) {
+  removeEventListener(type: string, listener: (event: Event | MessageEvent<string>) => void) {
     this.listeners.get(type)?.delete(listener)
   }
 
   emit(type: string, data: unknown) {
     const event = { data: JSON.stringify(data) } as MessageEvent<string>
     for (const listener of this.listeners.get(type) ?? []) {
+      listener(event)
+    }
+  }
+
+  emitError() {
+    const event = new Event('error')
+    for (const listener of this.listeners.get('error') ?? []) {
       listener(event)
     }
   }

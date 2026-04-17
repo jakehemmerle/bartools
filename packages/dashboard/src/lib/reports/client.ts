@@ -34,6 +34,7 @@ export type ReportStreamEvent =
   | { type: 'record.failed'; data: ReportBottleRecord }
   | { type: 'record.reviewed'; data: ReportBottleRecord }
   | { type: 'report.ready_for_review'; data: ReportProgress }
+  | { type: 'report.stream_disconnected'; data: { message: string } }
 
 export type ReportsClient = {
   readiness: ReportsIntegrationReadiness

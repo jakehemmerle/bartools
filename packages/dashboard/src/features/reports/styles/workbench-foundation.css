@@ -195,6 +195,7 @@
 }
 
 .bb-workbench-topbar {
+  position: relative;
   display: grid;
   grid-template-columns: 40px 1fr 40px;
   align-items: center;
@@ -224,6 +225,24 @@
 .bb-workbench-topbar__spacer {
   width: 24px;
   height: 24px;
+}
+
+.bb-workbench-topbar__mode {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3xl);
+  min-width: 72px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 999px;
+  background: var(--color-surface-high);
+  color: var(--color-text-muted);
+  font-size: var(--type-body-compact-size);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  transform: translateY(-50%);
 }
 
 .bb-workbench-canvas {
@@ -258,6 +277,13 @@
     gap: var(--space-md);
     height: 60px;
     padding: 0 14px;
+  }
+
+  .bb-workbench-topbar__mode {
+    right: 14px;
+    min-width: 56px;
+    padding: 5px 8px;
+    font-size: 11px;
   }
 
   .bb-page-title {

@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { createFixtureReportsClient } from '../../../lib/reports/client'
 import { renderAppRoutes } from '../../../test/test-utils'
@@ -44,10 +45,18 @@ describe('Reports workbench routes', () => {
 
   it('shows a calm reports unavailable state when the reports request fails', async () => {
     const baseClient = createFixtureReportsClient()
+    const user = userEvent.setup()
+    let attempts = 0
     const reportsClient = {
       ...baseClient,
       listReports: async () => {
-        throw new Error('network_error')
+        attempts += 1
+
+        if (attempts === 1) {
+          throw new Error('network_error')
+        }
+
+        return baseClient.listReports()
       },
     }
 
@@ -60,14 +69,27 @@ describe('Reports workbench routes', () => {
     expect(
       screen.getByText('Reports could not be loaded right now. Try again in a moment.'),
     ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(await screen.findByText('created')).toBeInTheDocument()
+    expect(attempts).toBe(2)
   })
 
   it('shows a calm report unavailable state when report detail fails to load', async () => {
     const baseClient = createFixtureReportsClient()
+    const user = userEvent.setup()
+    let attempts = 0
     const reportsClient = {
       ...baseClient,
       getReport: async () => {
-        throw new Error('network_error')
+        attempts += 1
+
+        if (attempts === 1) {
+          throw new Error('network_error')
+        }
+
+        return baseClient.getReport('report-1002')
       },
     }
 
@@ -78,5 +100,42 @@ describe('Reports workbench routes', () => {
 
     expect(await screen.findByRole('heading', { name: 'Report Unavailable' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Back to Reports' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
+
+    expect(await screen.findByRole('heading', { name: 'Report 1002' })).toBeInTheDocument()
+    expect(attempts).toBe(2)
+  })
+
+  it('shows a calm stream notice when live updates disconnect', async () => {
+    const baseClient = createFixtureReportsClient()
+    const detail = await baseClient.getReport('report-1001')
+    const reportsClient = {
+      ...baseClient,
+      async getReport() {
+        return detail
+      },
+      streamReport(_reportId: string, onEvent: Parameters<typeof baseClient.streamReport>[1]) {
+        queueMicrotask(() => {
+          onEvent({
+            type: 'report.stream_disconnected',
+            data: {
+              message: 'Live updates paused. Refresh or try again in a moment.',
+            },
+          })
+        })
+
+        return () => undefined
+      },
+    }
+
+    renderAppRoutes({
+      initialEntries: ['/reports/report-1001'],
+      reportsClient,
+    })
+
+    expect(
+      await screen.findByText('Live updates paused. Refresh or try again in a moment.'),
+    ).toBeInTheDocument()
   })
 })

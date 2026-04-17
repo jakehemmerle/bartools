@@ -25,6 +25,7 @@ type ReportDetailScreenProps = {
   onReviewSearchQueryChange: (recordId: string, query: string) => void
   onReviewBottleChange: (recordId: string, bottleId: string) => void
   readinessMessage: string
+  statusMessage?: string | null
   reviewActionMode?: ReviewActionMode
   reviewedComparisonVariant?: ComparisonCardVariant
 }
@@ -36,6 +37,7 @@ export function ReportDetailScreen({
   onReviewSearch,
   onReviewSearchQueryChange,
   readinessMessage,
+  statusMessage = null,
   reviewedComparisonVariant,
   reviewActionMode = 'integration-blocked',
   reviewDraft,
@@ -58,7 +60,13 @@ export function ReportDetailScreen({
   }
 
   if (detail.status === 'processing') {
-    return <ProcessingReportDetail detail={detail} progress={progress} />
+    return (
+      <ProcessingReportDetail
+        detail={detail}
+        progress={progress}
+        statusMessage={statusMessage}
+      />
+    )
   }
 
   if (detail.status === 'reviewed') {
@@ -86,6 +94,7 @@ export function ReportDetailScreen({
       reviewActionMode={reviewActionMode}
       reviewDraft={reviewDraft}
       searchState={searchState}
+      statusMessage={statusMessage}
     />
   )
 }

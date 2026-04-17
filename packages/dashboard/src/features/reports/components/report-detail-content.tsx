@@ -16,7 +16,11 @@ import { FailedRecordCard, ReviewRecordCard } from './report-review-record-card'
 export type ReviewActionMode = 'integration-blocked' | 'preview'
 type ProcessingProgressView = { label: string; ratio: number }
 type CreatedReportDetailProps = { detail: ReportDetail; heading: string; reportId: string }
-type ProcessingReportDetailProps = { detail: ReportDetail; progress: ProcessingProgressView }
+type ProcessingReportDetailProps = {
+  detail: ReportDetail
+  progress: ProcessingProgressView
+  statusMessage?: string | null
+}
 type ReviewedReportDetailProps = {
   detail: ReportDetail
   heading: string
@@ -33,6 +37,7 @@ type ReviewableReportDetailProps = {
   reviewActionMode: ReviewActionMode
   reviewDraft: ReportReviewRecordDraft[]
   searchState: Record<string, RecordSearchState>
+  statusMessage?: string | null
   onFillTenthsChange: (recordId: string, fillTenths: number) => void
   onReviewSearch: (recordId: string, query: string) => void
   onReviewSearchQueryChange: (recordId: string, query: string) => void
@@ -67,6 +72,7 @@ export function CreatedReportDetail({
 export function ProcessingReportDetail({
   detail,
   progress,
+  statusMessage = null,
 }: ProcessingReportDetailProps) {
   return (
     <div className="bb-report-screen">
@@ -87,6 +93,12 @@ export function ProcessingReportDetail({
       </SurfaceCard>
 
       <ReportProgressPanel label={progress.label} progress={progress.ratio} />
+
+      {statusMessage ? (
+        <SurfaceCard className="bb-message-panel" tone="low">
+          <p className="bb-message-panel__body">{statusMessage}</p>
+        </SurfaceCard>
+      ) : null}
 
       <section className="bb-record-stack bb-record-stack--processing">
         {detail.bottleRecords.map((record) => (
@@ -148,6 +160,7 @@ export function ReviewableReportDetail({
   reviewActionMode,
   reviewDraft,
   searchState,
+  statusMessage = null,
 }: ReviewableReportDetailProps) {
   const hasFailedRecords = detail.bottleRecords.some((record) => record.status === 'failed')
 
@@ -165,6 +178,12 @@ export function ReviewableReportDetail({
         <MetadataItem label="Completed">{formatReportTimestampLong(detail.completedAt)}</MetadataItem>
         <MetadataItem label="Operator">{detail.userDisplayName ?? 'Unknown operator'}</MetadataItem>
       </SurfaceCard>
+
+      {statusMessage ? (
+        <SurfaceCard className="bb-message-panel" tone="low">
+          <p className="bb-message-panel__body">{statusMessage}</p>
+        </SurfaceCard>
+      ) : null}
 
       <section className="bb-record-stack">
         {detail.bottleRecords.map((record) => {

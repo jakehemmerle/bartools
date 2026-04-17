@@ -1,6 +1,10 @@
 import { Button } from '../../../components/primitives/button'
 
-export function ReportLoadErrorScreen() {
+export function ReportLoadErrorScreen({
+  onRetry,
+}: {
+  onRetry?: () => void
+}) {
   return (
     <section className="bb-centered-state bb-centered-state--not-found">
       <div className="bb-centered-state__icon bb-centered-state__icon--not-found" aria-hidden="true">
@@ -15,6 +19,11 @@ export function ReportLoadErrorScreen() {
         moment.
       </p>
       <div className="bb-centered-state__actions">
+        {onRetry ? (
+          <Button onPress={onRetry} variant="secondary">
+            Retry
+          </Button>
+        ) : null}
         <Button to="/reports" variant="ghost">
           Back to Reports
         </Button>

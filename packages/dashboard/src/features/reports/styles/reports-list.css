@@ -184,6 +184,12 @@
   line-height: 1.6;
 }
 
+.bb-loading-panel__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-xl);
+}
+
 .bb-empty-state__icon {
   margin-bottom: var(--space-2xl);
   font-size: 48px;
