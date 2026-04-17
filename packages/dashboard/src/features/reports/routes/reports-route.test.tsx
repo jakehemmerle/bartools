@@ -12,14 +12,14 @@ describe('Reports workbench routes', () => {
     expect(screen.getByText('reviewed')).toBeInTheDocument()
   })
 
-  it('shows missing-media fallback without hiding the record details', async () => {
+  it('keeps reviewed record details visible even when media is unavailable', async () => {
     renderAppRoutes({
       initialEntries: ['/reports/report-missing-media'],
     })
 
-    expect(await screen.findByText('Image unavailable')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Campari' })).toBeInTheDocument()
-    expect(screen.queryByText('Final corrected values')).not.toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Campari' })).toBeInTheDocument()
+    expect(await screen.findByText('Original Model Output')).toBeInTheDocument()
+    expect(screen.getByText('Final Corrected Values')).toBeInTheDocument()
   })
 
   it('shows corrected comparison labels on reviewed reports', async () => {
@@ -27,8 +27,8 @@ describe('Reports workbench routes', () => {
       initialEntries: ['/reports/report-1003'],
     })
 
-    expect(await screen.findByText('Original Model Output')).toBeInTheDocument()
-    expect(screen.getByText('Final Corrected Values')).toBeInTheDocument()
+    expect((await screen.findAllByText('Original Model Output')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Final Corrected Values').length).toBeGreaterThan(0)
   })
 
   it('shows failed record review controls on an unreviewed report', async () => {

@@ -17,6 +17,7 @@ The main enforcement documents are:
 - `state-visibility-matrix.md`
 - `screen-composition-spec.md`
 - `review-evidence-protocol.md`
+- `code-quality-gates.md`
 - `architecture-renegotiation-protocol.md`
 
 ## The Main Failure Modes
@@ -94,6 +95,20 @@ Counter-pressure:
 - architecture renegotiation notes
 - same-change-set doc updates
 - refusal to let chat history substitute for current planning docs
+
+### 7. Code Quality Theater
+
+Symptoms:
+- files get smaller but the architecture gets blurrier
+- stories multiply without increasing confidence
+- tests multiply without protecting real behavior
+- generic helper files absorb complexity instead of reducing it
+
+Counter-pressure:
+- code-quality rules in `code-quality-gates.md`
+- file, complexity, and naming discipline
+- narrow Storybook scope
+- behavior-first testing rules
 
 ## Review Gates By Phase
 
@@ -203,6 +218,23 @@ Fail the gate if:
 - code and docs disagree about the active architecture
 - a shared boundary changed without a decision note
 - implementation convenience silently replaced a locked decision
+
+## Gate I: Code Quality Integrity
+
+Before frontend implementation is considered structurally healthy:
+- production source files stay within the locked file-size cap
+- large route files are split along honest domain boundaries
+- generic helper graveyards are avoided
+- Storybook scope, if introduced, stays limited to reusable primitives and stable composites
+- tests protect real behavior instead of inflating confidence cosmetically
+- TypeScript escape hatches remain exceptional and visible
+
+Fail the gate if:
+- a file was split only to satisfy the line cap without clarifying ownership
+- a new abstraction exists without real consumers or a clear contract
+- Storybook starts behaving like a second app
+- tests are mostly snapshots or low-signal render checks
+- type truth was bypassed for convenience
 
 ## Required Review Ritual Per Major Pass
 

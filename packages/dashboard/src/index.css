@@ -25,6 +25,24 @@
   --color-success-strong: #00a827;
   --color-error: #ffb4ab;
   --color-error-strong: #93000a;
+  --color-accent-line: rgba(255, 183, 130, 0.3);
+  --color-accent-strong-wash: rgba(199, 128, 74, 0.12);
+  --color-accent-glow: rgba(199, 128, 74, 0.24);
+  --color-accent-wash-soft: rgba(255, 183, 130, 0.12);
+  --color-accent-wash: rgba(255, 183, 130, 0.16);
+  --color-accent-wash-strong: rgba(255, 183, 130, 0.18);
+  --color-accent-soft-faint: rgba(255, 220, 197, 0.04);
+  --color-accent-soft-shell: rgba(255, 220, 197, 0.08);
+  --color-accent-soft-ghost: rgba(255, 220, 197, 0.12);
+  --color-accent-soft-veil: rgba(255, 220, 197, 0.16);
+  --color-accent-soft-glow: rgba(255, 220, 197, 0.2);
+  --color-accent-soft-strike: rgba(255, 220, 197, 0.22);
+  --color-success-wash: rgba(0, 230, 57, 0.12);
+  --color-error-wash: rgba(147, 0, 10, 0.24);
+  --color-text-muted-soft: rgba(160, 141, 128, 0.72);
+  --color-surface-veil: rgba(255, 255, 255, 0.02);
+  --color-bg-canvas-overlay: rgba(14, 14, 14, 0.8);
+  --color-bg-canvas-cutout: rgba(14, 14, 14, 0.82);
 
   --space-xs: 4px;
   --space-sm: 8px;
@@ -44,6 +62,20 @@
   --radius-full: 9999px;
 
   --shadow-ambient: 0 24px 48px rgba(0, 0, 0, 0.5);
+  --type-wordmark-size: 24px;
+  --type-hero-size: clamp(3rem, 6vw, 4.15rem);
+  --type-page-title-size: clamp(2.8rem, 4.8vw, 3.6rem);
+  --type-detail-title-size: clamp(2.4rem, 4.2vw, 3.25rem);
+  --type-section-title-size: 32px;
+  --type-section-title-compact-size: 30px;
+  --type-body-large-size: 20px;
+  --type-body-size: 16px;
+  --type-body-compact-size: 14px;
+  --type-label-size: 12px;
+  --type-label-compact-size: 11px;
+  --tracking-wordmark: 0.2em;
+  --tracking-label: 0.18em;
+  --tracking-label-compact: 0.14em;
 
   color: var(--color-text-primary);
   background: var(--color-bg-app);

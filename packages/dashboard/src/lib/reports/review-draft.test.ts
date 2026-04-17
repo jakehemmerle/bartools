@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { reportsScenario } from '../fixtures/scenarios'
+import { baseReportsScenario } from './base-scenario'
 import {
   buildReportReviewPayload,
   createReportReviewDraft,
@@ -7,7 +7,7 @@ import {
 
 describe('report review draft helpers', () => {
   it('creates a draft row for every bottle record', () => {
-    const drafts = createReportReviewDraft(reportsScenario.details['report-1002'])
+    const drafts = createReportReviewDraft(baseReportsScenario.details['report-1002'])
 
     expect(drafts).toHaveLength(2)
     expect(drafts[0]?.fillTenths).toBe(5)

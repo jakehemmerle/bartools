@@ -1,35 +1,32 @@
 import { useState } from 'react'
 import type { ReportDetail } from '@bartools/types'
 import { createReportReviewDraft } from '../../../lib/reports/review-draft'
+import type { RecordSearchState } from '../components/report-bottle-match-field'
+import type { ComparisonCardVariant } from '../components/report-comparison-record-card'
 import { ReportDetailScreen } from '../components/report-detail-screen'
 import {
   reviewBottleSearchResults,
   searchReviewBottles,
 } from '../fixtures/review-scenarios'
 
-type RecordSearchState = {
-  query: string
-  results: typeof reviewBottleSearchResults
-}
-
-export function ReviewDetailPreview({ detail }: { detail: ReportDetail }) {
+export function ReviewDetailPreview({
+  detail,
+  reviewedComparisonVariant,
+}: {
+  detail: ReportDetail
+  reviewedComparisonVariant?: ComparisonCardVariant
+}) {
   const [reviewDraft, setReviewDraft] = useState(() =>
     createReportReviewDraft(detail).map((draft) => ({
       ...draft,
-      bottleId: findBottleId(detail, draft.id),
+      bottleId: findBottleMatch(detail, draft.id)?.id ?? null,
     })),
   )
   const [searchState, setSearchState] = useState<Record<string, RecordSearchState>>(() =>
     Object.fromEntries(
       detail.bottleRecords.map((record) => [
         record.id,
-        {
-          query: record.status === 'failed' ? '' : record.bottleName,
-          results:
-            record.status === 'failed'
-              ? reviewBottleSearchResults
-              : searchReviewBottles(record.bottleName),
-        },
+        buildInitialSearchState(detail, record.id),
       ]),
     ),
   )
@@ -67,6 +64,7 @@ export function ReviewDetailPreview({ detail }: { detail: ReportDetail }) {
         }))
       }
       readinessMessage="Live report access requires venue and user context. Review submission requires user context."
+      reviewedComparisonVariant={reviewedComparisonVariant}
       reviewActionMode="preview"
       reviewDraft={reviewDraft}
       searchState={searchState}
@@ -74,7 +72,28 @@ export function ReviewDetailPreview({ detail }: { detail: ReportDetail }) {
   )
 }
 
-function findBottleId(detail: ReportDetail, recordId: string) {
+function buildInitialSearchState(detail: ReportDetail, recordId: string): RecordSearchState {
+  const record = detail.bottleRecords.find((item) => item.id === recordId)
+  const match = findBottleMatch(detail, recordId)
+
+  if (!record) {
+    return { query: '', results: [] }
+  }
+
+  if (record.status === 'failed') {
+    return {
+      query: match?.name ?? '',
+      results: [],
+    }
+  }
+
+  return {
+    query: record.bottleName,
+    results: searchReviewBottles(record.bottleName),
+  }
+}
+
+function findBottleMatch(detail: ReportDetail, recordId: string) {
   const record = detail.bottleRecords.find((item) => item.id === recordId)
 
   if (!record) {
@@ -82,10 +101,8 @@ function findBottleId(detail: ReportDetail, recordId: string) {
   }
 
   const normalizedName = record.bottleName.toLowerCase()
-  const match = reviewBottleSearchResults.find((result) =>
+  return reviewBottleSearchResults.find((result) =>
     result.name.toLowerCase().includes(normalizedName) ||
     normalizedName.includes(result.name.toLowerCase()),
   )
-
-  return match?.id ?? null
 }

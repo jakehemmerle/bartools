@@ -32,8 +32,12 @@ export function formatReportTimestampLong(value: string | undefined) {
   }).format(new Date(value))
 }
 
+export function buildReportId(detail: ReportDetail) {
+  return detail.id.replace(/^report-/, '')
+}
+
 export function buildReportHeading(detail: ReportDetail) {
-  return `Report ${formatReportIdForHeading(detail.id)}`
+  return `Report ${buildReportId(detail)}`
 }
 
 export function buildReportProgressView(detail: ReportDetail) {
@@ -56,14 +60,4 @@ export function buildReviewSubmissionState(
     payload,
     ready: payload !== null,
   }
-}
-
-function formatReportIdForHeading(reportId: string) {
-  const trimmed = reportId.replace(/^report-/, '')
-
-  if (trimmed.length <= 8) {
-    return trimmed
-  }
-
-  return `${trimmed.slice(0, 8)}...`
 }

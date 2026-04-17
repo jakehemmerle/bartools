@@ -1,20 +1,20 @@
 import type { BottleSearchResult, ReportDetail, ReportListItem } from '@bartools/types'
-import { reportsScenario } from '../../../lib/fixtures/scenarios'
 import { fixtureBottleSearchResults } from '../../../lib/reports/client'
+import { baseReportsScenario } from '../../../lib/reports/base-scenario'
 
 export const reviewBottleSearchResults = fixtureBottleSearchResults
 
 const reviewedTemplate = cloneValue(
-  reportsScenario.reports.find((report) => report.status === 'reviewed'),
+  baseReportsScenario.reports.find((report) => report.status === 'reviewed'),
 )
 const unreviewedTemplate = cloneValue(
-  reportsScenario.reports.find((report) => report.status === 'unreviewed'),
+  baseReportsScenario.reports.find((report) => report.status === 'unreviewed'),
 )
 const processingTemplate = cloneValue(
-  reportsScenario.reports.find((report) => report.status === 'processing'),
+  baseReportsScenario.reports.find((report) => report.status === 'processing'),
 )
 const createdTemplate = cloneValue(
-  reportsScenario.reports.find((report) => report.status === 'created'),
+  baseReportsScenario.reports.find((report) => report.status === 'created'),
 )
 
 if (!reviewedTemplate || !unreviewedTemplate || !processingTemplate || !createdTemplate) {
@@ -66,33 +66,26 @@ export const reviewReportsList: ReportListItem[] = [
 export const reviewReportsEmpty: ReportListItem[] = []
 
 export const reviewReportCreated: ReportDetail = cloneValue(
-  reportsScenario.details['report-1000'],
+  baseReportsScenario.details['report-1000'],
 )
 reviewReportCreated.id = '1d7b9e4f'
 
 export const reviewReportProcessing: ReportDetail = cloneValue(
-  reportsScenario.details['report-1001'],
+  buildProcessingReviewDetail(),
 )
-reviewReportProcessing.id = '4c8e5f2a'
 
-export const reviewReportUnreviewed: ReportDetail = cloneValue(
-  reportsScenario.details['report-1002'],
-)
-reviewReportUnreviewed.id = 'f47ac10b-52c1-4b72-91f1-3d9a184a7e93'
-reviewReportUnreviewed.startedAt = '2026-10-24T10:15:00Z'
-reviewReportUnreviewed.completedAt = '2026-10-24T11:30:00Z'
-reviewReportUnreviewed.userDisplayName = 'J. Smith'
+export const reviewReportUnreviewed: ReportDetail = buildUnreviewedReviewDetail()
 
 export const reviewReportReviewed: ReportDetail = cloneValue(
-  reportsScenario.details['report-1003'],
+  baseReportsScenario.details['report-1003'],
 )
 reviewReportReviewed.id = '8b3c6b41-25f6-45ab-b0d7-13da62fbe098'
 
 export const reviewReportComparison: ReportDetail = {
-  ...cloneValue(reportsScenario.details['report-1003']),
+  ...cloneValue(baseReportsScenario.details['report-1003']),
   id: '8b3c6b41-25f6-45ab-b0d7-13da62fbe098',
   bottleRecords: cloneValue(
-    reportsScenario.details['report-1003'].bottleRecords.filter(
+    baseReportsScenario.details['report-1003'].bottleRecords.filter(
       (record) => record.correctedValues || record.originalModelOutput,
     ),
   ).slice(0, 1),
@@ -113,7 +106,7 @@ export function searchReviewBottles(query: string): BottleSearchResult[] {
 }
 
 function buildFailedReviewDetail(): ReportDetail {
-  const source = cloneValue(reportsScenario.details['report-1002'])
+  const source = cloneValue(baseReportsScenario.details['report-1002'])
   const failedRecord = source.bottleRecords.find((record) => record.status === 'failed')
 
   if (!failedRecord) {
@@ -130,6 +123,7 @@ function buildFailedReviewDetail(): ReportDetail {
       {
         ...failedRecord,
         id: 'review-failed-1',
+        imageUrl: '/fixtures/report-bottle-ruby.svg',
         bottleName: 'Campari 1L',
         errorCode: 'E-402',
         errorMessage:
@@ -138,6 +132,7 @@ function buildFailedReviewDetail(): ReportDetail {
       {
         ...failedRecord,
         id: 'review-failed-2',
+        imageUrl: '/fixtures/report-bottle-amber.svg',
         bottleName: 'Unknown Entity',
         errorCode: 'E-105',
         errorMessage:
@@ -150,6 +145,84 @@ function buildFailedReviewDetail(): ReportDetail {
         imageUrl: '',
         errorCode: 'E-801',
         errorMessage: 'Image missing or corrupted. Visual analysis cannot be performed.',
+      },
+    ],
+  }
+}
+
+function buildProcessingReviewDetail(): ReportDetail {
+  const source = cloneValue(baseReportsScenario.details['report-1001'])
+  const inferredRecord = source.bottleRecords.find((record) => record.status === 'inferred')
+  const pendingRecord = source.bottleRecords.find((record) => record.status === 'pending')
+
+  if (!inferredRecord || !pendingRecord) {
+    return source
+  }
+
+  return {
+    ...source,
+    id: '4c8e5f2a',
+    bottleRecords: [
+      {
+        ...inferredRecord,
+        id: 'review-processing-1',
+        bottleName: "Maker's Mark",
+        category: 'Bourbon',
+      },
+      {
+        ...pendingRecord,
+        id: 'review-processing-2',
+        imageUrl: '',
+      },
+      {
+        ...pendingRecord,
+        id: 'review-processing-3',
+        imageUrl: '',
+      },
+    ],
+  }
+}
+
+function buildUnreviewedReviewDetail(): ReportDetail {
+  const source = cloneValue(baseReportsScenario.details['report-1002'])
+  const inferredRecord = source.bottleRecords.find((record) => record.status === 'inferred')
+
+  if (!inferredRecord) {
+    return source
+  }
+
+  return {
+    ...source,
+    id: 'f47ac10b-52c1-4b72-91f1-3d9a184a7e93',
+    startedAt: '2026-10-24T10:15:00Z',
+    completedAt: '2026-10-24T11:30:00Z',
+    userDisplayName: 'J. Smith',
+    bottleRecords: [
+      {
+        ...inferredRecord,
+        id: 'review-unreviewed-1',
+        bottleName: 'Espolòn Blanco',
+        category: 'Tequila',
+        upc: '721059000018',
+        volumeMl: 750,
+        fillPercent: 40,
+        originalModelOutput: {
+          bottleName: 'Espolon Tequila Blanco 750ml',
+          fillPercent: 40,
+        },
+      },
+      {
+        ...inferredRecord,
+        id: 'review-unreviewed-2',
+        bottleName: "Maker's Mark",
+        category: 'Whiskey',
+        upc: '085000020113',
+        volumeMl: 1000,
+        fillPercent: 80,
+        originalModelOutput: {
+          bottleName: "Maker's Mark",
+          fillPercent: 80,
+        },
       },
     ],
   }

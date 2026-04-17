@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { reportsScenario } from '../fixtures/scenarios'
+import { baseReportsScenario } from './base-scenario'
 import {
   applyReportStreamEvent,
   createReportStreamViewState,
@@ -7,12 +7,17 @@ import {
 
 describe('report stream reducer', () => {
   it('applies record and progress events to detail state', () => {
-    const initialState = createReportStreamViewState(reportsScenario.details['report-1001'])
+    const initialState = createReportStreamViewState(baseReportsScenario.details['report-1001'])
+    const inferredRecord = initialState.detail.bottleRecords[1]
+
+    if (!inferredRecord) {
+      throw new Error('Expected fixture report to include an inferred record candidate.')
+    }
 
     const afterRecord = applyReportStreamEvent(initialState, {
       type: 'record.inferred',
       data: {
-        ...initialState.detail.bottleRecords[1]!,
+        ...inferredRecord,
         bottleName: 'Wild Turkey 101',
         category: 'Bourbon',
         upc: '072105900151',
