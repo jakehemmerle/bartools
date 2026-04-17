@@ -8,4 +8,8 @@ config:
   bartools:memory: 512Mi
   bartools:databaseUrl:
     secure: v1:GufiGGvqP4dCATO+:R064hj1ZDZdQBV6J9PCHZm1kioJuGzXEjpoXiUQxxxowH3tU3YZxntTkAaUHqPXr23GN3XlBIA49omRiREX6RCdT7AxbMsnwxKGXyVjf4hrY+8ahKj95ps/vn3SRKTSX4kuhhuF37UP25DQWn/Ev1/YMqKJ8TErv7W9hFWSuierNgVDW6KR+9UKXMa4fmxXBY7IT98Z3DBfdNHsO+w4PdDDRFLY=
+  bartools:claudeCodeOauthToken:
+    secure: v1:RfhU50fn1lllCkQm:No1u6bDOFC95McmDN+0V5Np26XaiZiA+on3/G0tIY6puUZ2yyaH875FYiDRaGxyvhH4HnpFETRgT5ZTuFMAjVHKpkTkDBI/XSV0CcSnp9azqI77kXFRE8g4FRguCCjBSEkpRXzpXieys63MfYPalEeDST5DoomnPivIjGA==
+  bartools:langsmithApiKey:
+    secure: v1:/uv5WDC72TSHlseR:f5EzNx1AITbNIanPXqzAlNPnUoDbilMaa95P5Y50YT5YRMxuhJd1W7FzCOMXc7+t+YKnLAOXcrk2DK0FtlgnJEtQPg==
 encryptionsalt: v1:mSpTjxC1/UQ=:v1:rSnlWSg3quqxuZbk:F1mpag5lqxqNKuzdTJ2E2CZqvH1deA==
