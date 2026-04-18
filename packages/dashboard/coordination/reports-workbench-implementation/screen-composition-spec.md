@@ -1,6 +1,6 @@
 # Screen Composition Spec
 
-This document locks the screen-by-screen blueprint for the BARBACK web reports workbench.
+This document locks the screen-by-screen blueprint for the BARTOOLS web reports workbench.
 
 It exists because strong tokens and strong state rules are still not enough if block order, responsive collapse, and copy remain mushy.
 
@@ -30,7 +30,7 @@ This document defines:
 
 These decisions are now closed:
 
-1. Reports list uses custom BARBACK rows, not a stock data-table component.
+1. Reports list uses custom BARTOOLS rows, not a stock data-table component.
 2. Created state does not render a fake extracted-records section.
 3. Blocked state includes a disabled `Submit Review` button plus a `Back to Reports` action.
 4. Unreviewed uses a scrubber or rail-like tenths selector.
@@ -51,7 +51,7 @@ Use these planning breakpoints:
 
 Across list and detail screens:
 - use a top bar, not a sidebar
-- keep the BARBACK wordmark visible in the top bar
+- keep the BARTOOLS wordmark visible in the top bar
 - keep the main content inside a deliberate centered canvas
 - keep decorative chrome minimal
 - avoid floating utility widgets, search bars, and secondary nav
@@ -88,7 +88,7 @@ Reference:
 
 ### Locked Copy
 
-- wordmark: `BARBACK`
+- wordmark: `BARTOOLS`
 - headline: `Reports Workbench`
 - supporting copy: `Open recent reports and inspect records from desktop.`
 - CTA: `Open Reports`

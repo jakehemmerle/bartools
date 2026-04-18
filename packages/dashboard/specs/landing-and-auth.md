@@ -33,7 +33,7 @@ For MVP, the public surface is purely marketing. Utility begins only after sign 
 ### Required Sections
 
 - Hero with concise value proposition
-- Short explanation of how BarBack works
+- Short explanation of how BarTools works
 - Primary CTAs for `Sign up` and `Sign in`
 - Lightweight proof section
   Suggested content: screenshot, product flow, or a short list of operational outcomes

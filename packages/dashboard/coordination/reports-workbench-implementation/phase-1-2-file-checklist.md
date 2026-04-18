@@ -37,20 +37,20 @@ The point is to reduce planning drift once coding starts.
   Current file likely becomes a compatibility wrapper or gets broken apart.
 
 - `src/components/states/state-panel.tsx`
-  Keep only if it can survive BARBACK styling. Otherwise replace with more specific state components.
+  Keep only if it can survive BARTOOLS styling. Otherwise replace with more specific state components.
 
 ## Phase 1: Design Token And Shell Refactor
 
 ## Objective
 
-Make `/` and `/reports` feel like the same BARBACK product family before deeper feature work.
+Make `/` and `/reports` feel like the same BARTOOLS product family before deeper feature work.
 
 ## 1. Theme And Token Files
 
 ### `src/app/theme/tokens.ts`
 
 Phase 1 action:
-- define the locked BARBACK surface, text, accent, spacing, radius, border, and shadow tokens
+- define the locked BARTOOLS surface, text, accent, spacing, radius, border, and shadow tokens
 - implement the values from `visual-token-spec.md`
 
 ### `src/app/theme/typography.ts`
@@ -103,7 +103,7 @@ Phase 1 action:
 ### `src/components/shell/public/public-top-bar.tsx`
 
 Phase 1 action:
-- own the public BARBACK wordmark treatment
+- own the public BARTOOLS wordmark treatment
 - keep CTA framing restrained if the top bar needs an action at all
 
 ### `src/components/shell/workbench/workbench-shell.tsx`
@@ -199,7 +199,7 @@ Responsibilities:
 
 ## Phase 1 Completion Checklist
 
-- `/` looks like BARBACK entry surface, not generic auth shell
+- `/` looks like BARTOOLS entry surface, not generic auth shell
 - `/reports` looks like the same product family
 - shell no longer depends on sidebar-heavy layout assumptions
 - status styling is centralized

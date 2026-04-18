@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the dependency policy for the BARBACK reports workbench.
+This document defines the dependency policy for the BARTOOLS reports workbench.
 
 Its job is to make dependency-related stop conditions explicit so the implementation run does not pretend that package changes are "small refactors."
 

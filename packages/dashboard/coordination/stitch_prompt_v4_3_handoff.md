@@ -1,11 +1,11 @@
 # Stitch Prompt V4.3: Final Handoff Pass
 
-Use this in the existing BARBACK v4 Stitch project by answering:
+Use this in the existing BARTOOLS v4 Stitch project by answering:
 
 `What do you want to change or create?`
 
 ```text
-Revise the current BARBACK web project in place.
+Revise the current BARTOOLS web project in place.
 
 This is not a new exploration pass.
 This is not a redesign pass.
@@ -26,10 +26,10 @@ That means:
 1. HANDOFF GOAL
 ==================================================
 
-Turn the current project into a final design-direction handoff for the BARBACK web reports workbench.
+Turn the current project into a final design-direction handoff for the BARTOOLS web reports workbench.
 
 The project should communicate:
-- this is a desktop companion to the mobile BARBACK product
+- this is a desktop companion to the mobile BARTOOLS product
 - this is a reports-first review surface
 - the backend reports workflow is the functional truth
 - the chosen desktop patterns are now settled enough to implement
@@ -85,7 +85,7 @@ Do not add:
 3. DESIGN SOURCE OF TRUTH
 ==================================================
 
-Defer to the BARBACK mobile app visual language.
+Defer to the BARTOOLS mobile app visual language.
 
 This web workbench should feel like a desktop adaptation of the mobile product:
 - dark-first
@@ -141,7 +141,7 @@ Normalize the project so the canonical choices are visually obvious:
 
 1. Make the shell consistent across all report-detail states.
 2. Make the reports list and empty states clearly part of the same family.
-3. Keep the dark-first BARBACK mood consistent throughout.
+3. Keep the dark-first BARTOOLS mood consistent throughout.
 4. Reduce any remaining ornamental UI that exists only to “make a dashboard.”
 5. Remove any copy or action that looks like dev-process leakage or product-scope hallucination.
 
@@ -198,7 +198,7 @@ These decisions are settled and should be reinforced, not debated:
 The following problem areas must be corrected in the current project.
 
 FAILED EMPHASIS SCREEN:
-- Make the overall page dark-first so it sits inside the same BARBACK visual family as the other winning screens.
+- Make the overall page dark-first so it sits inside the same BARTOOLS visual family as the other winning screens.
 - Remove per-record submit buttons.
 - Keep only the report-level review submission pattern.
 - Keep the page operational and recoverable, not alarming.
@@ -259,7 +259,7 @@ Keep copy literal, calm, and product-truthful.
 
 Before you finish, validate the following:
 
-1. Does every screen still belong to one coherent BARBACK family?
+1. Does every screen still belong to one coherent BARTOOLS family?
 2. Is the reports-first scope visually unmistakable?
 3. Are unsupported surfaces absent rather than merely de-emphasized?
 4. Are the report-detail states semantically different without turning into different products?

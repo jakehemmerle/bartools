@@ -5,17 +5,17 @@ export function MetadataItem({
   label,
 }: PropsWithChildren<{ label: string }>) {
   return (
-    <div className="bb-metadata-item">
-      <span className="bb-field__label">{label}</span>
-      <span className="bb-metadata-item__value">{children}</span>
+    <div className="bt-metadata-item">
+      <span className="bt-field__label">{label}</span>
+      <span className="bt-metadata-item__value">{children}</span>
     </div>
   )
 }
 
 export function MetadataLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bb-metadata-line">
-      <span className="bb-field__label">{label}</span>
+    <div className="bt-metadata-line">
+      <span className="bt-field__label">{label}</span>
       <span>{value}</span>
     </div>
   )

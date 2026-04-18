@@ -15,7 +15,7 @@ It is intentionally concrete and file-oriented.
 ## Pass 2: Theme And Primitive Scaffold
 
 - create dashboard-local token source for colors, spacing, radii, typography intent
-- add BARBACK-specific chip/label/logo primitives
+- add BARTOOLS-specific chip/label/logo primitives
 - define shared surface primitives if repetition becomes obvious
 - remove remaining starter-feeling shell styles
 - use the canonical file layout from `architecture-and-file-plan.md`

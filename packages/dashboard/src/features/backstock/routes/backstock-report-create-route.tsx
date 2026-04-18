@@ -56,19 +56,19 @@ function ResolvedBackstockReportCreateRoute({
 
 function BackstockRouteLoadingScreen() {
   return (
-    <div className="bb-backstock-screen">
-      <section className="bb-backstock-header">
-        <p className="bb-backstock-header__eyebrow">Reports</p>
-        <h1 className="bb-page-title">New Backstock Report</h1>
-        <p className="bb-reports-header__support">
+    <div className="bt-backstock-screen">
+      <section className="bt-backstock-header">
+        <p className="bt-backstock-header__eyebrow">Reports</p>
+        <h1 className="bt-page-title">New Backstock Report</h1>
+        <p className="bt-reports-header__support">
           Count sealed bottles in one backstock location. Start from photos or enter line
           items directly.
         </p>
       </section>
 
-      <SurfaceCard className="bb-loading-panel" tone="low">
-        <p className="bb-loading-panel__eyebrow">Backstock</p>
-        <p className="bb-loading-panel__body">Loading available locations.</p>
+      <SurfaceCard className="bt-loading-panel" tone="low">
+        <p className="bt-loading-panel__eyebrow">Backstock</p>
+        <p className="bt-loading-panel__body">Loading available locations.</p>
       </SurfaceCard>
     </div>
   )
@@ -82,15 +82,15 @@ function BackstockLocationsUnavailableScreen({
   onRetry: () => void
 }) {
   return (
-    <section className="bb-centered-state">
-      <div className="bb-centered-state__icon bb-centered-state__icon--blocked" aria-hidden="true">
-        <span className="bb-centered-state__icon-core" />
-        <span className="bb-centered-state__icon-dot" />
-        <span className="bb-centered-state__icon-slash" />
+    <section className="bt-centered-state">
+      <div className="bt-centered-state__icon bt-centered-state__icon--blocked" aria-hidden="true">
+        <span className="bt-centered-state__icon-core" />
+        <span className="bt-centered-state__icon-dot" />
+        <span className="bt-centered-state__icon-slash" />
       </div>
-      <h1 className="bb-centered-state__title">Backstock Locations Unavailable</h1>
-      <p className="bb-centered-state__body">{errorMessage}</p>
-      <div className="bb-centered-state__actions">
+      <h1 className="bt-centered-state__title">Backstock Locations Unavailable</h1>
+      <p className="bt-centered-state__body">{errorMessage}</p>
+      <div className="bt-centered-state__actions">
         <Button onPress={onRetry} variant="secondary">
           Retry
         </Button>

@@ -11,17 +11,17 @@ export function WorkbenchTopBar() {
   const modeLabel = client.readiness.backendEnabled ? 'Live' : 'Fixtures'
 
   return (
-    <header className="bb-workbench-topbar">
-      <Button aria-label="Go back" className="bb-workbench-topbar__back" to={backTarget} variant="ghost">
+    <header className="bt-workbench-topbar">
+      <Button aria-label="Go back" className="bt-workbench-topbar__back" to={backTarget} variant="ghost">
         <span aria-hidden="true">←</span>
       </Button>
       <AppWordmark centered />
       {isDevMode ? (
-        <div className="bb-workbench-topbar__mode" aria-label={`Mode: ${modeLabel}`}>
+        <div className="bt-workbench-topbar__mode" aria-label={`Mode: ${modeLabel}`}>
           {modeLabel}
         </div>
       ) : (
-        <div className="bb-workbench-topbar__spacer" aria-hidden="true" />
+        <div className="bt-workbench-topbar__spacer" aria-hidden="true" />
       )}
     </header>
   )

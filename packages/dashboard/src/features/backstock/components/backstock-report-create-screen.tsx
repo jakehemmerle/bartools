@@ -104,7 +104,7 @@ export function BackstockReportCreateScreen({
   }
 
   return (
-    <div className="bb-backstock-screen">
+    <div className="bt-backstock-screen">
       <BackstockReportHeader
         support="Count sealed bottles in one backstock location. Start from photos or enter line items directly."
         title="New Backstock Report"
@@ -116,13 +116,13 @@ export function BackstockReportCreateScreen({
         submissionBlocked={!!submissionBlockedMessage}
       />
       {integrationNotice ? (
-        <SurfaceCard className="bb-message-panel" tone="low">
-          <p className="bb-message-panel__body">{integrationNotice}</p>
+        <SurfaceCard className="bt-message-panel" tone="low">
+          <p className="bt-message-panel__body">{integrationNotice}</p>
         </SurfaceCard>
       ) : null}
       {draftStatusMessage ? (
-        <SurfaceCard className="bb-message-panel" tone="low">
-          <p aria-live="polite" className="bb-message-panel__body">
+        <SurfaceCard className="bt-message-panel" tone="low">
+          <p aria-live="polite" className="bt-message-panel__body">
             {draftStatusMessage}
           </p>
         </SurfaceCard>
@@ -203,17 +203,17 @@ function BackstockWorkflowRail({
   ]
 
   return (
-    <ol className="bb-backstock-workflow" aria-label="Backstock report workflow">
+    <ol className="bt-backstock-workflow" aria-label="Backstock report workflow">
       {steps.map((step, index) => {
         const state =
           index < currentStage ? 'complete' : index === currentStage ? 'active' : 'upcoming'
 
         return (
-          <li className={`bb-backstock-workflow__step is-${state}`} key={step.label}>
-            <div className="bb-backstock-workflow__marker">{index + 1}</div>
+          <li className={`bt-backstock-workflow__step is-${state}`} key={step.label}>
+            <div className="bt-backstock-workflow__marker">{index + 1}</div>
             <div>
-              <p className="bb-backstock-workflow__label">{step.label}</p>
-              <p className="bb-backstock-workflow__support">{step.support}</p>
+              <p className="bt-backstock-workflow__label">{step.label}</p>
+              <p className="bt-backstock-workflow__support">{step.support}</p>
             </div>
           </li>
         )
@@ -230,10 +230,10 @@ function BackstockReportHeader({
   title: string
 }) {
   return (
-    <section className="bb-backstock-header">
-      <p className="bb-backstock-header__eyebrow">Reports</p>
-      <h1 className="bb-page-title">{title}</h1>
-      <p className="bb-reports-header__support">{support}</p>
+    <section className="bt-backstock-header">
+      <p className="bt-backstock-header__eyebrow">Reports</p>
+      <h1 className="bt-page-title">{title}</h1>
+      <p className="bt-reports-header__support">{support}</p>
     </section>
   )
 }
@@ -250,13 +250,13 @@ function BackstockSubmittedState({
   submittedSummary: SubmittedBackstockSummary
 }) {
   return (
-    <div className="bb-backstock-screen">
+    <div className="bt-backstock-screen">
       <BackstockReportHeader
         support="Fixture mode keeps this submitted snapshot in the current browser session for flow review."
         title="Backstock Report Submitted"
       />
 
-      <SurfaceCard className="bb-backstock-card bb-backstock-card--summary" tone="low">
+      <SurfaceCard className="bt-backstock-card bt-backstock-card--summary" tone="low">
         <BackstockSummaryGrid
           locationName={locationName}
           productCount={submittedSummary.skuCount}
@@ -264,23 +264,23 @@ function BackstockSubmittedState({
           totalBottleCount={submittedSummary.totalBottleCount}
         />
 
-        <div className="bb-backstock-submitted-list" aria-label="Submitted line items">
+        <div className="bt-backstock-submitted-list" aria-label="Submitted line items">
           {submittedSummary.lineItems.map((lineItem) => (
-            <div className="bb-backstock-submitted-row" key={lineItem.bottle.id}>
+            <div className="bt-backstock-submitted-row" key={lineItem.bottle.id}>
               <div>
-                <p className="bb-backstock-submitted-row__name">{lineItem.bottle.name}</p>
-                <p className="bb-backstock-submitted-row__meta">
+                <p className="bt-backstock-submitted-row__name">{lineItem.bottle.name}</p>
+                <p className="bt-backstock-submitted-row__meta">
                   {buildBottleMeta(lineItem.bottle)}
                 </p>
               </div>
-              <p className="bb-backstock-submitted-row__count">
+              <p className="bt-backstock-submitted-row__count">
                 {lineItem.quantityFullBottles}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="bb-backstock-card__actions">
+        <div className="bt-backstock-card__actions">
           <Button onPress={onStartAnotherReport} variant="secondary">
             Start Another Report
           </Button>
@@ -305,17 +305,17 @@ function BackstockSetupCard({
   startMode: BackstockStartMode
 }) {
   return (
-    <SurfaceCard className="bb-backstock-card" tone="low">
-      <div className="bb-backstock-card__heading">
+    <SurfaceCard className="bt-backstock-card" tone="low">
+      <div className="bt-backstock-card__heading">
         <div>
-          <h2 className="bb-backstock-card__title">Report Setup</h2>
-          <p className="bb-backstock-card__support">
+          <h2 className="bt-backstock-card__title">Report Setup</h2>
+          <p className="bt-backstock-card__support">
             Choose one location and the fastest starting point for this count.
           </p>
         </div>
       </div>
 
-      <div className="bb-backstock-setup-grid">
+      <div className="bt-backstock-setup-grid">
         <Select
           label="Backstock Location"
           onChange={(event) => onLocationChange(event.currentTarget.value)}
@@ -329,12 +329,12 @@ function BackstockSetupCard({
           ))}
         </Select>
 
-        <div className="bb-field">
-          <span className="bb-field__label">How To Start</span>
-          <div className="bb-backstock-mode-toggle" role="group" aria-label="How To Start">
+        <div className="bt-field">
+          <span className="bt-field__label">How To Start</span>
+          <div className="bt-backstock-mode-toggle" role="group" aria-label="How To Start">
             <button
               aria-pressed={startMode === 'photo'}
-              className={`bb-backstock-mode-toggle__option${startMode === 'photo' ? ' is-active' : ''}`}
+              className={`bt-backstock-mode-toggle__option${startMode === 'photo' ? ' is-active' : ''}`}
               onClick={() => onStartModeChange('photo')}
               type="button"
             >
@@ -342,7 +342,7 @@ function BackstockSetupCard({
             </button>
             <button
               aria-pressed={startMode === 'manual'}
-              className={`bb-backstock-mode-toggle__option${startMode === 'manual' ? ' is-active' : ''}`}
+              className={`bt-backstock-mode-toggle__option${startMode === 'manual' ? ' is-active' : ''}`}
               onClick={() => onStartModeChange('manual')}
               type="button"
             >
@@ -375,11 +375,11 @@ function BackstockLineItemsCard({
   startMode: BackstockStartMode
 }) {
   return (
-    <SurfaceCard className="bb-backstock-card" tone="low">
-      <div className="bb-backstock-card__heading">
+    <SurfaceCard className="bt-backstock-card" tone="low">
+      <div className="bt-backstock-card__heading">
         <div>
-          <h2 className="bb-backstock-card__title">Line Items</h2>
-          <p className="bb-backstock-card__support">
+          <h2 className="bt-backstock-card__title">Line Items</h2>
+          <p className="bt-backstock-card__support">
             Review grouped counts, fix product matches, and add anything the draft missed.
           </p>
         </div>
@@ -389,7 +389,7 @@ function BackstockLineItemsCard({
       </div>
 
       {lineItems.length > 0 ? (
-        <div className="bb-backstock-line-items">
+        <div className="bt-backstock-line-items">
           {lineItems.map((lineItem, index) => (
             <BackstockLineItemEditor
               index={index}
@@ -404,8 +404,8 @@ function BackstockLineItemsCard({
           ))}
         </div>
       ) : (
-        <SurfaceCard className="bb-backstock-empty-state" tone="canvas">
-          <p className="bb-empty-state__body">
+        <SurfaceCard className="bt-backstock-empty-state" tone="canvas">
+          <p className="bt-empty-state__body">
             {startMode === 'photo'
               ? 'Generate a draft from source photos or add a product manually to begin.'
               : 'Add the first product line item to begin the backstock snapshot.'}
@@ -436,11 +436,11 @@ function BackstockSummaryCard({
   submitDisabled: boolean
 }) {
   return (
-    <SurfaceCard className="bb-backstock-card" tone="base">
-      <div className="bb-backstock-card__heading">
+    <SurfaceCard className="bt-backstock-card" tone="base">
+      <div className="bt-backstock-card__heading">
         <div>
-          <h2 className="bb-backstock-card__title">Snapshot Summary</h2>
-          <p className="bb-backstock-card__support">
+          <h2 className="bt-backstock-card__title">Snapshot Summary</h2>
+          <p className="bt-backstock-card__support">
             {submissionBlockedMessage
               ? 'Finalize the snapshot details now. Live submission will connect here after backend support lands.'
               : 'Submit once the grouped counts reflect what is sealed and on hand right now.'}
@@ -455,18 +455,18 @@ function BackstockSummaryCard({
         totalBottleCount={draftSummary.totalBottleCount}
       />
 
-      <div className="bb-backstock-card__actions">
-        <div className="bb-backstock-card__actions-copy">
+      <div className="bt-backstock-card__actions">
+        <div className="bt-backstock-card__actions-copy">
           {submissionBlockedMessage ? (
-            <p aria-live="polite" className="bb-field__hint bb-field__hint--warning">
+            <p aria-live="polite" className="bt-field__hint bt-field__hint--warning">
               {submissionBlockedMessage}
             </p>
           ) : needsDraftRegeneration ? (
-            <p aria-live="polite" className="bb-field__hint bb-field__hint--warning">
+            <p aria-live="polite" className="bt-field__hint bt-field__hint--warning">
               Regenerate the draft to match the current photo set before submitting.
             </p>
           ) : submissionReadinessMessage ? (
-            <p aria-live="polite" className="bb-field__hint bb-field__hint--warning">
+            <p aria-live="polite" className="bt-field__hint bt-field__hint--warning">
               {submissionReadinessMessage}
             </p>
           ) : null}

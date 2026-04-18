@@ -13,7 +13,7 @@ export function StatusChip({ status }: StatusChipProps) {
   const tone = getStatusTone(status)
 
   return (
-    <span className={`bb-status-chip bb-status-chip--${tone}`}>
+    <span className={`bt-status-chip bt-status-chip--${tone}`}>
       {status.replaceAll('_', ' ')}
     </span>
   )

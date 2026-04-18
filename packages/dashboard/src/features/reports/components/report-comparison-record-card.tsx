@@ -19,26 +19,26 @@ export function ComparisonRecordCard({
 
   return (
     <SurfaceCard
-      className={`bb-comparison-card${variant === 'hero' ? ' bb-comparison-card--hero' : ''}`}
+      className={`bt-comparison-card${variant === 'hero' ? ' bt-comparison-card--hero' : ''}`}
       tone="low"
     >
       {variant === 'hero' ? (
-        <div className="bb-comparison-card__hero-header">
-          <div className="bb-comparison-card__hero-media">
+        <div className="bt-comparison-card__hero-header">
+          <div className="bt-comparison-card__hero-media">
             <RecordMedia record={record} />
           </div>
-          <div className="bb-comparison-card__record-title">
+          <div className="bt-comparison-card__record-title">
             <h2>{record.bottleName}</h2>
             <p>{record.category ?? 'Uncategorized'}</p>
           </div>
         </div>
       ) : (
-        <div className="bb-comparison-card__record-title">
+        <div className="bt-comparison-card__record-title">
           <h2>{record.bottleName}</h2>
           <p>{record.category ?? 'Uncategorized'}</p>
         </div>
       )}
-      <div className="bb-comparison-grid">
+      <div className="bt-comparison-grid">
         <ComparisonPanel
           fields={comparisonFields}
           fillField={fillField}
@@ -70,11 +70,11 @@ function ComparisonPanel({
   const isFinal = panel === 'final'
 
   return (
-    <div className={`bb-comparison-panel${isFinal ? ' bb-comparison-panel--final' : ''}`}>
+    <div className={`bt-comparison-panel${isFinal ? ' bt-comparison-panel--final' : ''}`}>
       <SectionEyebrow>{isFinal ? 'Final Corrected Values' : 'Original Model Output'}</SectionEyebrow>
       {fields.map((field) => (
-        <div className="bb-comparison-field" key={`${panel}-${field.label}`}>
-          <span className="bb-comparison-field__label">{field.label}</span>
+        <div className="bt-comparison-field" key={`${panel}-${field.label}`}>
+          <span className="bt-comparison-field__label">{field.label}</span>
           <span className={buildComparisonValueClass(field, panel)}>{selectComparisonValue(field, panel)}</span>
         </div>
       ))}
@@ -102,15 +102,15 @@ function ComparisonFillField({
       : field.label
 
   return (
-    <div className={`bb-comparison-field bb-comparison-field--fill${variant === 'hero' ? ' is-hero' : ''}`}>
-      <span className="bb-comparison-field__label">{label}</span>
-      <span className={`bb-comparison-field__fill-value${panel === 'final' ? ' is-final' : ''}`}>
+    <div className={`bt-comparison-field bt-comparison-field--fill${variant === 'hero' ? ' is-hero' : ''}`}>
+      <span className="bt-comparison-field__label">{label}</span>
+      <span className={`bt-comparison-field__fill-value${panel === 'final' ? ' is-final' : ''}`}>
         {value}
       </span>
       {fillTenths !== null ? (
-        <div className="bb-comparison-field__fill-track" aria-hidden="true">
+        <div className="bt-comparison-field__fill-track" aria-hidden="true">
           <span
-            className={`bb-comparison-field__fill-bar${panel === 'final' ? ' is-final' : ''}`}
+            className={`bt-comparison-field__fill-bar${panel === 'final' ? ' is-final' : ''}`}
             style={{ width: `${fillTenths * 10}%` }}
           />
         </div>
@@ -121,10 +121,10 @@ function ComparisonFillField({
 
 function buildComparisonValueClass(field: ComparisonField, panel: 'original' | 'final') {
   if (panel === 'final') {
-    return `bb-comparison-field__value${field.changed ? ' is-final' : ''}`
+    return `bt-comparison-field__value${field.changed ? ' is-final' : ''}`
   }
 
-  return `bb-comparison-field__value${field.changed ? ' is-struck' : ''}`
+  return `bt-comparison-field__value${field.changed ? ' is-struck' : ''}`
 }
 
 function selectComparisonValue(field: ComparisonField, panel: 'original' | 'final') {

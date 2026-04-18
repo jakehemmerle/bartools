@@ -20,7 +20,7 @@ Done when:
 ## Phase 1: Design Token And Shell Refactor
 
 Goal:
-- make the app feel like BARBACK before refining individual screens
+- make the app feel like BARTOOLS before refining individual screens
 
 Tasks:
 - extract dashboard-local visual tokens from mobile-aligned direction
@@ -69,7 +69,7 @@ Goal:
 
 Tasks:
 - replace generic table presentation
-- implement BARBACK-owned list rows instead of library-shaped table defaults
+- implement BARTOOLS-owned list rows instead of library-shaped table defaults
 - implement final row/card composition
 - align status chip treatment
 - implement empty state in same family

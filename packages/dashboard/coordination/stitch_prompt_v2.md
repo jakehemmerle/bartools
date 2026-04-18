@@ -1,9 +1,9 @@
-# Stitch Prompt: BARBACK Web Dashboard
+# Stitch Prompt: BARTOOLS Web Dashboard
 
 Use the following prompt in Stitch.
 
 ```text
-Design only a narrow desktop report-review workbench for BARBACK.
+Design only a narrow desktop report-review workbench for BARTOOLS.
 
 Do not design a general dashboard.
 Do not design an admin console.
@@ -30,7 +30,7 @@ Do not treat it as a source of truth for:
 
 If the linked project contains any page, module, navigation, metric, action, or concept not explicitly allowed in this prompt, ignore it.
 
-The mobile BARBACK app is the source of truth for design.
+The mobile BARTOOLS app is the source of truth for design.
 The backend reports workflow is the source of truth for functionality.
 
 If mobile design language conflicts with generic desktop dashboard conventions:
@@ -50,7 +50,7 @@ Do not design for speculative future backend capabilities.
 1. CORE PRODUCT TRUTH
 ========================================
 
-This web surface is a desktop companion to BARBACK mobile.
+This web surface is a desktop companion to BARTOOLS mobile.
 
 It is for one job:
 - reviewing reports
@@ -344,7 +344,7 @@ Only the content within the shared template may change by state.
 Use one restrained global shell.
 
 Allowed shell elements:
-- BARBACK wordmark / brand marker
+- BARTOOLS wordmark / brand marker
 - minimal top bar
 - current page title context
 - optional single back link where relevant
@@ -376,7 +376,7 @@ It is not an account entry flow.
 It should be a restrained launch surface for the reports workbench.
 
 It may contain:
-- BARBACK identity
+- BARTOOLS identity
 - a concise heading
 - one short descriptive paragraph
 - one primary action leading into reports
@@ -663,7 +663,7 @@ It should not:
 15. VISUAL SYSTEM REQUIREMENTS
 ========================================
 
-Match BARBACK mobile in spirit and in concrete typographic/material choices.
+Match BARTOOLS mobile in spirit and in concrete typographic/material choices.
 
 Typography:
 - display / major headings: Newsreader
@@ -784,7 +784,7 @@ The result should be implementation-directed, not ideation-directed.
 
 The design succeeds only if all of the following are true:
 
-1. It is unmistakably BARBACK.
+1. It is unmistakably BARTOOLS.
 2. It visually defers to the linked mobile design language.
 3. It functionally stays inside the backend reports workflow and nowhere else.
 4. Every visible element maps to a backend field, route, or state described in this prompt.

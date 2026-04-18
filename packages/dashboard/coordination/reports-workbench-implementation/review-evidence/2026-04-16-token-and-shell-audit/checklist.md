@@ -1,6 +1,6 @@
 | Screen | Route | Golden Reference | Screenshot | Visual Verdict | Semantic Verdict | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Entry | `/` | `golden-set-approved/reports_workbench_entry` | `screens/01-entry.png` | `pass` | `pass` | Typography, CTA emphasis, and calm dark shell now read much closer to the approved BARBACK entry family. |
+| Entry | `/` | `golden-set-approved/reports_workbench_entry` | `screens/01-entry.png` | `pass` | `pass` | Typography, CTA emphasis, and calm dark shell now read much closer to the approved BARTOOLS entry family. |
 | Reports List | `/reports` | `golden-set-approved/reports_list` | `screens/02-reports-list.png` | `pass-with-notes` | `pass` | Row chrome, wordmark shell, and chip palette are aligned; fixture data still differs from the literal mockup content and the list remains slightly more spacious. |
 | Reports Empty | `/__review/reports/empty` | `golden-set-approved/reports_list_empty_state` | `screens/03-reports-empty.png` | `pass` | `pass` | Empty state stays calm and centered without inventing troubleshooting or unsupported product scope. |
 | Report Created | `/__review/report/created` | `golden-set-approved/report_detail_created` | `screens/04-report-created.png` | `pass-with-notes` | `pass` | The state remains minimal and truthful, but the explainer slab is still thinner and less deliberate than the approved frame. |

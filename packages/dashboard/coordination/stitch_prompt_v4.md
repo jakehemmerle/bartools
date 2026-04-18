@@ -1,9 +1,9 @@
-# Stitch Prompt V4: BARBACK Web Reports Workbench
+# Stitch Prompt V4: BARTOOLS Web Reports Workbench
 
 Use the following prompt in a fresh Stitch project.
 
 ```text
-Design a desktop web reports workbench for BARBACK.
+Design a desktop web reports workbench for BARTOOLS.
 
 This is a fresh project.
 Do not inherit assumptions from prior Stitch attempts.
@@ -15,7 +15,7 @@ Do not reuse prior Stitch action vocabulary.
 Do not reuse prior Stitch “luxury dashboard” instincts.
 
 The design must defer to:
-- the BARBACK mobile app for design
+- the BARTOOLS mobile app for design
 - the backend reports workflow for functionality
 
 Primary visual reference:
@@ -75,7 +75,7 @@ This is:
 - a report review desk
 - a quiet operational workbench
 - a desktop reading and inspection surface
-- a BARBACK companion interface
+- a BARTOOLS companion interface
 
 The product job is extremely narrow:
 - open reports
@@ -87,7 +87,7 @@ The product job is extremely narrow:
 
 The web surface must not imply broader authority than the backend actually exposes.
 The web surface must not create any new product obligations for mobile or backend.
-The web surface must feel subordinate to the existing BARBACK product family, not like a new platform.
+The web surface must feel subordinate to the existing BARTOOLS product family, not like a new platform.
 
 
 ==================================================
@@ -97,7 +97,7 @@ The web surface must feel subordinate to the existing BARBACK product family, no
 There are exactly two sources of truth.
 
 Design source of truth:
-- BARBACK mobile app
+- BARTOOLS mobile app
 - the linked Stitch project only as visual reference
 
 Functional source of truth:
@@ -525,7 +525,7 @@ Do not create a design brief that:
 9. EXACT VISUAL SOURCE OF TRUTH
 ==================================================
 
-The web surface must feel like BARBACK mobile translated to desktop.
+The web surface must feel like BARTOOLS mobile translated to desktop.
 
 Typography:
 - major headings: Newsreader
@@ -595,7 +595,7 @@ The mood should not come from:
 There is one shell.
 
 Allowed shell elements:
-- BARBACK wordmark or simple brand mark
+- BARTOOLS wordmark or simple brand mark
 - one restrained top bar
 - one optional back link when appropriate
 
@@ -630,7 +630,7 @@ This is not product marketing.
 It is a sparse launch surface for the reports workbench.
 
 Allowed content:
-- BARBACK identity
+- BARTOOLS identity
 - one heading
 - one short paragraph
 - one primary action leading into reports
@@ -1012,7 +1012,7 @@ Do not write copy that sounds like an enterprise dashboard.
 Provide exactly:
 - 11 screens
 - one coherent visual system across them
-- one clear desktop adaptation of BARBACK mobile
+- one clear desktop adaptation of BARTOOLS mobile
 
 Do not provide:
 - system manifesto
@@ -1902,7 +1902,7 @@ It exists to open reports.
 It exists to calmly state the integration limitation.
 
 Allowed entry surface elements:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - heading
 - one short explanatory sentence
 - one primary action to open reports
@@ -1932,7 +1932,7 @@ Disallowed heading ideas:
 - Operations Hub
 - Inventory Command
 - Review Console
-- BARBACK Reserve
+- BARTOOLS Reserve
 - Ledger Workbench
 
 Allowed body copy tone:
@@ -2836,7 +2836,7 @@ Disallowed industrial nouns:
 If you are about to write any of the following, stop.
 
 Forbidden on entry screen:
-- BARBACK Reserve
+- BARTOOLS Reserve
 - Review Control Center
 - Daily Operations Hub
 
@@ -2962,7 +2962,7 @@ This section exists because Stitch keeps hallucinating titles and metadata clust
 Use this as a screen-by-screen whitelist.
 
 Entry surface header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - Reports Workbench heading
 
 Entry surface header may not include:
@@ -2973,7 +2973,7 @@ Entry surface header may not include:
 - workspace title
 
 Reports list header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - simple back path only if it makes sense
 - Reports heading
 - one short supporting sentence
@@ -2986,7 +2986,7 @@ Reports list header may not include:
 - utility links
 
 Created screen header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - Back to Reports
 - report id
 - created status chip
@@ -3001,7 +3001,7 @@ Created screen header may not include:
 - diagnostics
 
 Processing screen header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - Back to Reports
 - report id
 - processing status chip
@@ -3016,7 +3016,7 @@ Processing screen header may not include:
 - AI icon cluster
 
 Unreviewed screen header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - Back to Reports
 - report id
 - unreviewed status chip
@@ -3032,7 +3032,7 @@ Unreviewed screen header may not include:
 - Review All
 
 Reviewed screen header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - Back to Reports
 - report id
 - reviewed status chip
@@ -3048,7 +3048,7 @@ Reviewed screen header may not include:
 - profile icon
 
 Failed-emphasis screen header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - Back to Reports
 - report id
 - unreviewed status chip
@@ -3061,7 +3061,7 @@ Failed-emphasis screen header may not include:
 - retry action
 
 Comparison-emphasis screen header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - Back to Reports
 - report id
 - reviewed status chip
@@ -3073,7 +3073,7 @@ Comparison-emphasis screen header may not include:
 - document workflow copy
 
 Blocked screen header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - Back to Reports if shown
 - Access Unavailable
 
@@ -3083,7 +3083,7 @@ Blocked screen header may not include:
 - auth failure title
 
 Not-found screen header may include:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - Back to Reports if shown
 - Report Not Found
 
@@ -3382,7 +3382,7 @@ Before finalizing the design, validate all of the following:
 
 1. Does every visible thing map directly to the backend truth described above?
 2. Are all statuses named exactly as the backend names them?
-3. Is BARBACK mobile clearly the visual parent?
+3. Is BARTOOLS mobile clearly the visual parent?
 4. Is Manrope used for body copy rather than Inter?
 5. Are there zero sidebars, zero footer utility links, and zero profile/notification controls?
 6. Are there zero synthetic metrics?

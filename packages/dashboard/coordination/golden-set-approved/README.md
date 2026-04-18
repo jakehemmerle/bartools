@@ -1,6 +1,6 @@
 # Golden Set Approved
 
-This folder contains the approved BARBACK web dashboard design references collected into one repo-local bundle.
+This folder contains the approved BARTOOLS web dashboard design references collected into one repo-local bundle.
 
 Use this folder when:
 - sharing the approved screen set with another team

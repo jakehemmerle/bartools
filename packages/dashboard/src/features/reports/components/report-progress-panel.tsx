@@ -10,20 +10,20 @@ export function ReportProgressPanel({
   const progressPercent = Math.max(0, Math.min(100, Math.round(progress * 100)))
 
   return (
-    <section className="bb-progress-panel">
-      <div className="bb-progress-panel__meta">
-        <span className="bb-field__label">Progress</span>
-        <span className="bb-progress-panel__label">{label}</span>
+    <section className="bt-progress-panel">
+      <div className="bt-progress-panel__meta">
+        <span className="bt-field__label">Progress</span>
+        <span className="bt-progress-panel__label">{label}</span>
       </div>
       <div
         aria-label={label}
         aria-valuemax={100}
         aria-valuemin={0}
         aria-valuenow={progressPercent}
-        className="bb-progress-bar"
+        className="bt-progress-bar"
         role="progressbar"
       >
-        <span className="bb-progress-bar__fill" style={{ width: `${progressPercent}%` }} />
+        <span className="bt-progress-bar__fill" style={{ width: `${progressPercent}%` }} />
       </div>
     </section>
   )

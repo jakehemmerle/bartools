@@ -1,6 +1,6 @@
 # Reports Workbench Implementation
 
-This folder is the execution-facing plan for turning the approved golden-set mockups into the real BARBACK web frontend.
+This folder is the execution-facing plan for turning the approved golden-set mockups into the real BARTOOLS web frontend.
 
 This plan is intentionally narrower than the older dashboard-wide planning docs.
 
@@ -10,7 +10,7 @@ It assumes:
 - the approved web visual source is `packages/dashboard/coordination/golden-set-approved/`
 - the current web product is a reports-first workbench, not a full dashboard
 - React Aria is the interaction primitive layer
-- BARBACK-owned components and styles, not a third-party design system, define the visible product language
+- BARTOOLS-owned components and styles, not a third-party design system, define the visible product language
 
 ## Goal
 

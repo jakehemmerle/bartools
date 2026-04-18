@@ -58,7 +58,7 @@ describe('Reports workbench routes: baseline states', () => {
 
     const failedRecordCard = (
       await screen.findByText(/catalog_no_match/i)
-    ).closest('.bb-record-card')
+    ).closest('.bt-record-card')
 
     expect(failedRecordCard).toBeTruthy()
     await user.type(

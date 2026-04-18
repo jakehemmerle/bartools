@@ -9,9 +9,9 @@ export function Select({ className = '', hideLabel = false, id, label, ...props 
   const fieldId = id ?? label.toLowerCase().replaceAll(/\s+/g, '-')
 
   return (
-    <label className="bb-field">
-      <span className={`bb-field__label${hideLabel ? ' sr-only' : ''}`}>{label}</span>
-      <select className={`bb-select${className ? ` ${className}` : ''}`} id={fieldId} {...props} />
+    <label className="bt-field">
+      <span className={`bt-field__label${hideLabel ? ' sr-only' : ''}`}>{label}</span>
+      <select className={`bt-select${className ? ` ${className}` : ''}`} id={fieldId} {...props} />
     </label>
   )
 }
