@@ -55,7 +55,7 @@
       "autoIncrement": true,
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_BARTOOLS_API_URL": "https://bartools-backend-staging-zjausnxoyq-ue.a.run.app"
+        "EXPO_PUBLIC_BARTOOLS_API_URL": "https://bartools-backend-prod-ovhqgvlj5q-ue.a.run.app"
       }
     },
     "production-apk": {
