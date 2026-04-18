@@ -14,18 +14,17 @@ import type {
   BackstockStartMode,
   SubmittedBackstockSummary,
 } from '../lib/backstock-draft'
-
 type BackstockLocationOption = {
   id: string
   name: string
 }
-
 type BackstockReportCreateScreenProps = {
   canGenerateDraft: boolean
   draftStatusMessage: string | null
   draftSummary: SubmittedBackstockSummary
   generatingDraft: boolean
   hasGeneratedDraft: boolean
+  integrationNotice: string | null
   lineItems: BackstockDraftLineItem[]
   locationId: string
   locationOptions: ReadonlyArray<BackstockLocationOption>
@@ -43,17 +42,19 @@ type BackstockReportCreateScreenProps = {
   onStartModeChange: (mode: BackstockStartMode) => void
   onSubmit: () => void
   onQuantityChange: (lineItemId: string, quantity: number) => void
+  photoGenerationBlockedMessage: string | null
   sourcePhotos: BackstockSourcePhoto[]
   startMode: BackstockStartMode
+  submissionBlockedMessage: string | null
   submittedSummary: SubmittedBackstockSummary | null
 }
-
 export function BackstockReportCreateScreen({
   canGenerateDraft,
   draftStatusMessage,
   draftSummary,
   generatingDraft,
   hasGeneratedDraft,
+  integrationNotice,
   lineItems,
   locationId,
   locationOptions,
@@ -71,8 +72,10 @@ export function BackstockReportCreateScreen({
   onStartModeChange,
   onSubmit,
   onQuantityChange,
+  photoGenerationBlockedMessage,
   sourcePhotos,
   startMode,
+  submissionBlockedMessage,
   submittedSummary,
 }: BackstockReportCreateScreenProps) {
   const selectedLocation =
@@ -84,7 +87,6 @@ export function BackstockReportCreateScreen({
     sourcePhotoCount: sourcePhotos.length,
     startMode,
   })
-
   if (submittedSummary && selectedLocation) {
     return (
       <BackstockSubmittedState
@@ -102,8 +104,17 @@ export function BackstockReportCreateScreen({
         support="Count sealed bottles in one backstock location. Start from photos or enter line items directly."
         title="New Backstock Report"
       />
-      <BackstockWorkflowRail currentStage={workflowStage} startMode={startMode} />
-
+      <BackstockWorkflowRail
+        currentStage={workflowStage}
+        photoGenerationBlocked={!!photoGenerationBlockedMessage}
+        startMode={startMode}
+        submissionBlocked={!!submissionBlockedMessage}
+      />
+      {integrationNotice ? (
+        <SurfaceCard className="bb-message-panel" tone="low">
+          <p className="bb-message-panel__body">{integrationNotice}</p>
+        </SurfaceCard>
+      ) : null}
       {draftStatusMessage ? (
         <SurfaceCard className="bb-message-panel" tone="low">
           <p aria-live="polite" className="bb-message-panel__body">
@@ -111,7 +122,6 @@ export function BackstockReportCreateScreen({
           </p>
         </SurfaceCard>
       ) : null}
-
       <BackstockSetupCard
         locationId={locationId}
         locationOptions={locationOptions}
@@ -119,10 +129,10 @@ export function BackstockReportCreateScreen({
         onStartModeChange={onStartModeChange}
         startMode={startMode}
       />
-
       {startMode === 'photo' ? (
         <BackstockPhotoIntake
           canGenerateDraft={canGenerateDraft}
+          generationBlockedMessage={photoGenerationBlockedMessage}
           hasGeneratedDraft={hasGeneratedDraft}
           generatingDraft={generatingDraft}
           needsDraftRegeneration={needsDraftRegeneration}
@@ -132,7 +142,6 @@ export function BackstockReportCreateScreen({
           sourcePhotos={sourcePhotos}
         />
       ) : null}
-
       <BackstockLineItemsCard
         lineItems={lineItems}
         onAddLineItem={onAddLineItem}
@@ -143,14 +152,16 @@ export function BackstockReportCreateScreen({
         onSelectResult={onSelectResult}
         startMode={startMode}
       />
-
       <BackstockSummaryCard
         draftSummary={draftSummary}
         locationName={selectedLocation?.name ?? 'Choose one location'}
         needsDraftRegeneration={needsDraftRegeneration}
         onSubmit={onSubmit}
+        submissionBlockedMessage={submissionBlockedMessage}
         sourcePhotoCount={sourcePhotos.length}
-        submitDisabled={!locationId || !hasValidDraft || needsDraftRegeneration}
+        submitDisabled={
+          !locationId || !hasValidDraft || needsDraftRegeneration || !!submissionBlockedMessage
+        }
       />
     </div>
   )
@@ -184,10 +195,14 @@ function buildBackstockWorkflowStage({
 
 function BackstockWorkflowRail({
   currentStage,
+  photoGenerationBlocked,
   startMode,
+  submissionBlocked,
 }: {
   currentStage: number
+  photoGenerationBlocked: boolean
   startMode: BackstockStartMode
+  submissionBlocked: boolean
 }) {
   const steps = [
     { label: 'Setup', support: 'Choose the backstock location.' },
@@ -195,11 +210,16 @@ function BackstockWorkflowRail({
       label: 'Stage Photos',
       support:
         startMode === 'photo'
-          ? 'Queue shelf photos for the first draft.'
+          ? photoGenerationBlocked
+            ? 'Queue shelf photos while draft generation is pending backend work.'
+            : 'Queue shelf photos for the first draft.'
           : 'Optional when you want to start manually.',
     },
     { label: 'Review Draft', support: 'Fix grouped counts and product matches.' },
-    { label: 'Submit Snapshot', support: 'Save the sealed full-bottle count.' },
+    {
+      label: 'Submit Snapshot',
+      support: submissionBlocked ? 'Pending backend support.' : 'Save the sealed full-bottle count.',
+    },
   ]
 
   return (
@@ -252,7 +272,7 @@ function BackstockSubmittedState({
   return (
     <div className="bb-backstock-screen">
       <BackstockReportHeader
-        support={`${locationName} now has a saved full-bottle snapshot ready for later review.`}
+        support="Fixture mode keeps this submitted snapshot in the current browser session for flow review."
         title="Backstock Report Submitted"
       />
 
@@ -422,6 +442,7 @@ function BackstockSummaryCard({
   needsDraftRegeneration,
   onSubmit,
   sourcePhotoCount,
+  submissionBlockedMessage,
   submitDisabled,
 }: {
   draftSummary: SubmittedBackstockSummary
@@ -429,6 +450,7 @@ function BackstockSummaryCard({
   needsDraftRegeneration: boolean
   onSubmit: () => void
   sourcePhotoCount: number
+  submissionBlockedMessage: string | null
   submitDisabled: boolean
 }) {
   return (
@@ -437,7 +459,9 @@ function BackstockSummaryCard({
         <div>
           <h2 className="bb-backstock-card__title">Snapshot Summary</h2>
           <p className="bb-backstock-card__support">
-            Submit once the grouped counts reflect what is sealed and on hand right now.
+            {submissionBlockedMessage
+              ? 'Finalize the snapshot details now. Live submission will connect here after backend support lands.'
+              : 'Submit once the grouped counts reflect what is sealed and on hand right now.'}
           </p>
         </div>
       </div>
@@ -451,14 +475,18 @@ function BackstockSummaryCard({
 
       <div className="bb-backstock-card__actions">
         <div className="bb-backstock-card__actions-copy">
-          {needsDraftRegeneration ? (
+          {submissionBlockedMessage ? (
+            <p aria-live="polite" className="bb-field__hint bb-field__hint--warning">
+              {submissionBlockedMessage}
+            </p>
+          ) : needsDraftRegeneration ? (
             <p aria-live="polite" className="bb-field__hint bb-field__hint--warning">
               Regenerate the draft to match the current photo set before submitting.
             </p>
           ) : null}
         </div>
         <Button disabled={submitDisabled} onPress={onSubmit}>
-          Submit Backstock Report
+          {submissionBlockedMessage ? 'Submission Pending' : 'Submit Backstock Report'}
         </Button>
         <Button to="/reports" variant="ghost">
           Cancel

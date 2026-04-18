@@ -5,6 +5,7 @@ import type { BackstockSourcePhoto } from '../lib/backstock-draft'
 
 type BackstockPhotoIntakeProps = {
   canGenerateDraft: boolean
+  generationBlockedMessage: string | null
   hasGeneratedDraft: boolean
   generatingDraft: boolean
   needsDraftRegeneration: boolean
@@ -16,6 +17,7 @@ type BackstockPhotoIntakeProps = {
 
 export function BackstockPhotoIntake({
   canGenerateDraft,
+  generationBlockedMessage,
   hasGeneratedDraft,
   generatingDraft,
   needsDraftRegeneration,
@@ -26,14 +28,21 @@ export function BackstockPhotoIntake({
 }: BackstockPhotoIntakeProps) {
   return (
     <SurfaceCard className="bb-backstock-card bb-backstock-intake" tone="base">
-      <BackstockPhotoIntakeHeader sourcePhotoCount={sourcePhotos.length} />
+      <BackstockPhotoIntakeHeader
+        generationBlockedMessage={generationBlockedMessage}
+        sourcePhotoCount={sourcePhotos.length}
+      />
 
       <div className="bb-backstock-intake__stage">
         <BackstockPhotoDropzone
+          generationBlockedMessage={generationBlockedMessage}
           onPhotoFilesSelected={onPhotoFilesSelected}
           sourcePhotoCount={sourcePhotos.length}
         />
-        <BackstockPhotoWorkflow startModeHasPhotos={sourcePhotos.length > 0} />
+        <BackstockPhotoWorkflow
+          generationBlockedMessage={generationBlockedMessage}
+          startModeHasPhotos={sourcePhotos.length > 0}
+        />
       </div>
 
       {sourcePhotos.length > 0 ? (
@@ -43,12 +52,15 @@ export function BackstockPhotoIntake({
         />
       ) : (
         <p className="bb-field__hint">
-          Queue one or more images to generate the initial grouped draft.
+          {generationBlockedMessage
+            ? 'Queue one or more images now. Grouped draft generation will connect here after backend work lands.'
+            : 'Queue one or more images to generate the initial grouped draft.'}
         </p>
       )}
 
       <BackstockPhotoActions
         canGenerateDraft={canGenerateDraft}
+        generationBlockedMessage={generationBlockedMessage}
         generatingDraft={generatingDraft}
         hasGeneratedDraft={hasGeneratedDraft}
         needsDraftRegeneration={needsDraftRegeneration}
@@ -59,22 +71,24 @@ export function BackstockPhotoIntake({
 }
 
 function BackstockPhotoIntakeHeader({
+  generationBlockedMessage,
   sourcePhotoCount,
 }: {
+  generationBlockedMessage: string | null
   sourcePhotoCount: number
 }) {
   const queueLabel =
     sourcePhotoCount === 1 ? '1 frame queued' : `${sourcePhotoCount} frames queued`
+  const support = generationBlockedMessage
+    ? 'Stage shelf or storage photos from one location now. Live grouped draft generation will connect here after backend work lands.'
+    : 'Stage several shelf or storage photos from one location, then generate a grouped first draft to review below.'
 
   return (
     <div className="bb-backstock-intake__header">
       <div>
         <p className="bb-backstock-intake__eyebrow">Photo-Assisted Draft</p>
         <h2 className="bb-backstock-card__title">Photo Staging</h2>
-        <p className="bb-backstock-card__support">
-          Stage several shelf or storage photos from one location, then generate a
-          grouped first draft to review below.
-        </p>
+        <p className="bb-backstock-card__support">{support}</p>
       </div>
       <div className="bb-backstock-intake__summary">
         <p className="bb-backstock-intake__summary-value">{queueLabel}</p>
@@ -87,12 +101,18 @@ function BackstockPhotoIntakeHeader({
 }
 
 function BackstockPhotoDropzone({
+  generationBlockedMessage,
   onPhotoFilesSelected,
   sourcePhotoCount,
 }: {
+  generationBlockedMessage: string | null
   onPhotoFilesSelected: (files: FileList | null) => void
   sourcePhotoCount: number
 }) {
+  const support = generationBlockedMessage
+    ? 'Add a few wide shots of sealed bottles in one backstock area. Grouped draft generation will connect here once backend uploads are ready.'
+    : 'Add a few wide shots of sealed bottles in one backstock area. The draft groups likely products and bottle counts before review.'
+
   return (
     <label className="bb-backstock-intake__dropzone" htmlFor="backstock-source-photos">
       <input
@@ -108,10 +128,7 @@ function BackstockPhotoDropzone({
       <span className="bb-backstock-intake__drop-title">
         Stage shelf photos for the first draft
       </span>
-      <span className="bb-backstock-intake__drop-support">
-        Add a few wide shots of sealed bottles in one backstock area. The draft
-        groups likely products and bottle counts before review.
-      </span>
+      <span className="bb-backstock-intake__drop-support">{support}</span>
       <span className="bb-backstock-intake__drop-action">
         {sourcePhotoCount > 0 ? 'Add More Photos' : 'Choose Photos'}
       </span>
@@ -120,13 +137,17 @@ function BackstockPhotoDropzone({
 }
 
 function BackstockPhotoWorkflow({
+  generationBlockedMessage,
   startModeHasPhotos,
 }: {
+  generationBlockedMessage: string | null
   startModeHasPhotos: boolean
 }) {
   const steps = [
     'Add multiple shelf views before generating the draft.',
-    'Build a first pass from the queued photo set.',
+    generationBlockedMessage
+      ? 'Connect grouped draft generation once backend uploads are ready.'
+      : 'Build a first pass from the queued photo set.',
     'Adjust product matches and full-bottle counts before the snapshot.',
   ]
 
@@ -142,7 +163,9 @@ function BackstockPhotoWorkflow({
                   ? 'Queue looks active'
                   : 'Queue photos'
                 : index === 1
-                  ? 'Generate grouped draft'
+                  ? generationBlockedMessage
+                    ? 'Generation pending'
+                    : 'Generate grouped draft'
                   : 'Review and submit'}
             </p>
             <p className="bb-backstock-intake__workflow-copy">{step}</p>
@@ -215,12 +238,14 @@ function BackstockPhotoTrayCard({
 
 function BackstockPhotoActions({
   canGenerateDraft,
+  generationBlockedMessage,
   generatingDraft,
   hasGeneratedDraft,
   needsDraftRegeneration,
   onGenerateDraft,
 }: {
   canGenerateDraft: boolean
+  generationBlockedMessage: string | null
   generatingDraft: boolean
   hasGeneratedDraft: boolean
   needsDraftRegeneration: boolean
@@ -230,11 +255,17 @@ function BackstockPhotoActions({
     <div className="bb-backstock-intake__actions">
       <div className="bb-backstock-intake__actions-copy">
         <p className="bb-backstock-intake__actions-title">
-          {hasGeneratedDraft
+          {generationBlockedMessage
+            ? 'Photo-generated drafts are pending backend support.'
+            : hasGeneratedDraft
             ? 'The queued photo set already has a draft.'
             : 'Generate a grouped first pass when the queue looks right.'}
         </p>
-        {needsDraftRegeneration ? (
+        {generationBlockedMessage ? (
+          <p aria-live="polite" className="bb-field__hint bb-field__hint--warning">
+            {generationBlockedMessage}
+          </p>
+        ) : needsDraftRegeneration ? (
           <p aria-live="polite" className="bb-field__hint bb-field__hint--warning">
             Source photos changed. Regenerate the draft before submitting.
           </p>
@@ -250,7 +281,9 @@ function BackstockPhotoActions({
         onPress={onGenerateDraft}
         variant="secondary"
       >
-        {generatingDraft
+        {generationBlockedMessage
+          ? 'Generation Pending'
+          : generatingDraft
           ? 'Generating Draft…'
           : hasGeneratedDraft
             ? 'Regenerate Draft'

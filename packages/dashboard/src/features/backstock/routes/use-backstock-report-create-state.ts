@@ -20,11 +20,16 @@ import {
 } from './backstock-draft-persistence'
 
 type BackstockDraftFormState = ReturnType<typeof useBackstockDraftState>
+type BackstockIntegrationState = ReturnType<typeof createBackstockIntegrationState>
 
 export function useBackstockReportCreateState() {
   const reportsClient = useReportsClient()
   const restoredDraft = useMemo(() => loadPersistedBackstockDraft(), [])
   const formState = useBackstockDraftState(restoredDraft)
+  const integrationState = useMemo(
+    () => createBackstockIntegrationState(reportsClient.readiness.backendEnabled),
+    [reportsClient.readiness.backendEnabled],
+  )
 
   const draftSummary = useMemo(
     () => buildSubmittedBackstockSummary(formState.lineItems),
@@ -56,17 +61,20 @@ export function useBackstockReportCreateState() {
   const actions = createBackstockDraftActions({
     draftSummary,
     formState,
+    integrationState,
     needsDraftRegeneration,
     reportsClient,
     sourcePhotoSignature,
   })
 
   return {
-    canGenerateDraft: formState.sourcePhotos.length > 0,
+    canGenerateDraft:
+      integrationState.photoDraftGenerationEnabled && formState.sourcePhotos.length > 0,
     draftStatusMessage: formState.draftStatusMessage,
     draftSummary,
     generatingDraft: formState.generatingDraft,
     hasGeneratedDraft: formState.generatedPhotoSignature !== null,
+    integrationNotice: integrationState.integrationNotice,
     lineItems: formState.lineItems,
     locationId: formState.locationId,
     needsDraftRegeneration,
@@ -83,8 +91,10 @@ export function useBackstockReportCreateState() {
     onStartAnotherReport: actions.handleStartAnotherReport,
     onStartModeChange: actions.handleStartModeChange,
     onSubmit: actions.handleSubmit,
+    photoGenerationBlockedMessage: integrationState.photoGenerationBlockedMessage,
     sourcePhotos: formState.sourcePhotos,
     startMode: formState.startMode,
+    submissionBlockedMessage: integrationState.submissionBlockedMessage,
     submittedSummary: formState.submittedSummary,
   }
 }
@@ -92,12 +102,14 @@ export function useBackstockReportCreateState() {
 function createBackstockDraftActions({
   draftSummary,
   formState,
+  integrationState,
   needsDraftRegeneration,
   reportsClient,
   sourcePhotoSignature,
 }: {
   draftSummary: SubmittedBackstockSummary
   formState: BackstockDraftFormState
+  integrationState: BackstockIntegrationState
   needsDraftRegeneration: boolean
   reportsClient: ReturnType<typeof useReportsClient>
   sourcePhotoSignature: string
@@ -148,6 +160,11 @@ function createBackstockDraftActions({
   }
 
   async function handleGenerateDraft() {
+    if (!integrationState.photoDraftGenerationEnabled) {
+      formState.setDraftStatusMessage(integrationState.photoGenerationBlockedMessage)
+      return
+    }
+
     if (formState.sourcePhotos.length === 0) {
       return
     }
@@ -207,6 +224,11 @@ function createBackstockDraftActions({
   }
 
   function handleSubmit() {
+    if (!integrationState.submissionEnabled) {
+      formState.setDraftStatusMessage(integrationState.submissionBlockedMessage)
+      return
+    }
+
     if (needsDraftRegeneration) {
       return
     }
@@ -270,6 +292,29 @@ function useBackstockDraftState(restoredDraft: RestoredBackstockDraft | null) {
     sourcePhotos,
     startMode,
     submittedSummary,
+  }
+}
+
+function createBackstockIntegrationState(backendEnabled: boolean) {
+  if (!backendEnabled) {
+    return {
+      integrationNotice: null,
+      photoDraftGenerationEnabled: true,
+      photoGenerationBlockedMessage: null,
+      submissionBlockedMessage: null,
+      submissionEnabled: true,
+    }
+  }
+
+  return {
+    integrationNotice:
+      'Live backstock creation is still waiting on backend support. Photo-generated drafts and final submission are not connected yet.',
+    photoDraftGenerationEnabled: false,
+    photoGenerationBlockedMessage:
+      'Photo-generated drafts need backend uploads and grouping before they can run here.',
+    submissionBlockedMessage:
+      'Live backstock submission needs a dedicated backend contract before it can be sent.',
+    submissionEnabled: false,
   }
 }
 

@@ -1,8 +1,12 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createFixtureReportsClient } from '../../../lib/reports/client'
 import { renderAppRoutes } from '../../../test/test-utils'
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
 
 describe('Backstock report creation route', () => {
   it('links to the backstock route from the reports list header', async () => {
@@ -140,7 +144,9 @@ describe('Backstock report creation route', () => {
     expect(await screen.findByRole('heading', { name: 'New Backstock Report' })).toBeInTheDocument()
     expect(attempts).toBe(2)
   })
+})
 
+describe('Live backstock route guards', () => {
   it('blocks live backstock loading until a venue id is configured', async () => {
     const listVenueLocations = vi.fn()
 
@@ -166,5 +172,40 @@ describe('Backstock report creation route', () => {
       ),
     ).toBeInTheDocument()
     expect(listVenueLocations).not.toHaveBeenCalled()
+  })
+
+  it('keeps live-only backstock actions explicit about pending backend work', async () => {
+    vi.stubEnv('VITE_BARTOOLS_VENUE_ID', 'venue-1')
+
+    renderAppRoutes({
+      initialEntries: ['/reports/backstock/new'],
+      reportsClient: {
+        ...createFixtureReportsClient(),
+        readiness: {
+          backendEnabled: true,
+          blockedReason: 'review_submission_requires_user_context',
+          message: 'Review submission requires user context.',
+        },
+      },
+    })
+
+    expect(await screen.findByRole('combobox', { name: 'Backstock Location' })).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        'Live backstock creation is still waiting on backend support. Photo-generated drafts and final submission are not connected yet.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Generation Pending' })).toBeDisabled()
+    expect(
+      screen.getByText(
+        'Photo-generated drafts need backend uploads and grouping before they can run here.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Submission Pending' })).toBeDisabled()
+    expect(
+      screen.getByText(
+        'Live backstock submission needs a dedicated backend contract before it can be sent.',
+      ),
+    ).toBeInTheDocument()
   })
 })
