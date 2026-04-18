@@ -90,25 +90,136 @@ export function createReport(
   })
 }
 
-type UploadPhotosResponse = {
-  reportId: string
-  photos: { id: string; photoUrl: string; sortOrder: number }[]
+// ---------------------------------------------------------------------------
+// Photo upload: presign → PUT to GCS → complete
+// ---------------------------------------------------------------------------
+
+// MIME types the backend presign endpoint accepts. Keep in sync with the
+// allowlist in packages/backend/src/index.ts.
+export type PhotoContentType =
+  | 'image/jpeg'
+  | 'image/png'
+  | 'image/heic'
+  | 'image/heif'
+  | 'image/webp'
+
+// Extension → MIME, covering what vision-camera and expo-image-picker emit on
+// iOS/Android. Anything we can't match falls back to jpeg, which is also what
+// both libraries default to.
+export function inferPhotoContentType(uri: string): PhotoContentType {
+  const ext = uri.split('.').pop()?.toLowerCase() ?? ''
+  switch (ext) {
+    case 'png':
+      return 'image/png'
+    case 'heic':
+      return 'image/heic'
+    case 'heif':
+      return 'image/heif'
+    case 'webp':
+      return 'image/webp'
+    default:
+      return 'image/jpeg'
+  }
 }
 
-export function uploadPhotos(
+export type PresignedUpload = {
+  object: string
+  putUrl: string
+  contentType: PhotoContentType
+  expiresAt: string // ISO timestamp
+}
+
+export type PresignResponse = {
+  uploads: PresignedUpload[]
+}
+
+export type CompleteUploadInput = {
+  object: string
+  sortOrder: number
+}
+
+export type CompletedScan = {
+  id: string
+  object: string
+  sortOrder: number
+}
+
+export type CompleteResponse = {
+  scans: CompletedScan[]
+}
+
+export function presignUploads(
+  reportId: string,
+  uploads: Array<{ contentType: PhotoContentType }>,
+): Promise<PresignResponse> {
+  return fetchJson(`/reports/${encodePath(reportId)}/photos/presign`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ uploads }),
+  })
+}
+
+export function completeUploads(
+  reportId: string,
+  uploads: CompleteUploadInput[],
+): Promise<CompleteResponse> {
+  return fetchJson(`/reports/${encodePath(reportId)}/photos/complete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ uploads }),
+  })
+}
+
+/**
+ * PUT a local file directly to a GCS V4-signed URL. Uses the `File` API from
+ * `expo-file-system` to read raw bytes so we avoid multipart encoding (GCS
+ * rejects multipart bodies on a signed PUT) and the base64→bytes round-trip.
+ *
+ * `contentType` MUST equal the value the presign step was signed with, or GCS
+ * returns a signature mismatch.
+ */
+export async function uploadToGcs(
+  putUrl: string,
+  fileUri: string,
+  contentType: string,
+): Promise<void> {
+  // Dynamic import so the native `expo-file-system` module isn't loaded at
+  // module-evaluation time — keeps unit tests (and any non-RN import graph)
+  // from having to resolve the native chain up front.
+  const { File } = await import('expo-file-system')
+  const file = new File(fileUri)
+  const body = await file.arrayBuffer()
+  const res = await fetch(putUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': contentType },
+    body,
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new ApiError(res.status, `GCS PUT failed: ${text.slice(0, 200)}`)
+  }
+}
+
+export async function uploadPhotos(
   reportId: string,
   photoUris: string[],
-): Promise<UploadPhotosResponse> {
-  const formData = new FormData()
-  for (const [i, uri] of photoUris.entries()) {
-    // React Native's FormData accepts {uri,type,name} objects for file uploads
-    formData.append(`photo_${i}`, { uri, type: 'image/jpeg', name: `photo_${i}.jpg` })
+): Promise<CompleteResponse> {
+  const requested = photoUris.map((uri) => ({ contentType: inferPhotoContentType(uri) }))
+  const { uploads } = await presignUploads(reportId, requested)
+  if (uploads.length !== photoUris.length) {
+    throw new Error(
+      `presign returned ${uploads.length} URLs for ${photoUris.length} photos`,
+    )
   }
-  return fetchJson(`/reports/${encodePath(reportId)}/photos`, {
-    method: 'POST',
-    body: formData,
-    // Do NOT set Content-Type — RN sets the multipart boundary automatically
-  })
+  await Promise.all(
+    photoUris.map((uri, i) =>
+      uploadToGcs(uploads[i]!.putUrl, uri, uploads[i]!.contentType),
+    ),
+  )
+  return completeUploads(
+    reportId,
+    photoUris.map((_, i) => ({ object: uploads[i]!.object, sortOrder: i })),
+  )
 }
 
 type SubmitReportResponse = {

@@ -1,8 +1,7 @@
-import { readFile } from 'node:fs/promises';
-import { basename } from 'node:path';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { streamSSE } from 'hono/streaming';
+import { z } from 'zod';
 import {
   addReportPhotos,
   createReport,
@@ -16,8 +15,8 @@ import {
   searchBottles,
   submitReport,
 } from './report-service';
-import { resolveUploadPathFromUrl } from './uploads';
 import { enqueueReportInference } from './queue';
+import { getBucketName, getTtlSeconds, presignPut } from './storage';
 
 const app = new Hono();
 
@@ -25,27 +24,6 @@ function jsonError(status: 400 | 404 | 409 | 500, message: string) {
   return new HTTPException(status, {
     message,
   });
-}
-
-function collectFiles(body: Record<string, unknown>): File[] {
-  const files: File[] = [];
-
-  for (const value of Object.values(body)) {
-    if (value instanceof File) {
-      files.push(value);
-      continue;
-    }
-
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        if (item instanceof File) {
-          files.push(item);
-        }
-      }
-    }
-  }
-
-  return files;
 }
 
 app.onError((error, c) => {
@@ -63,31 +41,6 @@ app.onError((error, c) => {
 app.get('/', (c) => c.json({ service: 'bartools-backend', ok: true }));
 app.get('/health', (c) => c.json({ ok: true }));
 
-app.get('/uploads/:filename', async (c) => {
-  const filename = basename(c.req.param('filename'));
-  const filePath = resolveUploadPathFromUrl(`/uploads/${filename}`);
-
-  try {
-    const bytes = await readFile(filePath);
-    const extension = filename.split('.').pop()?.toLowerCase();
-    const contentType =
-      extension === 'png'
-        ? 'image/png'
-        : extension === 'webp'
-          ? 'image/webp'
-          : 'image/jpeg';
-
-    return new Response(bytes, {
-      headers: {
-        'content-type': contentType,
-        'cache-control': 'public, max-age=31536000, immutable',
-      },
-    });
-  } catch {
-    throw jsonError(404, 'upload_not_found');
-  }
-});
-
 app.post('/reports', async (c) => {
   const input = createReportSchema.safeParse(await c.req.json());
   if (!input.success) {
@@ -98,22 +51,96 @@ app.post('/reports', async (c) => {
   return c.json(report, 201);
 });
 
-app.post('/reports/:reportId/photos', async (c) => {
-  const reportId = c.req.param('reportId');
-  const body = await c.req.parseBody({ all: true });
-  const files = collectFiles(body);
+// Allowlist of photo MIME types mobile/web clients may upload. Keep in sync
+// with EXT_FOR_CONTENT_TYPE below so object keys carry the matching extension.
+const ALLOWED_PHOTO_CONTENT_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/heic',
+  'image/heif',
+  'image/webp',
+] as const;
+type PhotoContentType = (typeof ALLOWED_PHOTO_CONTENT_TYPES)[number];
 
-  if (files.length === 0) {
-    throw jsonError(400, 'no_files_uploaded');
+const EXT_FOR_CONTENT_TYPE: Record<PhotoContentType, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
+  'image/webp': 'webp',
+};
+
+function buildPhotoObjectKey(reportId: string, contentType: PhotoContentType): string {
+  return `reports/${reportId}/${crypto.randomUUID()}.${EXT_FOR_CONTENT_TYPE[contentType]}`;
+}
+
+const presignRequestSchema = z.object({
+  uploads: z
+    .array(
+      z.object({
+        contentType: z.enum(ALLOWED_PHOTO_CONTENT_TYPES).default('image/jpeg'),
+      })
+    )
+    .min(1)
+    .max(50),
+});
+
+app.post('/reports/:reportId/photos/presign', async (c) => {
+  const reportId = c.req.param('reportId');
+  const parsed = presignRequestSchema.safeParse(await c.req.json());
+  if (!parsed.success) {
+    throw jsonError(400, 'invalid_presign_payload');
+  }
+
+  const ttlSeconds = getTtlSeconds();
+
+  const signed = await Promise.all(
+    parsed.data.uploads.map(async ({ contentType }) => {
+      const object = buildPhotoObjectKey(reportId, contentType);
+      const { putUrl, expiresAt } = await presignPut(object, contentType, ttlSeconds);
+      return {
+        object,
+        putUrl,
+        contentType,
+        expiresAt: expiresAt.toISOString(),
+      };
+    })
+  );
+
+  return c.json({ uploads: signed });
+});
+
+const completeUploadSchema = z.object({
+  object: z.string().min(1),
+  sortOrder: z.number().int().min(0),
+});
+
+const completeRequestSchema = z.object({
+  uploads: z.array(completeUploadSchema).min(1),
+});
+
+app.post('/reports/:reportId/photos/complete', async (c) => {
+  const reportId = c.req.param('reportId');
+  const parsed = completeRequestSchema.safeParse(await c.req.json());
+  if (!parsed.success) {
+    throw jsonError(400, 'invalid_complete_payload');
+  }
+
+  const expectedPrefix = `reports/${reportId}/`;
+  for (const upload of parsed.data.uploads) {
+    if (!upload.object.startsWith(expectedPrefix)) {
+      throw jsonError(400, 'invalid_object_key');
+    }
   }
 
   try {
-    const created = await addReportPhotos(reportId, files);
+    // Ensure bucket is configured before mutating DB.
+    getBucketName();
+    const created = await addReportPhotos(reportId, parsed.data.uploads);
     return c.json({
-      reportId,
-      photos: created.map((scan) => ({
+      scans: created.map((scan) => ({
         id: scan.id,
-        photoUrl: scan.photoUrl,
+        object: scan.photoGcsObject,
         sortOrder: scan.sortOrder,
       })),
     });

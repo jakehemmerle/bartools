@@ -1,4 +1,16 @@
-import { describe, it, expect, beforeEach, afterAll } from 'bun:test'
+import { describe, it, expect, beforeEach, afterAll, mock } from 'bun:test'
+
+// Stub expo-file-system before api.ts (which imports `File`) is evaluated —
+// the real module pulls in react-native, which Bun can't parse (Flow syntax).
+mock.module('expo-file-system', () => ({
+  File: class {
+    constructor(public uri: string) {}
+    // Return a trivial ArrayBuffer; tests assert on fetch args, not bytes.
+    async arrayBuffer(): Promise<ArrayBuffer> {
+      return new ArrayBuffer(0)
+    }
+  },
+}))
 
 // Track fetch calls manually for type-safe assertions
 const fetchCalls: Array<{ url: string; init: RequestInit | undefined }> = []
@@ -132,15 +144,79 @@ describe('api client', () => {
     expect(lastCall().url).toContain('/venues/v-1/locations')
   })
 
-  it('uploadPhotos sends multipart FormData without Content-Type header', async () => {
-    queueResponse({ reportId: 'r-1', photos: [] })
+  it('uploadPhotos infers per-photo Content-Type and threads it through presign + PUT', async () => {
+    // 1) presign response (backend echoes contentType back)
+    queueResponse({
+      uploads: [
+        {
+          object: 'obj-a',
+          putUrl: 'https://gcs.example.com/a?sig=1',
+          contentType: 'image/jpeg',
+          expiresAt: '2030-01-01T00:00:00Z',
+        },
+        {
+          object: 'obj-b',
+          putUrl: 'https://gcs.example.com/b?sig=2',
+          contentType: 'image/heic',
+          expiresAt: '2030-01-01T00:00:00Z',
+        },
+      ],
+    })
+    // 2) two GCS PUTs
+    queueResponse({})
+    queueResponse({})
+    // 3) complete response
+    queueResponse({
+      scans: [
+        { id: 's-1', object: 'obj-a', sortOrder: 0 },
+        { id: 's-2', object: 'obj-b', sortOrder: 1 },
+      ],
+    })
 
-    await uploadPhotos('r-1', ['file:///a.jpg', 'file:///b.jpg'])
+    const result = await uploadPhotos('r-1', ['file:///a.jpg', 'file:///b.heic'])
 
-    expect(lastCall().url).toContain('/reports/r-1/photos')
-    expect(lastCall().init?.method).toBe('POST')
-    expect(lastCall().init?.body).toBeInstanceOf(FormData)
-    expect(lastCall().init?.headers).toBeUndefined()
+    // Presign call: per-photo contentType derived from URI extension.
+    expect(fetchCalls[0]!.url).toContain('/reports/r-1/photos/presign')
+    expect(fetchCalls[0]!.init?.method).toBe('POST')
+    const presignBody = JSON.parse(fetchCalls[0]!.init?.body as string)
+    expect(presignBody).toEqual({
+      uploads: [
+        { contentType: 'image/jpeg' },
+        { contentType: 'image/heic' },
+      ],
+    })
+
+    // GCS PUT calls — each must use the contentType the server signed for.
+    const gcsCalls = fetchCalls.slice(1, 3)
+    const byUrl = Object.fromEntries(gcsCalls.map((c) => [c.url, c]))
+    expect(Object.keys(byUrl).sort()).toEqual([
+      'https://gcs.example.com/a?sig=1',
+      'https://gcs.example.com/b?sig=2',
+    ])
+    expect(byUrl['https://gcs.example.com/a?sig=1']!.init?.method).toBe('PUT')
+    expect(
+      (byUrl['https://gcs.example.com/a?sig=1']!.init?.headers as Record<string, string>)[
+        'Content-Type'
+      ],
+    ).toBe('image/jpeg')
+    expect(
+      (byUrl['https://gcs.example.com/b?sig=2']!.init?.headers as Record<string, string>)[
+        'Content-Type'
+      ],
+    ).toBe('image/heic')
+
+    // Complete call
+    expect(fetchCalls[3]!.url).toContain('/reports/r-1/photos/complete')
+    expect(fetchCalls[3]!.init?.method).toBe('POST')
+    const completeBody = JSON.parse(fetchCalls[3]!.init?.body as string)
+    expect(completeBody).toEqual({
+      uploads: [
+        { object: 'obj-a', sortOrder: 0 },
+        { object: 'obj-b', sortOrder: 1 },
+      ],
+    })
+
+    expect(result.scans).toHaveLength(2)
   })
 
   it('reviewReport converts fillPercent (0-100) to fillTenths (0-10)', async () => {

@@ -5,6 +5,8 @@ const REQUIRED_APIS = [
   'artifactregistry.googleapis.com',
   'secretmanager.googleapis.com',
   'iam.googleapis.com',
+  'iamcredentials.googleapis.com',
+  'storage.googleapis.com',
   'cloudresourcemanager.googleapis.com',
   'serviceusage.googleapis.com',
 ] as const;

@@ -1,8 +1,8 @@
-import { count, eq, sql } from 'drizzle-orm';
+import { count, eq, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from './db';
 import { inferenceJobs, reportRecords, reports, scans } from './schema';
-import { saveUploadedPhoto } from './uploads';
+import { getBucketName } from './storage';
 
 export const createReportSchema = z.object({
   userId: z.string().uuid(),
@@ -25,7 +25,10 @@ export async function createReport(input: z.infer<typeof createReportSchema>) {
   return report;
 }
 
-export async function addReportPhotos(reportId: string, files: File[]) {
+export async function addReportPhotos(
+  reportId: string,
+  uploads: Array<{ object: string; sortOrder: number }>
+) {
   const [report] = await db
     .select({
       id: reports.id,
@@ -46,35 +49,46 @@ export async function addReportPhotos(reportId: string, files: File[]) {
     throw new Error('report_not_editable');
   }
 
-  const [{ existingCount }] = await db
-    .select({ existingCount: count(scans.id) })
-    .from(scans)
-    .where(eq(scans.reportId, reportId));
+  if (uploads.length === 0) {
+    return [];
+  }
 
-  const offset = Number(existingCount);
-  const photoUrls = await Promise.all(
-    files.map((file) => saveUploadedPhoto(reportId, file))
-  );
-  const uploaded = photoUrls.map((photoUrl, index) => ({
+  const bucket = getBucketName();
+  const rows = uploads.map((upload) => ({
     reportId,
     userId: report.userId,
     venueId: report.venueId,
     locationId: report.locationId,
-    photoUrl,
-    sortOrder: offset + index,
+    photoGcsBucket: bucket,
+    photoGcsObject: upload.object,
+    sortOrder: upload.sortOrder,
   }));
 
-  const created = uploaded.length
-    ? await db.insert(scans).values(uploaded).returning()
-    : [];
+  // Idempotent on scans.photoGcsObject: a retried /complete (flaky network,
+  // app resume, etc.) lands on the existing row instead of duplicating.
+  // onConflictDoNothing skips returning existing rows, so we select by the
+  // full object list below.
+  await db
+    .insert(scans)
+    .values(rows)
+    .onConflictDoNothing({ target: scans.photoGcsObject });
 
-  const nextPhotoCount = offset + created.length;
+  const objects = uploads.map((u) => u.object);
+  const resolved = await db.select().from(scans).where(inArray(scans.photoGcsObject, objects));
+  const byObject = new Map(resolved.map((scan) => [scan.photoGcsObject, scan]));
+
+  const [{ totalCount }] = await db
+    .select({ totalCount: count(scans.id) })
+    .from(scans)
+    .where(eq(scans.reportId, reportId));
+
   await db
     .update(reports)
-    .set({ photoCount: nextPhotoCount })
+    .set({ photoCount: Number(totalCount) })
     .where(eq(reports.id, reportId));
 
-  return created;
+  // Preserve request order so response[i] corresponds to uploads[i].
+  return uploads.map((u) => byObject.get(u.object)!);
 }
 
 export async function submitReport(reportId: string): Promise<ReportScanInferencePayload[]> {

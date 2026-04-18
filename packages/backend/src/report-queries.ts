@@ -67,7 +67,8 @@ export async function getReportDetail(reportId: string) {
     .select({
       id: reportRecords.id,
       status: reportRecords.status,
-      imageUrl: scans.photoUrl,
+      photoGcsBucket: scans.photoGcsBucket,
+      photoGcsObject: scans.photoGcsObject,
       sortOrder: scans.sortOrder,
       originalBottleId: reportRecords.originalBottleId,
       originalBottleName: reportRecords.originalBottleName,
@@ -104,9 +105,14 @@ export async function getReportDetail(reportId: string) {
       const finalVolumeMl = row.correctedVolumeMl ?? row.originalVolumeMl ?? undefined;
       const finalFillTenths = row.correctedFillTenths ?? row.originalFillTenths ?? 0;
 
+      const imageUrl =
+        row.photoGcsBucket && row.photoGcsObject
+          ? `gs://${row.photoGcsBucket}/${row.photoGcsObject}`
+          : '';
+
       return {
         id: row.id,
-        imageUrl: row.imageUrl ?? '',
+        imageUrl,
         bottleName: finalBottleName,
         category: finalCategory,
         upc: finalUpc,

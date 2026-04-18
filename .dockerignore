@@ -26,7 +26,6 @@ packages/eval/**
 !packages/eval/package.json
 
 # local-only
-packages/backend/data
 infra/.pulumi
 infra/node_modules
 .git

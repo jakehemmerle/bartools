@@ -199,6 +199,70 @@ bash infra/scripts/push-schema.sh staging
 bash infra/scripts/deploy.sh staging
 ```
 
+## GCS uploads bucket
+
+Bucket: `bartools-uploads-<env>`. The backend writes via pre-signed PUT URLs it
+mints itself using the attached Cloud Run service account and the IAM
+Credentials API's `signBlob`. **There are no AWS keys, no HMAC keys, and no
+downloaded JSON credentials to rotate** — auth rotates automatically with the
+SA.
+
+### List bucket contents
+
+```bash
+# Top-level listing
+gcloud storage ls gs://bartools-uploads-<env>/ \
+  --project bartools-<env>
+
+# Recursive, with sizes and timestamps
+gcloud storage ls -l -r gs://bartools-uploads-<env>/** \
+  --project bartools-<env>
+```
+
+### Inspect a single object's metadata
+
+```bash
+gcloud storage objects describe gs://bartools-uploads-<env>/<object-name> \
+  --project bartools-<env>
+```
+
+Includes contentType, size, md5, storageClass, generation, and custom
+metadata (useful for debugging the uploader).
+
+### Delete orphaned objects
+
+Common causes of orphans: client got a pre-signed PUT, uploaded, but never
+posted the "attach to report" request back to the backend. These have no DB
+row pointing at them.
+
+```bash
+# Dry-run: list what you'd delete
+gcloud storage ls -l gs://bartools-uploads-<env>/<path>/ \
+  --project bartools-<env>
+
+# Delete one object
+gcloud storage rm gs://bartools-uploads-<env>/<object-name> \
+  --project bartools-<env>
+
+# Delete a prefix (careful)
+gcloud storage rm -r gs://bartools-uploads-<env>/<prefix>/ \
+  --project bartools-<env>
+```
+
+For bulk orphan cleanup, the recommended workflow is to diff the bucket
+listing against the DB's set of known object keys and `rm` the difference.
+We don't have a dedicated script yet; write an ad-hoc one if orphan volume
+grows.
+
+Note: the bucket has a lifecycle rule that aborts incomplete multipart uploads
+after 1 day, so partial uploads don't accrue cost.
+
+### "Auth rotation"
+
+Not applicable. The container's identity is the Cloud Run service account
+`bartools-backend-<env>@bartools-<env>.iam.gserviceaccount.com`. Replace the
+SA only if it's been compromised; otherwise there's nothing to rotate.
+
 ## Schema
 
 ### Push changes to one env

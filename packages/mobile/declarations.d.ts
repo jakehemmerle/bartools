@@ -19,3 +19,29 @@ interface FormDataFileValue {
 interface FormData {
   append(name: string, value: FormDataFileValue): void
 }
+
+// Metro resolves image/font requires to a numeric asset registry ID.
+declare module '*.png' {
+  const src: number
+  export default src
+}
+declare module '*.jpg' {
+  const src: number
+  export default src
+}
+declare module '*.jpeg' {
+  const src: number
+  export default src
+}
+declare module '*.webp' {
+  const src: number
+  export default src
+}
+declare module '*.gif' {
+  const src: number
+  export default src
+}
+declare module '*.svg' {
+  const src: number
+  export default src
+}
