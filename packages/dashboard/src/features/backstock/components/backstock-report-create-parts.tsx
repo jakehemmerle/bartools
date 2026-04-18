@@ -54,10 +54,12 @@ export function BackstockLineItemEditor({
           <input
             className="bb-input"
             id={quantityInputId}
+            inputMode="numeric"
             min={0}
             onChange={(event) =>
-              onQuantityChange(lineItem.id, Math.max(0, event.currentTarget.valueAsNumber || 0))
+              onQuantityChange(lineItem.id, normalizeFullBottleQuantity(event.currentTarget.valueAsNumber))
             }
+            step={1}
             type="number"
             value={lineItem.quantityFullBottles}
           />
@@ -70,6 +72,14 @@ export function BackstockLineItemEditor({
       </div>
     </div>
   )
+}
+
+function normalizeFullBottleQuantity(value: number) {
+  if (!Number.isFinite(value)) {
+    return 0
+  }
+
+  return Math.max(0, Math.trunc(value))
 }
 
 export function BackstockSummaryGrid({

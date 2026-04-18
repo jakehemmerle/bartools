@@ -35,7 +35,11 @@ export type SubmittedBackstockSummary = {
   totalBottleCount: number
 }
 
-let nextDraftEntityId = 0
+export type BackstockSubmissionReadiness = {
+  isReady: boolean
+  message: string | null
+  summary: SubmittedBackstockSummary
+}
 
 export function createBackstockDraftLineItem(
   overrides: Partial<BackstockDraftLineItem> = {},
@@ -166,8 +170,39 @@ export function buildSubmittedBackstockSummary(
   }
 }
 
-function createBackstockDraftEntityId(prefix: string) {
-  nextDraftEntityId += 1
+export function buildBackstockSubmissionReadiness(
+  lineItems: BackstockDraftLineItem[],
+): BackstockSubmissionReadiness {
+  const summary = buildSubmittedBackstockSummary(lineItems)
+  const hasIncompleteLineItems = lineItems.some(
+    (lineItem) =>
+      !isBlankBackstockDraftLineItem(lineItem) &&
+      (!lineItem.selectedBottle || lineItem.quantityFullBottles <= 0),
+  )
 
-  return `${prefix}-${nextDraftEntityId}`
+  if (hasIncompleteLineItems) {
+    return {
+      isReady: false,
+      message: 'Finish or remove incomplete line items before submitting.',
+      summary,
+    }
+  }
+
+  if (summary.skuCount === 0) {
+    return {
+      isReady: false,
+      message: 'Add at least one counted product before submitting.',
+      summary,
+    }
+  }
+
+  return {
+    isReady: true,
+    message: null,
+    summary,
+  }
+}
+
+function createBackstockDraftEntityId(prefix: string) {
+  return `${prefix}-${globalThis.crypto.randomUUID()}`
 }

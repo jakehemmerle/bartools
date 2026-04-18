@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { createFixtureReportsClient } from '../../../lib/reports/client'
@@ -56,11 +56,15 @@ describe('Reports workbench routes: baseline states', () => {
       initialEntries: ['/reports/report-1002'],
     })
 
-    const productFields = await screen.findAllByRole('textbox', { name: 'Product Match' })
-    const failedProductField = productFields[1]
+    const failedRecordCard = (
+      await screen.findByText(/catalog_no_match/i)
+    ).closest('.bb-record-card')
 
-    expect(failedProductField).toBeDefined()
-    await user.type(failedProductField as HTMLInputElement, 'espol')
+    expect(failedRecordCard).toBeTruthy()
+    await user.type(
+      within(failedRecordCard as HTMLElement).getByRole('textbox', { name: 'Product Match' }),
+      'espol',
+    )
     await user.click(await screen.findByRole('button', { name: /Espolòn Blanco/i }))
     await user.click(screen.getByRole('button', { name: 'Submit Review' }))
 

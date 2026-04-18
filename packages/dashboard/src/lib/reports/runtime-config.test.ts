@@ -58,4 +58,17 @@ describe('dashboard runtime config', () => {
       }),
     ).toBe('user-1')
   })
+
+  it('treats empty optional identifiers as undefined', () => {
+    expect(
+      getDashboardVenueId({
+        VITE_BARTOOLS_VENUE_ID: '   ',
+      }),
+    ).toBeUndefined()
+    expect(
+      getDashboardReviewerUserId({
+        VITE_BARTOOLS_REVIEWER_USER_ID: '',
+      }),
+    ).toBeUndefined()
+  })
 })

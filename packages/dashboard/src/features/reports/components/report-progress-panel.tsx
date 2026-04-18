@@ -7,7 +7,7 @@ export function ReportProgressPanel({
   label,
   progress,
 }: ReportProgressPanelProps) {
-  const progressPercent = Math.round(progress * 100)
+  const progressPercent = Math.max(0, Math.min(100, Math.round(progress * 100)))
 
   return (
     <section className="bb-progress-panel">

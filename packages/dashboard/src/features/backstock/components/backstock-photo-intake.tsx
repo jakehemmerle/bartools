@@ -144,31 +144,30 @@ function BackstockPhotoWorkflow({
   startModeHasPhotos: boolean
 }) {
   const steps = [
-    'Add multiple shelf views before generating the draft.',
-    generationBlockedMessage
-      ? 'Connect grouped draft generation once backend uploads are ready.'
-      : 'Build a first pass from the queued photo set.',
-    'Adjust product matches and full-bottle counts before the snapshot.',
+    {
+      copy: 'Add multiple shelf views before generating the draft.',
+      title: startModeHasPhotos ? 'Queue looks active' : 'Queue photos',
+    },
+    {
+      copy: generationBlockedMessage
+        ? 'Connect grouped draft generation once backend uploads are ready.'
+        : 'Build a first pass from the queued photo set.',
+      title: generationBlockedMessage ? 'Generation pending' : 'Generate grouped draft',
+    },
+    {
+      copy: 'Adjust product matches and full-bottle counts before the snapshot.',
+      title: 'Review and submit',
+    },
   ]
 
   return (
     <ol className="bb-backstock-intake__workflow">
       {steps.map((step, index) => (
-        <li key={step}>
+        <li key={step.title}>
           <span className="bb-backstock-intake__workflow-step">{index + 1}</span>
           <div>
-            <p className="bb-backstock-intake__workflow-title">
-              {index === 0
-                ? startModeHasPhotos
-                  ? 'Queue looks active'
-                  : 'Queue photos'
-                : index === 1
-                  ? generationBlockedMessage
-                    ? 'Generation pending'
-                    : 'Generate grouped draft'
-                  : 'Review and submit'}
-            </p>
-            <p className="bb-backstock-intake__workflow-copy">{step}</p>
+            <p className="bb-backstock-intake__workflow-title">{step.title}</p>
+            <p className="bb-backstock-intake__workflow-copy">{step.copy}</p>
           </div>
         </li>
       ))}

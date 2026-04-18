@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildBackstockSubmissionReadiness,
   buildFixtureGeneratedLineItems,
   buildSubmittedBackstockSummary,
   createBackstockDraftLineItem,
@@ -63,6 +64,7 @@ describe('backstock draft helpers', () => {
 
     expect(summary.skuCount).toBe(2)
     expect(summary.totalBottleCount).toBe(7)
+    // Submission rows stay alphabetized by product name for a stable review order.
     expect(summary.lineItems).toEqual([
       {
         bottle: {
@@ -85,5 +87,59 @@ describe('backstock draft helpers', () => {
         quantityFullBottles: 6,
       },
     ])
+  })
+
+  it('creates collision-resistant ids for new line items after restored drafts', () => {
+    const restoredLineItem = createBackstockDraftLineItem({
+      id: 'line-item-restored',
+    })
+    const nextLineItem = createBackstockDraftLineItem()
+
+    expect(restoredLineItem.id).toBe('line-item-restored')
+    expect(nextLineItem.id).toMatch(/^line-item-/)
+    expect(nextLineItem.id).not.toBe(restoredLineItem.id)
+  })
+
+  it('allows submission when valid counts exist alongside a blank placeholder row', () => {
+    const readiness = buildBackstockSubmissionReadiness([
+      createBackstockDraftLineItem({
+        quantityFullBottles: 3,
+        selectedBottle: {
+          id: 'bottle-1',
+          name: "Tito's Handmade Vodka",
+          category: 'vodka',
+          upc: '619947000013',
+          volumeMl: 750,
+        },
+      }),
+      createBackstockDraftLineItem({
+        quantityFullBottles: 1,
+        search: {
+          query: '',
+          results: [],
+        },
+        selectedBottle: null,
+      }),
+    ])
+
+    expect(readiness.isReady).toBe(true)
+    expect(readiness.message).toBeNull()
+    expect(readiness.summary.totalBottleCount).toBe(3)
+  })
+
+  it('blocks submission when a nonblank line item is incomplete', () => {
+    const readiness = buildBackstockSubmissionReadiness([
+      createBackstockDraftLineItem({
+        quantityFullBottles: 1,
+        search: {
+          query: 'Tito',
+          results: [],
+        },
+        selectedBottle: null,
+      }),
+    ])
+
+    expect(readiness.isReady).toBe(false)
+    expect(readiness.message).toBe('Finish or remove incomplete line items before submitting.')
   })
 })

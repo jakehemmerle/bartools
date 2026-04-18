@@ -5,10 +5,11 @@ import { createFixtureReportsClient } from '../../../lib/reports/client'
 import { renderAppRoutes } from '../../../test/test-utils'
 
 afterEach(() => {
+  window.sessionStorage.clear()
   vi.unstubAllEnvs()
 })
 
-describe('Backstock report creation route', () => {
+describe('Backstock report creation route: core flows', () => {
   it('links to the backstock route from the reports list header', async () => {
     renderAppRoutes({ initialEntries: ['/reports'] })
 
@@ -110,6 +111,65 @@ describe('Backstock report creation route', () => {
     expect(screen.getByRole('button', { name: 'Regenerate Draft' })).toBeInTheDocument()
   })
 
+  it('allows a generated draft to submit after every source photo is removed', async () => {
+    const user = userEvent.setup()
+
+    renderAppRoutes({ initialEntries: ['/reports/backstock/new'] })
+
+    await user.selectOptions(
+      await screen.findByRole('combobox', { name: 'Backstock Location' }),
+      'location-1',
+    )
+    await user.upload(await screen.findByLabelText('Choose Photos'), [
+      new File(['a'], 'shelf-1.png', { type: 'image/png' }),
+    ])
+    await user.click(screen.getByRole('button', { name: 'Generate Draft' }))
+    expect(await screen.findByDisplayValue("Tito's Handmade Vodka")).toBeInTheDocument()
+
+    await user.click(
+      within(screen.getByLabelText('Selected source photos')).getByRole('button', {
+        name: 'Remove',
+      }),
+    )
+
+    expect(
+      screen.queryByText('Source photos changed. Regenerate the draft before submitting.'),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Submit Backstock Report' })).toBeEnabled()
+
+    await user.click(screen.getByRole('button', { name: 'Submit Backstock Report' }))
+
+    expect(
+      await screen.findByRole('heading', { name: 'Backstock Report Submitted' }),
+    ).toBeInTheDocument()
+  })
+
+  it('surfaces a calm message when product search fails', async () => {
+    const baseClient = createFixtureReportsClient()
+    const user = userEvent.setup()
+    const reportsClient = {
+      ...baseClient,
+      searchBottles: vi.fn(async () => {
+        throw new Error('search_unavailable')
+      }),
+    }
+
+    renderAppRoutes({
+      initialEntries: ['/reports/backstock/new'],
+      reportsClient,
+    })
+
+    await user.click(await screen.findByRole('button', { name: 'Enter Manually' }))
+    await user.type(await screen.findByRole('textbox', { name: 'Product' }), 'ti')
+
+    expect(
+      await screen.findByText('Product search is temporarily unavailable. Try again in a moment.'),
+    ).toBeInTheDocument()
+  })
+
+})
+
+describe('Backstock report creation route: resilience', () => {
   it('shows a retry state when backstock locations fail to load', async () => {
     const baseClient = createFixtureReportsClient()
     const user = userEvent.setup()

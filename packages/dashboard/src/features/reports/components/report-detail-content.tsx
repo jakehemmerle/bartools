@@ -242,11 +242,13 @@ export function ReviewableReportDetail({
         className={`bb-review-action${showCompactReviewAction ? ' bb-review-action--enabled' : ''}`}
       >
         <div className="bb-review-action__copy">
-          {reviewActionErrorMessage ? (
-            <p aria-live="polite" className="bb-review-action__helper bb-review-action__helper--error">
-              {reviewActionErrorMessage}
-            </p>
-          ) : null}
+          <p
+            className="bb-review-action__helper bb-review-action__helper--error"
+            hidden={!reviewActionErrorMessage}
+            role="alert"
+          >
+            {reviewActionErrorMessage ?? ''}
+          </p>
           {readinessMessage ? (
             <p className="bb-review-action__helper">{readinessMessage}</p>
           ) : null}

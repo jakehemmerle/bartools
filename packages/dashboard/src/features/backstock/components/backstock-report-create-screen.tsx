@@ -3,6 +3,7 @@ import { Button } from '../../../components/primitives/button'
 import { Select } from '../../../components/primitives/select'
 import { SurfaceCard } from '../../../components/primitives/surface-card'
 import { BackstockPhotoIntake } from './backstock-photo-intake'
+import { buildBackstockWorkflowStage } from './backstock-report-create-workflow'
 import {
   BackstockLineItemEditor,
   BackstockSummaryGrid,
@@ -20,6 +21,7 @@ type BackstockLocationOption = {
 }
 type BackstockReportCreateScreenProps = {
   canGenerateDraft: boolean
+  canSubmitDraft: boolean
   draftStatusMessage: string | null
   draftSummary: SubmittedBackstockSummary
   generatingDraft: boolean
@@ -46,10 +48,12 @@ type BackstockReportCreateScreenProps = {
   sourcePhotos: BackstockSourcePhoto[]
   startMode: BackstockStartMode
   submissionBlockedMessage: string | null
+  submissionReadinessMessage: string | null
   submittedSummary: SubmittedBackstockSummary | null
 }
 export function BackstockReportCreateScreen({
   canGenerateDraft,
+  canSubmitDraft,
   draftStatusMessage,
   draftSummary,
   generatingDraft,
@@ -76,6 +80,7 @@ export function BackstockReportCreateScreen({
   sourcePhotos,
   startMode,
   submissionBlockedMessage,
+  submissionReadinessMessage,
   submittedSummary,
 }: BackstockReportCreateScreenProps) {
   const selectedLocation =
@@ -158,39 +163,14 @@ export function BackstockReportCreateScreen({
         needsDraftRegeneration={needsDraftRegeneration}
         onSubmit={onSubmit}
         submissionBlockedMessage={submissionBlockedMessage}
+        submissionReadinessMessage={submissionReadinessMessage}
         sourcePhotoCount={sourcePhotos.length}
         submitDisabled={
-          !locationId || !hasValidDraft || needsDraftRegeneration || !!submissionBlockedMessage
+          !locationId || !canSubmitDraft || needsDraftRegeneration || !!submissionBlockedMessage
         }
       />
     </div>
   )
-}
-
-function buildBackstockWorkflowStage({
-  hasValidDraft,
-  locationId,
-  sourcePhotoCount,
-  startMode,
-}: {
-  hasValidDraft: boolean
-  locationId: string
-  sourcePhotoCount: number
-  startMode: BackstockStartMode
-}) {
-  if (!locationId) {
-    return 0
-  }
-
-  if (startMode === 'photo' && sourcePhotoCount === 0) {
-    return 1
-  }
-
-  if (!hasValidDraft) {
-    return 2
-  }
-
-  return 3
 }
 
 function BackstockWorkflowRail({
@@ -443,6 +423,7 @@ function BackstockSummaryCard({
   onSubmit,
   sourcePhotoCount,
   submissionBlockedMessage,
+  submissionReadinessMessage,
   submitDisabled,
 }: {
   draftSummary: SubmittedBackstockSummary
@@ -451,6 +432,7 @@ function BackstockSummaryCard({
   onSubmit: () => void
   sourcePhotoCount: number
   submissionBlockedMessage: string | null
+  submissionReadinessMessage: string | null
   submitDisabled: boolean
 }) {
   return (
@@ -482,6 +464,10 @@ function BackstockSummaryCard({
           ) : needsDraftRegeneration ? (
             <p aria-live="polite" className="bb-field__hint bb-field__hint--warning">
               Regenerate the draft to match the current photo set before submitting.
+            </p>
+          ) : submissionReadinessMessage ? (
+            <p aria-live="polite" className="bb-field__hint bb-field__hint--warning">
+              {submissionReadinessMessage}
             </p>
           ) : null}
         </div>

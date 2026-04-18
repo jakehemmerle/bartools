@@ -2,11 +2,12 @@ import type { BottleSearchResult } from '@bartools/types'
 import { useMemo, useState } from 'react'
 import { useReportsClient } from '../../../lib/reports/provider'
 import {
+  buildBackstockSubmissionReadiness,
   buildFixtureGeneratedLineItems,
-  buildSubmittedBackstockSummary,
   createBackstockDraftLineItem,
   createBackstockSourcePhoto,
   isBlankBackstockDraftLineItem,
+  type BackstockSubmissionReadiness,
   type BackstockDraftLineItem,
   type BackstockSourcePhoto,
   type BackstockStartMode,
@@ -30,11 +31,11 @@ export function useBackstockReportCreateState() {
     () => createBackstockIntegrationState(reportsClient.readiness.backendEnabled),
     [reportsClient.readiness.backendEnabled],
   )
-
-  const draftSummary = useMemo(
-    () => buildSubmittedBackstockSummary(formState.lineItems),
+  const submissionReadiness = useMemo(
+    () => buildBackstockSubmissionReadiness(formState.lineItems),
     [formState.lineItems],
   )
+  const draftSummary = submissionReadiness.summary
   const sourcePhotoSignature = useMemo(
     () => formState.sourcePhotos.map((sourcePhoto) => sourcePhoto.id).join(':'),
     [formState.sourcePhotos],
@@ -59,17 +60,18 @@ export function useBackstockReportCreateState() {
     submittedSummary: formState.submittedSummary,
   })
   const actions = createBackstockDraftActions({
-    draftSummary,
     formState,
     integrationState,
     needsDraftRegeneration,
     reportsClient,
     sourcePhotoSignature,
+    submissionReadiness,
   })
 
   return {
     canGenerateDraft:
       integrationState.photoDraftGenerationEnabled && formState.sourcePhotos.length > 0,
+    canSubmitDraft: submissionReadiness.isReady,
     draftStatusMessage: formState.draftStatusMessage,
     draftSummary,
     generatingDraft: formState.generatingDraft,
@@ -95,40 +97,33 @@ export function useBackstockReportCreateState() {
     sourcePhotos: formState.sourcePhotos,
     startMode: formState.startMode,
     submissionBlockedMessage: integrationState.submissionBlockedMessage,
+    submissionReadinessMessage: submissionReadiness.message,
     submittedSummary: formState.submittedSummary,
   }
 }
 
 function createBackstockDraftActions({
-  draftSummary,
   formState,
   integrationState,
   needsDraftRegeneration,
   reportsClient,
   sourcePhotoSignature,
+  submissionReadiness,
 }: {
-  draftSummary: SubmittedBackstockSummary
   formState: BackstockDraftFormState
   integrationState: BackstockIntegrationState
   needsDraftRegeneration: boolean
   reportsClient: ReturnType<typeof useReportsClient>
   sourcePhotoSignature: string
+  submissionReadiness: BackstockSubmissionReadiness
 }) {
   async function handleSearch(lineItemId: string, query: string) {
-    if (query.trim().length < 2) {
-      formState.setDraftStatusMessage(null)
-      formState.setLineItems((currentLineItems) =>
-        clearLineItemSearchResults(currentLineItems, lineItemId),
-      )
-      return
-    }
-
-    const results = await reportsClient.searchBottles(query)
-
-    formState.setDraftStatusMessage(null)
-    formState.setLineItems((currentLineItems) =>
-      applySearchResultsToLineItem(currentLineItems, lineItemId, query, results),
-    )
+    await searchBackstockLineItem({
+      formState,
+      lineItemId,
+      query,
+      reportsClient,
+    })
   }
 
   function handleQueryChange(lineItemId: string, query: string) {
@@ -193,10 +188,7 @@ function createBackstockDraftActions({
   }
 
   function handleRemoveSourcePhoto(sourcePhotoId: string) {
-    formState.setDraftStatusMessage(null)
-    formState.setSourcePhotos((currentPhotos) =>
-      currentPhotos.filter((sourcePhoto) => sourcePhoto.id !== sourcePhotoId),
-    )
+    removeBackstockSourcePhoto(formState, sourcePhotoId)
   }
 
   function handleAddLineItem() {
@@ -224,18 +216,12 @@ function createBackstockDraftActions({
   }
 
   function handleSubmit() {
-    if (!integrationState.submissionEnabled) {
-      formState.setDraftStatusMessage(integrationState.submissionBlockedMessage)
-      return
-    }
-
-    if (needsDraftRegeneration) {
-      return
-    }
-
-    clearPersistedBackstockDraft()
-    formState.setDraftStatusMessage(null)
-    formState.setSubmittedSummary(draftSummary)
+    submitBackstockDraft({
+      formState,
+      integrationState,
+      needsDraftRegeneration,
+      submissionReadiness,
+    })
   }
 
   return {
@@ -253,6 +239,86 @@ function createBackstockDraftActions({
     handleStartModeChange,
     handleSubmit,
   }
+}
+
+async function searchBackstockLineItem({
+  formState,
+  lineItemId,
+  query,
+  reportsClient,
+}: {
+  formState: BackstockDraftFormState
+  lineItemId: string
+  query: string
+  reportsClient: ReturnType<typeof useReportsClient>
+}) {
+  if (query.trim().length < 2) {
+    formState.setDraftStatusMessage(null)
+    formState.setLineItems((currentLineItems) =>
+      clearLineItemSearchResults(currentLineItems, lineItemId),
+    )
+    return
+  }
+
+  try {
+    const results = await reportsClient.searchBottles(query)
+
+    formState.setDraftStatusMessage(null)
+    formState.setLineItems((currentLineItems) =>
+      applySearchResultsToLineItem(currentLineItems, lineItemId, query, results),
+    )
+  } catch {
+    formState.setDraftStatusMessage('Product search is temporarily unavailable. Try again in a moment.')
+    formState.setLineItems((currentLineItems) =>
+      clearLineItemSearchResults(currentLineItems, lineItemId),
+    )
+  }
+}
+
+function removeBackstockSourcePhoto(
+  formState: BackstockDraftFormState,
+  sourcePhotoId: string,
+) {
+  formState.setDraftStatusMessage(null)
+  const nextPhotos = formState.sourcePhotos.filter(
+    (sourcePhoto) => sourcePhoto.id !== sourcePhotoId,
+  )
+
+  formState.setSourcePhotos(nextPhotos)
+  if (nextPhotos.length === 0) {
+    formState.setGeneratedPhotoSignature(null)
+  }
+}
+
+function submitBackstockDraft({
+  formState,
+  integrationState,
+  needsDraftRegeneration,
+  submissionReadiness,
+}: {
+  formState: BackstockDraftFormState
+  integrationState: BackstockIntegrationState
+  needsDraftRegeneration: boolean
+  submissionReadiness: BackstockSubmissionReadiness
+}) {
+  if (!integrationState.submissionEnabled) {
+    formState.setDraftStatusMessage(integrationState.submissionBlockedMessage)
+    return
+  }
+
+  if (needsDraftRegeneration) {
+    formState.setDraftStatusMessage('Source photos changed. Regenerate the draft before submitting.')
+    return
+  }
+
+  if (!submissionReadiness.isReady) {
+    formState.setDraftStatusMessage(submissionReadiness.message)
+    return
+  }
+
+  clearPersistedBackstockDraft()
+  formState.setDraftStatusMessage(null)
+  formState.setSubmittedSummary(submissionReadiness.summary)
 }
 
 function useBackstockDraftState(restoredDraft: RestoredBackstockDraft | null) {

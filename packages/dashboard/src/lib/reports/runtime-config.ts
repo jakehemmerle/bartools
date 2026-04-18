@@ -51,7 +51,7 @@ export function getDashboardVenueId(
 ) {
   const parsedEnvironment = environmentSchema.parse(environment ?? import.meta.env)
 
-  return normalizeVenueId(parsedEnvironment.VITE_BARTOOLS_VENUE_ID)
+  return normalizeOptionalIdentifier(parsedEnvironment.VITE_BARTOOLS_VENUE_ID)
 }
 
 export function getDashboardReviewerUserId(
@@ -59,7 +59,7 @@ export function getDashboardReviewerUserId(
 ) {
   const parsedEnvironment = environmentSchema.parse(environment ?? import.meta.env)
 
-  return normalizeVenueId(parsedEnvironment.VITE_BARTOOLS_REVIEWER_USER_ID)
+  return normalizeOptionalIdentifier(parsedEnvironment.VITE_BARTOOLS_REVIEWER_USER_ID)
 }
 
 function normalizeBackendBaseUrl(value: string | undefined) {
@@ -72,7 +72,7 @@ function normalizeBackendBaseUrl(value: string | undefined) {
   return trimmedValue.replace(/\/+$/, '')
 }
 
-function normalizeVenueId(value: string | undefined) {
+function normalizeOptionalIdentifier(value: string | undefined) {
   const trimmedValue = value?.trim()
 
   return trimmedValue ? trimmedValue : undefined
