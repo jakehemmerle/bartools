@@ -23,9 +23,12 @@
       "bundleIdentifier": "com.bartools.barback",
       "infoPlist": {
         "NSCameraUsageDescription": "BarBack uses the camera to photograph bottles for inventory identification.",
-        "NSPhotoLibraryUsageDescription": "BarBack accesses your photo library to import bottle photos for inventory."
+        "NSPhotoLibraryUsageDescription": "BarBack accesses your photo library to import bottle photos for inventory.",
+        "NSLocationWhenInUseUsageDescription": "BarBack does not use your location. This key is required because a bundled dependency references the Location API.",
+        "NSMicrophoneUsageDescription": "BarBack does not record audio. This key is required by the camera framework used to photograph bottles.",
+        "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "4"
+      "buildNumber": "6"
     },
     "android": {
       "package": "com.bartools.barback",
@@ -38,7 +41,7 @@
       "permissions": [
         "android.permission.CAMERA"
       ],
-      "versionCode": 4
+      "versionCode": 6
     },
     "web": {
       "favicon": "./assets/favicon.png"
