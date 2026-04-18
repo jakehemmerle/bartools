@@ -24,7 +24,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "BarBack uses the camera to photograph bottles for inventory identification.",
         "NSPhotoLibraryUsageDescription": "BarBack accesses your photo library to import bottle photos for inventory."
-      }
+      },
+      "buildNumber": "4"
     },
     "android": {
       "package": "com.bartools.barback",
@@ -36,17 +37,26 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.CAMERA"
-      ]
+      ],
+      "versionCode": 4
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      ["expo-build-properties", {
-        "ios": { "newArchEnabled": true },
-        "android": { "newArchEnabled": true }
-      }],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": true
+          },
+          "android": {
+            "newArchEnabled": true
+          }
+        }
+      ],
       "expo-router",
+      "expo-font",
       [
         "react-native-vision-camera",
         {
