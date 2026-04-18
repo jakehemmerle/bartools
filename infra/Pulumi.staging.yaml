@@ -8,4 +8,8 @@ config:
   bartools:memory: 512Mi
   bartools:databaseUrl:
     secure: v1:GufiGGvqP4dCATO+:R064hj1ZDZdQBV6J9PCHZm1kioJuGzXEjpoXiUQxxxowH3tU3YZxntTkAaUHqPXr23GN3XlBIA49omRiREX6RCdT7AxbMsnwxKGXyVjf4hrY+8ahKj95ps/vn3SRKTSX4kuhhuF37UP25DQWn/Ev1/YMqKJ8TErv7W9hFWSuierNgVDW6KR+9UKXMa4fmxXBY7IT98Z3DBfdNHsO+w4PdDDRFLY=
+  bartools:claudeCodeOauthToken:
+    secure: v1:3vs4G5XhPdM6gVkg:UElVH2vRGb00uN1snlLTkUIz3cTdg1qmbCo9VwaCmlY0MVF5UciPJacbFBJuMAYE/1wce9AXmcWUkVcCYuXNHhaLal30F3NOeUfqAPFpUwwSixWIlXwO+dRvFFc/zjinvbE5OnEljtRr3AyzXNvdn+eNCQpj7ezPwOdUvQ==
+  bartools:langsmithApiKey:
+    secure: v1:py/aLdBR+gGsMlQt:rWmL/X2ZCd2C6p0z+dWSGIC0CsaYo3Bf3seTXej55tS9aYgp4Sy3HXcmsKATtYcBCmeLkWhos2atI8rNez3Tc+chWg==
 encryptionsalt: v1:mSpTjxC1/UQ=:v1:rSnlWSg3quqxuZbk:F1mpag5lqxqNKuzdTJ2E2CZqvH1deA==
