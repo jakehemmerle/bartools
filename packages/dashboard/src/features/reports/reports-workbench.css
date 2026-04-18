@@ -1,4 +1,6 @@
 @import './styles/workbench-foundation.css';
 @import './styles/reports-list.css';
 @import './styles/report-detail.css';
+@import './styles/report-review-action.css';
 @import './styles/report-states-responsive.css';
+@import '../backstock/styles/backstock-report.css';

@@ -64,7 +64,9 @@ export function ReviewDetailPreview({
         }))
       }
       readinessMessage="Live report access requires venue and user context. Review submission requires user context."
+      onSubmitReview={() => undefined}
       reviewedComparisonVariant={reviewedComparisonVariant}
+      reviewerUserId="preview-user"
       reviewActionMode="preview"
       reviewDraft={reviewDraft}
       searchState={searchState}

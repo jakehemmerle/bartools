@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-router-dom'
 import { PublicShell } from '../components/shell/public/public-shell'
 import { WorkbenchShell } from '../components/shell/workbench/workbench-shell'
+import { BackstockReportCreateRoute } from '../features/backstock/routes/backstock-report-create-route'
 import { EntryRoute } from '../features/reports/routes/entry-route'
 import { ReportDetailRoute } from '../features/reports/routes/report-detail-route'
 import { ReportsRoute } from '../features/reports/routes/reports-route'
@@ -17,11 +18,15 @@ import { ReviewReportsEmptyRoute } from '../features/reports/routes/review-repor
 import { ReviewReportsListRoute } from '../features/reports/routes/review-reports-list-route'
 import type { ReportsClient } from '../lib/reports/client'
 import {
+  createBackstockCreateLoader,
   createReportDetailLoader,
   createReportsListLoader,
 } from '../lib/reports/route-loaders'
+import { getDashboardVenueId } from '../lib/reports/runtime-config'
 
 export function createAppRoutes(reportsClient: ReportsClient): RouteObject[] {
+  const backstockVenueId = getDashboardVenueId()
+
   return [
     {
       path: '/',
@@ -50,6 +55,11 @@ export function createAppRoutes(reportsClient: ReportsClient): RouteObject[] {
           path: '/reports',
           loader: createReportsListLoader(reportsClient),
           element: <ReportsRoute />,
+        },
+        {
+          path: '/reports/backstock/new',
+          loader: createBackstockCreateLoader(reportsClient, backstockVenueId),
+          element: <BackstockReportCreateRoute />,
         },
         {
           path: '/reports/:reportId',

@@ -2,6 +2,8 @@ import { z } from 'zod'
 
 type DashboardEnvironment = {
   VITE_BARTOOLS_API_BASE_URL?: string
+  VITE_BARTOOLS_REVIEWER_USER_ID?: string
+  VITE_BARTOOLS_VENUE_ID?: string
 }
 
 export type DashboardRuntimeConfig =
@@ -10,7 +12,11 @@ export type DashboardRuntimeConfig =
 
 const environmentSchema = z.object({
   VITE_BARTOOLS_API_BASE_URL: z.string().optional(),
+  VITE_BARTOOLS_REVIEWER_USER_ID: z.string().optional(),
+  VITE_BARTOOLS_VENUE_ID: z.string().optional(),
 })
+
+export const dashboardFixtureVenueId = 'fixture-venue'
 
 const backendBaseUrlSchema = z.string().refine(isSupportedBackendBaseUrl, {
   message: 'Invalid URL',
@@ -40,6 +46,22 @@ export function getDashboardRuntimeConfig(): DashboardRuntimeConfig {
   })
 }
 
+export function getDashboardVenueId(
+  environment?: DashboardEnvironment,
+) {
+  const parsedEnvironment = environmentSchema.parse(environment ?? import.meta.env)
+
+  return normalizeVenueId(parsedEnvironment.VITE_BARTOOLS_VENUE_ID)
+}
+
+export function getDashboardReviewerUserId(
+  environment?: DashboardEnvironment,
+) {
+  const parsedEnvironment = environmentSchema.parse(environment ?? import.meta.env)
+
+  return normalizeVenueId(parsedEnvironment.VITE_BARTOOLS_REVIEWER_USER_ID)
+}
+
 function normalizeBackendBaseUrl(value: string | undefined) {
   const trimmedValue = value?.trim()
 
@@ -48,6 +70,12 @@ function normalizeBackendBaseUrl(value: string | undefined) {
   }
 
   return trimmedValue.replace(/\/+$/, '')
+}
+
+function normalizeVenueId(value: string | undefined) {
+  const trimmedValue = value?.trim()
+
+  return trimmedValue ? trimmedValue : undefined
 }
 
 function isSupportedBackendBaseUrl(value: string) {

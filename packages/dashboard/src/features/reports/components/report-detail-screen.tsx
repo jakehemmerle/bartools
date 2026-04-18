@@ -18,17 +18,24 @@ import {
 
 type ReportDetailScreenProps = {
   detail: ReportDetail
-  reviewDraft: ReportReviewRecordDraft[]
-  searchState: Record<string, RecordSearchState>
   onFillTenthsChange: (recordId: string, fillTenths: number) => void
+  onReviewBottleChange: (recordId: string, bottleId: string) => void
   onReviewSearch: (recordId: string, query: string) => void
   onReviewSearchQueryChange: (recordId: string, query: string) => void
-  onReviewBottleChange: (recordId: string, bottleId: string) => void
+  onSubmitReview?: () => void
   readinessMessage: string
-  statusMessage?: string | null
+  reviewActionErrorMessage?: string | null
   reviewActionMode?: ReviewActionMode
+  reviewDraft: ReportReviewRecordDraft[]
+  reviewerUserId?: string | null
   reviewedComparisonVariant?: ComparisonCardVariant
+  searchState: Record<string, RecordSearchState>
+  statusMessage?: string | null
+  submittingReview?: boolean
 }
+
+const incompleteReviewMessage =
+  'Pick a product match and fill level for every actionable record before review can be submitted.'
 
 export function ReportDetailScreen({
   detail,
@@ -36,24 +43,27 @@ export function ReportDetailScreen({
   onReviewBottleChange,
   onReviewSearch,
   onReviewSearchQueryChange,
+  onSubmitReview,
   readinessMessage,
+  reviewActionErrorMessage = null,
   statusMessage = null,
   reviewedComparisonVariant,
-  reviewActionMode = 'integration-blocked',
+  reviewActionMode = 'disabled',
   reviewDraft,
+  reviewerUserId = null,
   searchState,
+  submittingReview = false,
 }: ReportDetailScreenProps) {
   const reportId = buildReportId(detail)
   const heading = buildReportHeading(detail)
   const progress = buildReportProgressView(detail)
-  const submission = buildReviewSubmissionState(detail, reviewDraft)
-  const reviewActionDisabled = reviewActionMode !== 'preview'
-  const reviewActionMessage =
-    reviewActionMode === 'preview'
-      ? null
-      : submission.ready
-        ? readinessMessage
-        : 'Pick a product match and fill level for every actionable record before review can be submitted.'
+  const submission = buildReviewSubmissionState(reviewerUserId, reviewDraft)
+  const reviewAction = buildReviewActionState({
+    readinessMessage,
+    reviewActionMode,
+    submissionReady: submission.ready,
+    submittingReview,
+  })
 
   if (detail.status === 'created') {
     return <CreatedReportDetail detail={detail} heading={heading} reportId={reportId} />
@@ -84,17 +94,51 @@ export function ReportDetailScreen({
     <ReviewableReportDetail
       detail={detail}
       heading={heading}
+      onReviewSubmit={onSubmitReview}
       reportId={reportId}
       onFillTenthsChange={onFillTenthsChange}
       onReviewBottleChange={onReviewBottleChange}
       onReviewSearch={onReviewSearch}
       onReviewSearchQueryChange={onReviewSearchQueryChange}
-      readinessMessage={reviewActionMessage}
-      reviewActionDisabled={reviewActionDisabled}
+      readinessMessage={reviewAction.message}
+      reviewActionDisabled={reviewAction.disabled}
+      reviewActionErrorMessage={reviewActionErrorMessage}
       reviewActionMode={reviewActionMode}
       reviewDraft={reviewDraft}
       searchState={searchState}
       statusMessage={statusMessage}
+      submittingReview={submittingReview}
     />
   )
+}
+
+function buildReviewActionState({
+  readinessMessage,
+  reviewActionMode,
+  submissionReady,
+  submittingReview,
+}: {
+  readinessMessage: string
+  reviewActionMode: ReviewActionMode
+  submissionReady: boolean
+  submittingReview: boolean
+}) {
+  if (reviewActionMode === 'preview') {
+    return {
+      disabled: submittingReview,
+      message: null,
+    }
+  }
+
+  if (reviewActionMode === 'enabled') {
+    return {
+      disabled: !submissionReady || submittingReview,
+      message: submissionReady ? null : incompleteReviewMessage,
+    }
+  }
+
+  return {
+    disabled: true,
+    message: submissionReady ? readinessMessage : incompleteReviewMessage,
+  }
 }

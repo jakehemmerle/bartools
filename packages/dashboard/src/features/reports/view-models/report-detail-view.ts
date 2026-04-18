@@ -51,10 +51,10 @@ export function buildReportProgressView(detail: ReportDetail) {
 }
 
 export function buildReviewSubmissionState(
-  detail: ReportDetail,
+  reviewerUserId: string | null | undefined,
   drafts: ReportReviewRecordDraft[],
 ) {
-  const payload = buildReportReviewPayload(detail.userId ?? null, drafts)
+  const payload = buildReportReviewPayload(reviewerUserId, drafts)
 
   return {
     payload,

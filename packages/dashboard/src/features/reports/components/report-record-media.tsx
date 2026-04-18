@@ -12,7 +12,7 @@ export function RecordMedia({ record }: { record: ReportBottleRecord }) {
 
   return (
     <div className="bb-record-media">
-      <img alt={record.bottleName} src={record.imageUrl} />
+      <img alt={record.bottleName} height={96} src={record.imageUrl} width={72} />
     </div>
   )
 }

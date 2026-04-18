@@ -48,6 +48,25 @@ describe('Reports workbench routes: baseline states', () => {
     expect(screen.getByText(/catalog_no_match/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Submit Review' })).toBeDisabled()
   })
+
+  it('submits a fixture review once every actionable record is resolved', async () => {
+    const user = userEvent.setup()
+
+    renderAppRoutes({
+      initialEntries: ['/reports/report-1002'],
+    })
+
+    const productFields = await screen.findAllByRole('textbox', { name: 'Product Match' })
+    const failedProductField = productFields[1]
+
+    expect(failedProductField).toBeDefined()
+    await user.type(failedProductField as HTMLInputElement, 'espol')
+    await user.click(await screen.findByRole('button', { name: /Espolòn Blanco/i }))
+    await user.click(screen.getByRole('button', { name: 'Submit Review' }))
+
+    expect((await screen.findAllByText('Final Corrected Values')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Original Model Output').length).toBeGreaterThan(0)
+  })
 })
 
 describe('Reports workbench routes: resilience', () => {
@@ -147,6 +166,33 @@ describe('Reports workbench routes: live transitions', () => {
     expect(
       await screen.findByText('Live updates paused. Refresh or try again in a moment.'),
     ).toBeInTheDocument()
+  })
+
+  it('keeps review submission blocked when live reviewer context is missing', async () => {
+    const baseClient = createFixtureReportsClient()
+    const detail = await baseClient.getReport('report-1002')
+    const reportsClient = {
+      ...baseClient,
+      readiness: {
+        backendEnabled: true,
+        blockedReason: 'review_submission_requires_user_context' as const,
+        message: 'Review submission requires user context.',
+      },
+      async getReport() {
+        return detail
+      },
+      streamReport() {
+        return () => undefined
+      },
+    }
+
+    renderAppRoutes({
+      initialEntries: ['/reports/report-1002'],
+      reportsClient,
+    })
+
+    expect(await screen.findByDisplayValue('Montelobos Mezcal')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Submit Review' })).toBeDisabled()
   })
 
   it('hydrates review draft state from streamed records before processing becomes reviewable', async () => {
