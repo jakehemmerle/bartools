@@ -1,0 +1,29 @@
+.bb-review-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-xl);
+}
+
+.bb-review-action__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.bb-review-action__helper {
+  margin: 0;
+  font-size: var(--type-body-compact-size);
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.bb-review-action__helper--error {
+  color: var(--color-error);
+}
+
+.bb-review-action--enabled {
+  justify-content: flex-end;
+}

@@ -48,7 +48,7 @@ describe('review harness routes', () => {
         expect(await screen.findByText('Progress')).toBeInTheDocument()
         expect(screen.getByText('4c8e5f2a')).toBeInTheDocument()
         expect(screen.queryByText(/Failed/i)).not.toBeInTheDocument()
-        expect(screen.getAllByText('Processing...')).toHaveLength(2)
+        expect(screen.getAllByText('Processing…')).toHaveLength(2)
       },
     },
     {

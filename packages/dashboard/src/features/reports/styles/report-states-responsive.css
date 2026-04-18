@@ -434,12 +434,12 @@
   }
 
   .bb-review-action,
-  .bb-review-action--preview {
+  .bb-review-action--enabled {
     justify-content: stretch;
   }
 
   .bb-review-action .bb-button,
-  .bb-review-action--preview .bb-button {
+  .bb-review-action--enabled .bb-button {
     width: 100%;
   }
 

@@ -9,14 +9,14 @@ export function ProcessingRecord({ record }: { record: ReportBottleRecord }) {
     >
       <div className="bb-processing-record__media">
         {record.imageUrl ? (
-          <img alt={record.bottleName} src={record.imageUrl} />
+          <img alt={record.bottleName} height={96} src={record.imageUrl} width={72} />
         ) : (
           <div className="bb-processing-record__placeholder">◻</div>
         )}
       </div>
       <div className="bb-processing-record__summary">
         {record.status === 'pending' ? (
-          <p className="bb-processing-record__pending">Processing...</p>
+          <p className="bb-processing-record__pending">Processing…</p>
         ) : (
           <>
             <h3 className="bb-processing-record__title">{record.bottleName}</h3>

@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from 'react-router-dom'
-import type { ReportDetail, ReportListItem } from '@bartools/types'
+import type { LocationListItem, ReportDetail, ReportListItem } from '@bartools/types'
 import type { ReportsClient } from './client'
+import { dashboardFixtureVenueId } from './runtime-config'
 
 export type ReportsListRouteData = {
   loadResult: Promise<ReportsListLoadResult>
@@ -8,6 +9,10 @@ export type ReportsListRouteData = {
 
 export type ReportDetailRouteData = {
   loadResult: Promise<ReportDetailLoadResult>
+}
+
+export type BackstockCreateRouteData = {
+  loadResult: Promise<BackstockCreateLoadResult>
 }
 
 export type ReportsListLoadResult =
@@ -29,7 +34,21 @@ export type ReportDetailLoadResult =
       status: 'error'
     }
 
+export type BackstockCreateLoadResult =
+  | {
+      locations: LocationListItem[]
+      status: 'loaded'
+    }
+  | {
+      errorMessage: string
+      status: 'error'
+    }
+
 const reportsLoadErrorMessage = 'Reports could not be loaded right now. Try again in a moment.'
+const backstockLocationsLoadErrorMessage =
+  'Backstock locations could not be loaded right now. Try again in a moment.'
+const backstockVenueContextErrorMessage =
+  'Backstock locations need a configured venue context before live data can load here.'
 
 export function createReportsListLoader(client: ReportsClient) {
   return function reportsListLoader(): ReportsListRouteData {
@@ -69,6 +88,39 @@ export function createReportDetailLoader(client: ReportsClient) {
         )
         .catch(
           (): ReportDetailLoadResult => ({
+            status: 'error',
+          }),
+        ),
+    }
+  }
+}
+
+export function createBackstockCreateLoader(
+  client: ReportsClient,
+  venueId: string | undefined,
+) {
+  return function backstockCreateLoader(): BackstockCreateRouteData {
+    if (client.readiness.backendEnabled && !venueId) {
+      return {
+        loadResult: Promise.resolve({
+          errorMessage: backstockVenueContextErrorMessage,
+          status: 'error',
+        }),
+      }
+    }
+
+    return {
+      loadResult: client
+        .listVenueLocations(venueId ?? dashboardFixtureVenueId)
+        .then(
+          (locations): BackstockCreateLoadResult => ({
+            locations,
+            status: 'loaded',
+          }),
+        )
+        .catch(
+          (): BackstockCreateLoadResult => ({
+            errorMessage: backstockLocationsLoadErrorMessage,
             status: 'error',
           }),
         ),

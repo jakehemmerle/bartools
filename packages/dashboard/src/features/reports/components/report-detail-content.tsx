@@ -13,7 +13,7 @@ import { ReportProgressPanel } from './report-progress-panel'
 import { ProcessingRecord } from './report-processing-record'
 import { FailedRecordCard, ReviewRecordCard } from './report-review-record-card'
 
-export type ReviewActionMode = 'integration-blocked' | 'preview'
+export type ReviewActionMode = 'disabled' | 'enabled' | 'preview'
 type ProcessingProgressView = { label: string; ratio: number }
 type CreatedReportDetailProps = { detail: ReportDetail; heading: string; reportId: string }
 type ProcessingReportDetailProps = {
@@ -31,13 +31,16 @@ type ReviewedReportDetailProps = {
 type ReviewableReportDetailProps = {
   detail: ReportDetail
   heading: string
+  onReviewSubmit?: () => void
   reportId: string
   readinessMessage: string | null
   reviewActionDisabled: boolean
+  reviewActionErrorMessage?: string | null
   reviewActionMode: ReviewActionMode
   reviewDraft: ReportReviewRecordDraft[]
   searchState: Record<string, RecordSearchState>
   statusMessage?: string | null
+  submittingReview?: boolean
   onFillTenthsChange: (recordId: string, fillTenths: number) => void
   onReviewSearch: (recordId: string, query: string) => void
   onReviewSearchQueryChange: (recordId: string, query: string) => void
@@ -96,7 +99,9 @@ export function ProcessingReportDetail({
 
       {statusMessage ? (
         <SurfaceCard className="bb-message-panel" tone="low">
-          <p className="bb-message-panel__body">{statusMessage}</p>
+          <p aria-live="polite" className="bb-message-panel__body">
+            {statusMessage}
+          </p>
         </SurfaceCard>
       ) : null}
 
@@ -150,6 +155,7 @@ export function ReviewedReportDetail({
 export function ReviewableReportDetail({
   detail,
   heading,
+  onReviewSubmit,
   reportId,
   onFillTenthsChange,
   onReviewBottleChange,
@@ -157,12 +163,18 @@ export function ReviewableReportDetail({
   onReviewSearchQueryChange,
   readinessMessage,
   reviewActionDisabled,
+  reviewActionErrorMessage = null,
   reviewActionMode,
   reviewDraft,
   searchState,
   statusMessage = null,
+  submittingReview = false,
 }: ReviewableReportDetailProps) {
   const hasFailedRecords = detail.bottleRecords.some((record) => record.status === 'failed')
+  const showCompactReviewAction =
+    (reviewActionMode === 'enabled' || reviewActionMode === 'preview') &&
+    !reviewActionErrorMessage &&
+    !readinessMessage
 
   return (
     <div className="bb-report-screen">
@@ -181,7 +193,9 @@ export function ReviewableReportDetail({
 
       {statusMessage ? (
         <SurfaceCard className="bb-message-panel" tone="low">
-          <p className="bb-message-panel__body">{statusMessage}</p>
+          <p aria-live="polite" className="bb-message-panel__body">
+            {statusMessage}
+          </p>
         </SurfaceCard>
       ) : null}
 
@@ -225,13 +239,22 @@ export function ReviewableReportDetail({
       </section>
 
       <div
-        className={`bb-review-action${reviewActionMode === 'preview' ? ' bb-review-action--preview' : ''}`}
+        className={`bb-review-action${showCompactReviewAction ? ' bb-review-action--enabled' : ''}`}
       >
-        {readinessMessage ? (
-          <p className="bb-review-action__helper">{readinessMessage}</p>
-        ) : null}
-        <Button disabled={reviewActionDisabled} variant="primary">
-          Submit Review
+        <div className="bb-review-action__copy">
+          <p
+            className="bb-review-action__helper bb-review-action__helper--error"
+            hidden={!reviewActionErrorMessage}
+            role="alert"
+          >
+            {reviewActionErrorMessage ?? ''}
+          </p>
+          {readinessMessage ? (
+            <p className="bb-review-action__helper">{readinessMessage}</p>
+          ) : null}
+        </div>
+        <Button disabled={reviewActionDisabled} onPress={onReviewSubmit} variant="primary">
+          {submittingReview ? 'Submitting Review…' : 'Submit Review'}
         </Button>
       </div>
 

@@ -31,6 +31,7 @@ When a backend capability matters to the dashboard, the spec should describe the
 
 - Public landing page with sign in and sign up entry points
 - Authenticated dashboard for inventory operations
+- Backstock report creation for full bottles in backstock
 - Export of inventory data to CSV
 - A dashboard-specific component and styling system built on Mantine
 
@@ -38,6 +39,7 @@ When a backend capability matters to the dashboard, the spec should describe the
 
 - `mvp-overview.md` — product scope, user journeys, and success criteria
 - `styling-and-component-system.md` — visual system decisions and component usage rules
+- `backstock-reports.md` — web-native backstock reporting workflow for full bottles
 - `landing-and-auth.md` — public marketing surface and authentication flows
 - `inventory.md` — inventory table and default signed-in view
 - `low-stock.md` — reorder queue / low-stock workflow

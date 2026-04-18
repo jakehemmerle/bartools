@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The dashboard exists to support bar managers and staff after mobile capture is complete. It is not a second capture workflow. Its job is to make the latest confirmed inventory picture easy to inspect, act on, and export.
+The dashboard exists to support bar managers and staff after mobile capture is complete. It is not intended to become a general duplicate of the mobile capture workflow. Its job is to make the latest confirmed inventory picture easy to inspect, act on, and export, while also supporting approved desktop-native operational workflows such as manual or photo-assisted backstock reporting for full bottles.
 
 The dashboard is part of the product MVP.
 
@@ -18,12 +18,13 @@ The dashboard is part of the product MVP.
 - Show the latest confirmed inventory in a usable table immediately after sign in
 - Surface low-stock items that need attention
 - Preserve a reviewable history of inventory sessions
+- Allow staff to create backstock reports for full bottles from desktop
 - Allow export of operational data to CSV
 - Establish a dashboard design system on Mantine before page implementation
 
 ## Non-Goals
 
-- Web-based bottle capture
+- General web-based bottle capture outside approved backstock workflows
 - Web-based bottle-by-bottle editing workflow
 - Advanced analytics dashboards or forecasting
 - Multi-location management
@@ -56,6 +57,14 @@ MVP assumes self-serve sign up so early customers can adopt the product without 
 2. User chooses a recent session
 3. User reviews the final saved bottle records and thumbnails
 4. User confirms what happened in that session without leaving the dashboard
+
+### 4. Staff member reporting full-bottle backstock from desktop
+
+1. User starts a new backstock report
+2. User chooses a backstock location
+3. User either uploads one or more backstock photos up front or enters line items manually
+4. If photos are uploaded, the dashboard generates grouped product counts as a draft
+5. User corrects line items and submits the report
 
 ## Navigation
 
@@ -93,6 +102,7 @@ This is a speed and consistency decision, not a decision to accept Mantine defau
 - Stable identifiers for bottles and sessions
 - Export endpoint or client-generated CSV based on fetched data
 - A single-bar tenancy model for each user in MVP
+- For photo-assisted backstock, a serverless-compatible upload path such as presigned URLs to object storage
 
 ## Risks
 
@@ -100,3 +110,4 @@ This is a speed and consistency decision, not a decision to accept Mantine defau
 - If users mistake the latest-confirmed aggregate for a live or single-session stock view, they may over-trust the dashboard
 - If low-stock logic is unclear, the reorder queue will feel arbitrary
 - If session detail lacks thumbnails or correction metadata, audit value drops
+- If backstock reporting is forced through the same bottle-by-bottle model as mobile scan review, the workflow will feel slow and redundant

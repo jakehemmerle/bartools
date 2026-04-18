@@ -161,6 +161,14 @@
   transform: translateY(-1px);
 }
 
+.bb-button:focus-visible,
+.bb-select:focus-visible,
+.bb-input:focus-visible,
+.bb-reports-row:focus-visible {
+  outline: 2px solid var(--color-accent-soft);
+  outline-offset: 2px;
+}
+
 .bb-button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
@@ -261,9 +269,12 @@
 
 .bb-reports-header {
   display: flex;
-  max-width: 760px;
   flex-direction: column;
   gap: var(--space-lg);
+}
+
+.bb-reports-header__copy {
+  max-width: 760px;
 }
 
 @media (max-width: 767px) {
@@ -313,5 +324,13 @@
   .bb-centered-state__body,
   .bb-message-panel__body {
     font-size: var(--type-body-size);
+  }
+}
+
+@media (min-width: 900px) {
+  .bb-reports-header {
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-between;
   }
 }

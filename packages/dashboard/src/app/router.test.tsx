@@ -34,4 +34,10 @@ describe('app routing', () => {
 
     expect(await screen.findByRole('heading', { name: 'Report 1002' })).toBeInTheDocument()
   })
+
+  it('keeps the backstock report route active inside the reports area', async () => {
+    renderAppRoutes({ initialEntries: ['/reports/backstock/new'] })
+
+    expect(await screen.findByRole('heading', { name: 'New Backstock Report' })).toBeInTheDocument()
+  })
 })

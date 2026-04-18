@@ -24,7 +24,7 @@ export function ReportBottleMatchField({
   onQueryChange,
   onSearch,
   onSelectResult,
-  placeholder = 'Search to rematch...',
+  placeholder = 'Search to rematch…',
   search,
   selectedBottleId,
 }: ReportBottleMatchFieldProps) {

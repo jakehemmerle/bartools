@@ -43,6 +43,10 @@
   background: var(--color-surface-base);
 }
 
+.bb-reports-row:focus-visible .bb-reports-row__hoverrail {
+  opacity: 1;
+}
+
 .bb-reports-row__field-label {
   display: none;
 }
@@ -103,11 +107,13 @@
 .bb-reports-row__count-value {
   font-size: 18px;
   color: var(--color-accent);
+  font-variant-numeric: tabular-nums;
 }
 
 .bb-reports-row__count-detail {
   color: var(--color-text-muted);
   font-size: var(--type-label-size);
+  font-variant-numeric: tabular-nums;
 }
 
 .bb-status-chip {

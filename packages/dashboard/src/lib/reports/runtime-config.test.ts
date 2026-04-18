@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { createDashboardRuntimeConfig } from './runtime-config'
+import {
+  createDashboardRuntimeConfig,
+  getDashboardReviewerUserId,
+  getDashboardVenueId,
+} from './runtime-config'
 
 describe('dashboard runtime config', () => {
   it('defaults to fixture mode when the backend base url is missing', () => {
@@ -37,5 +41,34 @@ describe('dashboard runtime config', () => {
         VITE_BARTOOLS_API_BASE_URL: 'not-a-url',
       }),
     ).toThrow('Invalid URL')
+  })
+
+  it('normalizes the configured venue id when present', () => {
+    expect(
+      getDashboardVenueId({
+        VITE_BARTOOLS_VENUE_ID: ' venue-1 ',
+      }),
+    ).toBe('venue-1')
+  })
+
+  it('normalizes the configured reviewer user id when present', () => {
+    expect(
+      getDashboardReviewerUserId({
+        VITE_BARTOOLS_REVIEWER_USER_ID: ' user-1 ',
+      }),
+    ).toBe('user-1')
+  })
+
+  it('treats empty optional identifiers as undefined', () => {
+    expect(
+      getDashboardVenueId({
+        VITE_BARTOOLS_VENUE_ID: '   ',
+      }),
+    ).toBeUndefined()
+    expect(
+      getDashboardReviewerUserId({
+        VITE_BARTOOLS_REVIEWER_USER_ID: '',
+      }),
+    ).toBeUndefined()
   })
 })
