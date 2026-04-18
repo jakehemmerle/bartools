@@ -147,7 +147,7 @@ Should not own:
 
 ## Primitive Component Plan
 
-We should introduce small BARBACK-flavored primitives to prevent style drift:
+We should introduce small BARTOOLS-flavored primitives to prevent style drift:
 
 - `StatusChip`
   Shared status rendering for report and record states.
@@ -156,7 +156,7 @@ We should introduce small BARBACK-flavored primitives to prevent style drift:
   Small uppercase label used across comparison and metadata sections.
 
 - `AppWordmark`
-  Consistent BARBACK header identity.
+  Consistent BARTOOLS header identity.
 
 - `SurfaceCard`
   Shared surface wrapper for panels/cards if repetition appears.

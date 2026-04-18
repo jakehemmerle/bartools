@@ -117,4 +117,4 @@ During a long unattended run:
 
 ## Success Condition
 
-This policy is working if the implemented screens are recognizably the approved BARBACK product, but the run does not grind to a halt over trivial pixel drama.
+This policy is working if the implemented screens are recognizably the approved BARTOOLS product, but the run does not grind to a halt over trivial pixel drama.

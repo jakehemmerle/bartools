@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines how much implementation autonomy is allowed for the BARBACK reports workbench.
+This document defines how much implementation autonomy is allowed for the BARTOOLS reports workbench.
 
 Its job is to make long-running execution possible without turning "autonomy" into silent drift.
 

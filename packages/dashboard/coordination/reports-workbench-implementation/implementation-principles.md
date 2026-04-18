@@ -66,7 +66,7 @@ Today the reports pages exist, but they are still generic product scaffolding:
 The target is not "same data, prettier cards."
 
 The target is:
-- a report workbench that reads like the approved BARBACK desktop product
+- a report workbench that reads like the approved BARTOOLS desktop product
 - deterministic screen states matching the golden set
 - a code structure that allows future backend wiring without redesign
 
@@ -123,7 +123,7 @@ UI consequences:
 
 ## Design System Rules
 
-The web app should feel like BARBACK, not like a component library demo.
+The web app should feel like BARTOOLS, not like a component library demo.
 
 That means:
 - define dashboard-local tokens
@@ -148,7 +148,7 @@ The scaffolding is successful when a developer can open a route and compare it d
 
 Every major implementation pass should be checked against these questions:
 
-1. Does this screen still look like BARBACK, or did it regress into a library demo?
+1. Does this screen still look like BARTOOLS, or did it regress into a library demo?
 2. Does this interaction imply backend capabilities we do not have?
 3. Did any old full-dashboard scope leak back in?
 4. Are we preserving the calm operational tone?

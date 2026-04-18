@@ -1,64 +1,64 @@
-.bb-review-action__helper,
-.bb-empty-state__title {
+.bt-review-action__helper,
+.bt-empty-state__title {
   margin: 0;
 }
 
-.bb-review-action__helper,
-.bb-report-screen__footnote {
+.bt-review-action__helper,
+.bt-report-screen__footnote {
   line-height: 1.6;
 }
 
-.bb-review-action__helper {
+.bt-review-action__helper {
   max-width: 620px;
   color: var(--color-text-muted);
 }
 
-.bb-report-header--inline .bb-report-header__headline-row {
+.bt-report-header--inline .bt-report-header__headline-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-lg);
 }
 
-.bb-reviewed-shell {
+.bt-reviewed-shell {
   border-bottom: 1px solid var(--color-border-subtle);
   padding-bottom: var(--space-3xl);
 }
 
-.bb-reviewed-shell--summary {
+.bt-reviewed-shell--summary {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   gap: var(--space-3xl);
 }
 
-.bb-reviewed-shell--comparison {
+.bt-reviewed-shell--comparison {
   border-bottom: 0;
   padding-bottom: var(--space-xl);
 }
 
-.bb-reviewed-shell__meta {
+.bt-reviewed-shell__meta {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--space-lg);
 }
 
-.bb-reviewed-shell--summary .bb-reviewed-shell__meta {
+.bt-reviewed-shell--summary .bt-reviewed-shell__meta {
   min-width: 280px;
   flex-direction: column;
   align-items: flex-end;
   gap: var(--space-sm);
 }
 
-.bb-metadata-line {
+.bt-metadata-line {
   display: flex;
   gap: var(--space-sm);
   align-items: center;
 }
 
-.bb-comparison-card,
-.bb-resolved-card {
+.bt-comparison-card,
+.bt-resolved-card {
   display: flex;
   flex-direction: column;
   gap: var(--space-2xl);
@@ -66,27 +66,27 @@
   box-shadow: var(--shadow-ambient);
 }
 
-.bb-reviewed-grid--comparison {
+.bt-reviewed-grid--comparison {
   max-width: 860px;
 }
 
-.bb-resolved-card__media {
+.bt-resolved-card__media {
   width: 120px;
 }
 
-.bb-comparison-card__record-title {
+.bt-comparison-card__record-title {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
 }
 
-.bb-comparison-card--hero {
+.bt-comparison-card--hero {
   gap: 0;
   padding: 0;
   overflow: hidden;
 }
 
-.bb-comparison-card__hero-header {
+.bt-comparison-card__hero-header {
   display: flex;
   align-items: center;
   gap: var(--space-lg);
@@ -94,18 +94,18 @@
   border-bottom: 1px solid var(--color-border-subtle);
 }
 
-.bb-comparison-card__hero-media {
+.bt-comparison-card__hero-media {
   flex: 0 0 auto;
 }
 
-.bb-comparison-card__hero-media .bb-record-media,
-.bb-comparison-card__hero-media .bb-record-media--missing {
+.bt-comparison-card__hero-media .bt-record-media,
+.bt-comparison-card__hero-media .bt-record-media--missing {
   width: 52px;
   height: 68px;
 }
 
-.bb-processing-record__media img,
-.bb-record-media img {
+.bt-processing-record__media img,
+.bt-record-media img {
   display: block;
   width: 100%;
   height: 100%;
@@ -115,7 +115,7 @@
   opacity: 0.82;
 }
 
-.bb-comparison-card__record-title p {
+.bt-comparison-card__record-title p {
   margin: 0;
   font-family: var(--font-label);
   font-size: var(--type-label-size);
@@ -124,14 +124,14 @@
   text-transform: uppercase;
 }
 
-.bb-comparison-grid {
+.bt-comparison-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   background: var(--color-border-subtle);
 }
 
-.bb-comparison-panel {
+.bt-comparison-panel {
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
@@ -139,17 +139,17 @@
   background: var(--color-bg-canvas);
 }
 
-.bb-comparison-panel--final {
+.bt-comparison-panel--final {
   background: var(--color-surface-low);
 }
 
-.bb-comparison-field {
+.bt-comparison-field {
   display: flex;
   flex-direction: column;
   gap: var(--space-xs);
 }
 
-.bb-comparison-field__label {
+.bt-comparison-field__label {
   font-family: var(--font-label);
   font-size: var(--type-label-compact-size);
   letter-spacing: var(--tracking-label-compact);
@@ -157,69 +157,69 @@
   color: var(--color-text-muted);
 }
 
-.bb-comparison-field__value {
+.bt-comparison-field__value {
   color: var(--color-text-primary);
 }
 
-.bb-comparison-field__value.is-struck {
+.bt-comparison-field__value.is-struck {
   opacity: 0.72;
   text-decoration: line-through;
 }
 
-.bb-comparison-field__value.is-final {
+.bt-comparison-field__value.is-final {
   color: var(--color-accent-soft);
   font-weight: 700;
 }
 
-.bb-comparison-panel--final .bb-comparison-field__value {
+.bt-comparison-panel--final .bt-comparison-field__value {
   color: var(--color-text-primary);
 }
 
-.bb-comparison-field--fill {
+.bt-comparison-field--fill {
   gap: var(--space-sm);
 }
 
-.bb-comparison-field--fill.is-hero {
+.bt-comparison-field--fill.is-hero {
   margin-top: var(--space-sm);
 }
 
-.bb-comparison-field__fill-value {
+.bt-comparison-field__fill-value {
   font-family: var(--font-display);
   font-size: 28px;
   color: var(--color-text-primary);
 }
 
-.bb-comparison-field__fill-value.is-final {
+.bt-comparison-field__fill-value.is-final {
   color: var(--color-accent-soft);
 }
 
-.bb-comparison-field__fill-track {
+.bt-comparison-field__fill-track {
   position: relative;
   height: 2px;
   background: var(--color-border-strong);
 }
 
-.bb-comparison-field__fill-bar {
+.bt-comparison-field__fill-bar {
   position: absolute;
   inset: 0 auto 0 0;
   background: var(--color-text-muted);
 }
 
-.bb-comparison-field__fill-bar.is-final {
+.bt-comparison-field__fill-bar.is-final {
   background: var(--color-accent);
 }
 
-.bb-resolved-card__fill {
+.bt-resolved-card__fill {
   margin: 0;
   color: var(--color-text-secondary);
 }
 
-.bb-resolved-card__fill span {
+.bt-resolved-card__fill span {
   color: var(--color-success);
   font-weight: 700;
 }
 
-.bb-centered-state {
+.bt-centered-state {
   display: flex;
   min-height: calc(100vh - 64px - 96px);
   max-width: 520px;
@@ -231,7 +231,7 @@
   text-align: center;
 }
 
-.bb-centered-state__icon {
+.bt-centered-state__icon {
   position: relative;
   display: grid;
   place-items: center;
@@ -240,8 +240,8 @@
   color: var(--color-accent-soft-glow);
 }
 
-.bb-centered-state__icon--blocked::before,
-.bb-centered-state__icon--not-found::before {
+.bt-centered-state__icon--blocked::before,
+.bt-centered-state__icon--not-found::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -249,14 +249,14 @@
   border: 1px solid var(--color-accent-soft-faint);
 }
 
-.bb-centered-state__icon-core {
+.bt-centered-state__icon-core {
   width: 84px;
   height: 84px;
   border-radius: 24px;
   background: var(--color-accent-soft-shell);
 }
 
-.bb-centered-state__icon-dot {
+.bt-centered-state__icon-dot {
   position: absolute;
   top: 18px;
   width: 22px;
@@ -265,7 +265,7 @@
   background: var(--color-accent-wash-strong);
 }
 
-.bb-centered-state__icon-slash {
+.bt-centered-state__icon-slash {
   position: absolute;
   width: 72px;
   height: 10px;
@@ -274,7 +274,7 @@
   transform: rotate(45deg);
 }
 
-.bb-centered-state__file-icon {
+.bt-centered-state__file-icon {
   position: relative;
   width: 60px;
   height: 76px;
@@ -282,7 +282,7 @@
   background: var(--color-accent-soft-ghost);
 }
 
-.bb-centered-state__file-icon::before {
+.bt-centered-state__file-icon::before {
   content: '';
   position: absolute;
   right: 0;
@@ -291,7 +291,7 @@
   border-left: 20px solid transparent;
 }
 
-.bb-centered-state__file-badge {
+.bt-centered-state__file-badge {
   position: absolute;
   right: 34px;
   bottom: 28px;
@@ -301,7 +301,7 @@
   background: var(--color-accent-soft-veil);
 }
 
-.bb-centered-state__file-badge-line {
+.bt-centered-state__file-badge-line {
   position: absolute;
   right: 43px;
   bottom: 43px;
@@ -311,68 +311,68 @@
   background: var(--color-bg-canvas-overlay);
 }
 
-.bb-centered-state__file-badge-line--one {
+.bt-centered-state__file-badge-line--one {
   transform: rotate(45deg);
 }
 
-.bb-centered-state__file-badge-line--two {
+.bt-centered-state__file-badge-line--two {
   transform: rotate(-45deg);
 }
 
-.bb-centered-state__title {
+.bt-centered-state__title {
   font-size: var(--type-detail-title-size);
 }
 
-.bb-centered-state__body {
+.bt-centered-state__body {
   max-width: 420px;
 }
 
-.bb-centered-state__divider {
+.bt-centered-state__divider {
   width: 100%;
   height: 1px;
   background: var(--color-border-subtle);
 }
 
-.bb-loading-route {
+.bt-loading-route {
   color: var(--color-text-muted);
 }
 
 @media (max-width: 1279px) {
-  .bb-reports-columns,
-  .bb-reports-row {
+  .bt-reports-columns,
+  .bt-reports-row {
     grid-template-columns: 2fr 1.4fr 2fr 1.3fr 1fr;
   }
 
-  .bb-reports-columns > :nth-child(5),
-  .bb-reports-row__completed {
+  .bt-reports-columns > :nth-child(5),
+  .bt-reports-row__completed {
     display: none;
   }
 }
 
 @media (max-width: 1024px) {
-  .bb-record-card,
-  .bb-record-card--failed,
-  .bb-reviewed-grid {
+  .bt-record-card,
+  .bt-record-card--failed,
+  .bt-reviewed-grid {
     grid-template-columns: 1fr;
   }
 
-  .bb-reviewed-shell--summary {
+  .bt-reviewed-shell--summary {
     grid-template-columns: 1fr;
     gap: var(--space-lg);
   }
 
-  .bb-record-card__failed-controls,
-  .bb-comparison-grid {
+  .bt-record-card__failed-controls,
+  .bt-comparison-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 767px) {
-  .bb-reports-columns {
+  .bt-reports-columns {
     display: none;
   }
 
-  .bb-reports-row {
+  .bt-reports-row {
     grid-template-columns: 1.3fr auto;
     grid-template-areas:
       'id count'
@@ -384,32 +384,32 @@
     border: 1px solid var(--color-border-subtle);
   }
 
-  .bb-reports-row__completed {
+  .bt-reports-row__completed {
     display: none;
   }
 
-  .bb-reports-row__id {
+  .bt-reports-row__id {
     display: flex;
     grid-area: id;
   }
 
-  .bb-reports-row__status {
+  .bt-reports-row__status {
     grid-area: status;
   }
 
-  .bb-reports-row__count {
+  .bt-reports-row__count {
     grid-area: count;
   }
 
-  .bb-reports-row__operator {
+  .bt-reports-row__operator {
     grid-area: operator;
   }
 
-  .bb-reports-row__started {
+  .bt-reports-row__started {
     grid-area: started;
   }
 
-  .bb-reports-row__field-label {
+  .bt-reports-row__field-label {
     display: inline-flex;
     font-family: var(--font-label);
     font-size: var(--type-label-compact-size);
@@ -418,80 +418,80 @@
     color: var(--color-text-muted);
   }
 
-  .bb-reports-row__field-value {
+  .bt-reports-row__field-value {
     color: inherit;
   }
 
-  .bb-reports-row__operator .bb-reports-row__field-value {
+  .bt-reports-row__operator .bt-reports-row__field-value {
     font-size: var(--type-body-size);
   }
 
-  .bb-report-meta-slab,
-  .bb-processing-header,
-  .bb-inline-search,
-  .bb-review-action {
+  .bt-report-meta-slab,
+  .bt-processing-header,
+  .bt-inline-search,
+  .bt-review-action {
     grid-template-columns: 1fr;
   }
 
-  .bb-review-action,
-  .bb-review-action--enabled {
+  .bt-review-action,
+  .bt-review-action--enabled {
     justify-content: stretch;
   }
 
-  .bb-review-action .bb-button,
-  .bb-review-action--enabled .bb-button {
+  .bt-review-action .bt-button,
+  .bt-review-action--enabled .bt-button {
     width: 100%;
   }
 
-  .bb-record-card__media-slab {
+  .bt-record-card__media-slab {
     flex-direction: column;
     align-items: start;
   }
 
-  .bb-report-meta-slab,
-  .bb-processing-header,
-  .bb-comparison-card,
-  .bb-record-card__controls,
-  .bb-record-card__failed-content {
+  .bt-report-meta-slab,
+  .bt-processing-header,
+  .bt-comparison-card,
+  .bt-record-card__controls,
+  .bt-record-card__failed-content {
     padding: var(--space-xl);
   }
 
-  .bb-reviewed-shell__meta {
+  .bt-reviewed-shell__meta {
     align-items: flex-start;
     justify-content: flex-start;
     gap: var(--space-sm);
   }
 
-  .bb-metadata-line {
+  .bt-metadata-line {
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
   }
 
-  .bb-comparison-card__hero-header,
-  .bb-comparison-panel {
+  .bt-comparison-card__hero-header,
+  .bt-comparison-panel {
     padding: var(--space-lg);
   }
 
-  .bb-record-card__failed-media {
+  .bt-record-card__failed-media {
     min-height: 188px;
     padding: var(--space-lg);
   }
 
-  .bb-record-card__failed-media .bb-record-media,
-  .bb-record-card__failed-media .bb-record-media--missing {
+  .bt-record-card__failed-media .bt-record-media,
+  .bt-record-card__failed-media .bt-record-media--missing {
     min-height: 148px;
   }
 
-  .bb-fill-rail__options {
+  .bt-fill-rail__options {
     gap: 6px;
   }
 
-  .bb-fill-rail__option {
+  .bt-fill-rail__option {
     min-width: 28px;
   }
 
-  .bb-comparison-card__hero-header {
+  .bt-comparison-card__hero-header {
     align-items: start;
   }
 }

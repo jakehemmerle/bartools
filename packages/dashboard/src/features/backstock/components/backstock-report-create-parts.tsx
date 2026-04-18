@@ -26,9 +26,9 @@ export function BackstockLineItemEditor({
   const selectedBottleLabel = lineItem.selectedBottle?.name ?? `Line item ${index + 1}`
 
   return (
-    <div className="bb-backstock-line-item">
-      <div className="bb-backstock-line-item__meta">
-        <p className="bb-backstock-line-item__eyebrow">
+    <div className="bt-backstock-line-item">
+      <div className="bt-backstock-line-item__meta">
+        <p className="bt-backstock-line-item__eyebrow">
           {lineItem.origin === 'generated' ? 'Generated Suggestion' : 'Manual Entry'}
         </p>
         <Button onPress={() => onRemoveLineItem(lineItem.id)} variant="ghost">
@@ -36,7 +36,7 @@ export function BackstockLineItemEditor({
         </Button>
       </div>
 
-      <div className="bb-backstock-line-item__fields">
+      <div className="bt-backstock-line-item__fields">
         <ReportBottleMatchField
           emptyHint="Search by product name to add the right bottle."
           inputId={`${lineItem.id}-product`}
@@ -49,10 +49,10 @@ export function BackstockLineItemEditor({
           selectedBottleId={lineItem.selectedBottle?.id ?? null}
         />
 
-        <label className="bb-field" htmlFor={quantityInputId}>
-          <span className="bb-field__label">Full Bottles</span>
+        <label className="bt-field" htmlFor={quantityInputId}>
+          <span className="bt-field__label">Full Bottles</span>
           <input
-            className="bb-input"
+            className="bt-input"
             id={quantityInputId}
             inputMode="numeric"
             min={0}
@@ -63,7 +63,7 @@ export function BackstockLineItemEditor({
             type="number"
             value={lineItem.quantityFullBottles}
           />
-          <p className="bb-field__hint">
+          <p className="bt-field__hint">
             {lineItem.selectedBottle
               ? `${selectedBottleLabel} is counted as sealed and full.`
               : 'Choose a product before submitting this line item.'}
@@ -94,22 +94,22 @@ export function BackstockSummaryGrid({
   totalBottleCount: number
 }) {
   return (
-    <div className="bb-backstock-summary-grid">
+    <div className="bt-backstock-summary-grid">
       <div>
-        <p className="bb-backstock-stat__label">Location</p>
-        <p className="bb-backstock-stat__value">{locationName}</p>
+        <p className="bt-backstock-stat__label">Location</p>
+        <p className="bt-backstock-stat__value">{locationName}</p>
       </div>
       <div>
-        <p className="bb-backstock-stat__label">Products</p>
-        <p className="bb-backstock-stat__value">{productCount}</p>
+        <p className="bt-backstock-stat__label">Products</p>
+        <p className="bt-backstock-stat__value">{productCount}</p>
       </div>
       <div>
-        <p className="bb-backstock-stat__label">Full Bottles</p>
-        <p className="bb-backstock-stat__value">{totalBottleCount}</p>
+        <p className="bt-backstock-stat__label">Full Bottles</p>
+        <p className="bt-backstock-stat__value">{totalBottleCount}</p>
       </div>
       <div>
-        <p className="bb-backstock-stat__label">Source Photos</p>
-        <p className="bb-backstock-stat__value">{sourcePhotoCount}</p>
+        <p className="bt-backstock-stat__label">Source Photos</p>
+        <p className="bt-backstock-stat__value">{sourcePhotoCount}</p>
       </div>
     </div>
   )

@@ -16,7 +16,7 @@ export function SurfaceCard({
 }: SurfaceCardProps) {
   return (
     <div
-      className={`bb-surface-card bb-surface-card--${tone}${className ? ` ${className}` : ''}`}
+      className={`bt-surface-card bt-surface-card--${tone}${className ? ` ${className}` : ''}`}
       {...rest}
     >
       {children}

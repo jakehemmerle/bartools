@@ -5,5 +5,5 @@ type SectionEyebrowProps = {
 }
 
 export function SectionEyebrow({ children }: SectionEyebrowProps) {
-  return <p className="bb-section-eyebrow">{children}</p>
+  return <p className="bt-section-eyebrow">{children}</p>
 }

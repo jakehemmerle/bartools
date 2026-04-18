@@ -1,6 +1,6 @@
 # Visual Token Spec
 
-This document is the hard visual contract for the BARBACK web reports workbench.
+This document is the hard visual contract for the BARTOOLS web reports workbench.
 
 It exists to answer one question:
 

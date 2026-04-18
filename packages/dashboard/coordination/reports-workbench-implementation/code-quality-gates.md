@@ -1,6 +1,6 @@
 # Code Quality Gates
 
-This document defines the code-quality backpressure for the BARBACK dashboard.
+This document defines the code-quality backpressure for the BARTOOLS dashboard.
 
 It exists to prevent a familiar failure mode:
 

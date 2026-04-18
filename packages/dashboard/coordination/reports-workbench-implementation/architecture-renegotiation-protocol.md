@@ -38,7 +38,7 @@ These decisions are locked until consciously changed:
 3. The active web product is a reports-first workbench, not a general dashboard.
 4. Unsupported surfaces stay hidden or redirected rather than remaining as fake product pages.
 5. React Aria is the behavior and accessibility layer.
-6. BARBACK-owned styling and components define the visible product language.
+6. BARTOOLS-owned styling and components define the visible product language.
 7. Review remains report-level, not per-record submit.
 8. Fixtures and review routes are required for deterministic visual iteration.
 

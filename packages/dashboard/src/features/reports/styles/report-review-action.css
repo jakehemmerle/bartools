@@ -1,4 +1,4 @@
-.bb-review-action {
+.bt-review-action {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -7,23 +7,23 @@
   padding-top: var(--space-xl);
 }
 
-.bb-review-action__copy {
+.bt-review-action__copy {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
 }
 
-.bb-review-action__helper {
+.bt-review-action__helper {
   margin: 0;
   font-size: var(--type-body-compact-size);
   line-height: 1.5;
   color: var(--color-text-muted);
 }
 
-.bb-review-action__helper--error {
+.bt-review-action__helper--error {
   color: var(--color-error);
 }
 
-.bb-review-action--enabled {
+.bt-review-action--enabled {
   justify-content: flex-end;
 }

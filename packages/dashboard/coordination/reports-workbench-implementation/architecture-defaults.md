@@ -104,7 +104,7 @@ Do not prefer:
 ### 9. Prefer Product Primitives Over One-Off Styling
 
 If a visual pattern appears twice or more, prefer:
-- strengthening a local BARBACK primitive
+- strengthening a local BARTOOLS primitive
 
 Do not prefer:
 - copying CSS fragments into multiple screens

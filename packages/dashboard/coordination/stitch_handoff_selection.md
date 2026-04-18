@@ -1,6 +1,6 @@
 # Stitch Handoff Selection
 
-This document identifies the canonical mockups and locked design choices for the BARBACK web reports workbench handoff.
+This document identifies the canonical mockups and locked design choices for the BARTOOLS web reports workbench handoff.
 
 Use this when:
 - aligning with the mobile team on visual direction
@@ -40,7 +40,7 @@ The current recommendation is:
 
 Why this matters:
 
-- the approved screens are visually aligned with the dark-first BARBACK direction
+- the approved screens are visually aligned with the dark-first BARTOOLS direction
 - the worst fake-product copy has been removed
 - the per-record submit buttons are gone
 - the remaining action model is close enough to backend truth to implement carefully
@@ -100,7 +100,7 @@ These decisions should be visually reinforced in the final Stitch handoff.
 - Dark-first composition should dominate.
 - Mobile-derived typography and color language should dominate over generic web-dashboard instincts.
 - The surface should feel calm, precise, and operational.
-- The design should feel like a desktop extension of BARBACK, not a separate SaaS product.
+- The design should feel like a desktop extension of BARTOOLS, not a separate SaaS product.
 
 ### Layout And Shell
 
@@ -161,7 +161,7 @@ These issues are still present in the selected exports and should not be mistake
 
 In `golden-set-approved/report_detail_failed_emphasis_final`:
 
-- the page now matches the dark-first BARBACK family much better
+- the page now matches the dark-first BARTOOLS family much better
 - per-record submit buttons are gone, which is a major improvement
 - the bogus weight-entry and kilogram language is gone
 - the bottom action label is now a single report-level `Submit Review`, which is acceptable but should still be implemented carefully against the backend review contract
@@ -179,7 +179,7 @@ In `golden-set-approved/report_detail_comparison_emphasis_final`:
 After the final Stitch cleanup pass, a reviewer should be able to understand:
 
 - which screens are canonical
-- what the desktop BARBACK shell feels like
+- what the desktop BARTOOLS shell feels like
 - how reports move from processing to review
 - how unreviewed, reviewed, failed, and comparison-heavy states differ
 - how bottle selection and fill-level correction should look

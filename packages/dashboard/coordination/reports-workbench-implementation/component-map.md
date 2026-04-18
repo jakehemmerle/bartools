@@ -89,7 +89,7 @@ Responsibilities:
 - outer content framing
 
 Should render:
-- BARBACK wordmark
+- BARTOOLS wordmark
 - restrained workbench entry CTA
 - child screen content
 
@@ -126,7 +126,7 @@ Important note:
 ### `WorkbenchTopBar`
 
 Responsibilities:
-- BARBACK identity
+- BARTOOLS identity
 - page-level back action if required by final composition
 - narrow workbench framing
 
@@ -151,7 +151,7 @@ Use for:
 - workbench shell
 
 Responsibilities:
-- consistent BARBACK identity treatment
+- consistent BARTOOLS identity treatment
 
 ### `StatusChip`
 

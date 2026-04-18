@@ -67,7 +67,7 @@ Purpose:
 
 Must include:
 - public shell
-- BARBACK identity
+- BARTOOLS identity
 - reports-workbench framing
 - restrained primary CTA toward reports workbench
 
@@ -95,7 +95,7 @@ Must include:
 - report status
 
 Implementation decision now locked:
-- reports list uses custom BARBACK row composition
+- reports list uses custom BARTOOLS row composition
 - stock data-table components are not allowed to define the visible list presentation
 - semantic list markup or CSS grid composition is fine
 - stock admin-table chrome is not

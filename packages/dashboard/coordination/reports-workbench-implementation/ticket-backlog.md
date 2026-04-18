@@ -225,7 +225,7 @@ Validation:
 
 Outcome:
 
-- make the workbench shell feel like the approved BARBACK product family
+- make the workbench shell feel like the approved BARTOOLS product family
 - tighten top bar, canvas width, gutters, and detail/list frame behavior
 
 Current baseline:

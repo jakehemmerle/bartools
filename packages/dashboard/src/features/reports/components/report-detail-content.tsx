@@ -53,18 +53,18 @@ export function CreatedReportDetail({
   reportId,
 }: CreatedReportDetailProps) {
   return (
-    <div className="bb-report-screen">
+    <div className="bt-report-screen">
       <ReportHeader
         heading={heading}
         mobileSupportingLine={reportId}
         mobileTitle="Report"
         status={detail.status}
       />
-      <SurfaceCard className="bb-report-meta-slab" tone="low">
+      <SurfaceCard className="bt-report-meta-slab" tone="low">
         <MetadataItem label="Started">{formatReportTimestampLong(detail.startedAt)}</MetadataItem>
       </SurfaceCard>
-      <SurfaceCard className="bb-message-panel" tone="low">
-        <p className="bb-message-panel__body">
+      <SurfaceCard className="bt-message-panel" tone="low">
+        <p className="bt-message-panel__body">
           This report has been created. Processing has not started yet.
         </p>
       </SurfaceCard>
@@ -78,19 +78,19 @@ export function ProcessingReportDetail({
   statusMessage = null,
 }: ProcessingReportDetailProps) {
   return (
-    <div className="bb-report-screen">
-      <SurfaceCard className="bb-processing-header" tone="canvas">
-        <div className="bb-processing-header__copy">
-          <div className="bb-processing-header__meta">
+    <div className="bt-report-screen">
+      <SurfaceCard className="bt-processing-header" tone="canvas">
+        <div className="bt-processing-header__copy">
+          <div className="bt-processing-header__meta">
             <SectionEyebrow>Report ID</SectionEyebrow>
-            <span className="bb-processing-header__report-id">{detail.id}</span>
+            <span className="bt-processing-header__report-id">{detail.id}</span>
           </div>
-          <div className="bb-processing-header__details">
+          <div className="bt-processing-header__details">
             <span>Started at {formatReportTimestampLong(detail.startedAt)}</span>
             <span>Operator: {detail.userDisplayName ?? 'Unknown operator'}</span>
           </div>
         </div>
-        <div className="bb-processing-header__status">
+        <div className="bt-processing-header__status">
           <StatusChip status={detail.status} />
         </div>
       </SurfaceCard>
@@ -98,14 +98,14 @@ export function ProcessingReportDetail({
       <ReportProgressPanel label={progress.label} progress={progress.ratio} />
 
       {statusMessage ? (
-        <SurfaceCard className="bb-message-panel" tone="low">
-          <p aria-live="polite" className="bb-message-panel__body">
+        <SurfaceCard className="bt-message-panel" tone="low">
+          <p aria-live="polite" className="bt-message-panel__body">
             {statusMessage}
           </p>
         </SurfaceCard>
       ) : null}
 
-      <section className="bb-record-stack bb-record-stack--processing">
+      <section className="bt-record-stack bt-record-stack--processing">
         {detail.bottleRecords.map((record) => (
           <ProcessingRecord key={record.id} record={record} />
         ))}
@@ -123,9 +123,9 @@ export function ReviewedReportDetail({
   const isComparisonEmphasis = comparisonVariant === 'hero'
 
   return (
-    <div className="bb-report-screen">
+    <div className="bt-report-screen">
       <div
-        className={`bb-reviewed-shell${isComparisonEmphasis ? ' bb-reviewed-shell--comparison' : ' bb-reviewed-shell--summary'}`}
+        className={`bt-reviewed-shell${isComparisonEmphasis ? ' bt-reviewed-shell--comparison' : ' bt-reviewed-shell--summary'}`}
       >
         <ReportHeader
           heading={heading}
@@ -135,7 +135,7 @@ export function ReviewedReportDetail({
           variant={isComparisonEmphasis ? 'inline-chip' : 'stacked'}
         />
         {!isComparisonEmphasis ? (
-          <div className="bb-reviewed-shell__meta">
+          <div className="bt-reviewed-shell__meta">
             <MetadataLine label="Started" value={formatReportTimestampLong(detail.startedAt)} />
             <MetadataLine label="Completed" value={formatReportTimestampLong(detail.completedAt)} />
             <MetadataLine label="Operator" value={detail.userDisplayName ?? 'Unknown operator'} />
@@ -143,7 +143,7 @@ export function ReviewedReportDetail({
         ) : null}
       </div>
 
-      <div className={`bb-reviewed-grid${isComparisonEmphasis ? ' bb-reviewed-grid--comparison' : ''}`}>
+      <div className={`bt-reviewed-grid${isComparisonEmphasis ? ' bt-reviewed-grid--comparison' : ''}`}>
         {detail.bottleRecords.map((record) => (
           <ComparisonRecordCard key={record.id} record={record} variant={comparisonVariant} />
         ))}
@@ -177,7 +177,7 @@ export function ReviewableReportDetail({
     !readinessMessage
 
   return (
-    <div className="bb-report-screen">
+    <div className="bt-report-screen">
       <ReportHeader
         heading={heading}
         mobileSupportingLine={reportId}
@@ -185,21 +185,21 @@ export function ReviewableReportDetail({
         status={detail.status}
       />
 
-      <SurfaceCard className="bb-report-meta-slab" tone="low">
+      <SurfaceCard className="bt-report-meta-slab" tone="low">
         <MetadataItem label="Started">{formatReportTimestampLong(detail.startedAt)}</MetadataItem>
         <MetadataItem label="Completed">{formatReportTimestampLong(detail.completedAt)}</MetadataItem>
         <MetadataItem label="Operator">{detail.userDisplayName ?? 'Unknown operator'}</MetadataItem>
       </SurfaceCard>
 
       {statusMessage ? (
-        <SurfaceCard className="bb-message-panel" tone="low">
-          <p aria-live="polite" className="bb-message-panel__body">
+        <SurfaceCard className="bt-message-panel" tone="low">
+          <p aria-live="polite" className="bt-message-panel__body">
             {statusMessage}
           </p>
         </SurfaceCard>
       ) : null}
 
-      <section className="bb-record-stack">
+      <section className="bt-record-stack">
         {detail.bottleRecords.map((record) => {
           const draft = reviewDraft.find((entry) => entry.id === record.id)
           const search = searchState[record.id] ?? { query: '', results: [] }
@@ -239,18 +239,18 @@ export function ReviewableReportDetail({
       </section>
 
       <div
-        className={`bb-review-action${showCompactReviewAction ? ' bb-review-action--enabled' : ''}`}
+        className={`bt-review-action${showCompactReviewAction ? ' bt-review-action--enabled' : ''}`}
       >
-        <div className="bb-review-action__copy">
+        <div className="bt-review-action__copy">
           <p
-            className="bb-review-action__helper bb-review-action__helper--error"
+            className="bt-review-action__helper bt-review-action__helper--error"
             hidden={!reviewActionErrorMessage}
             role="alert"
           >
             {reviewActionErrorMessage ?? ''}
           </p>
           {readinessMessage ? (
-            <p className="bb-review-action__helper">{readinessMessage}</p>
+            <p className="bt-review-action__helper">{readinessMessage}</p>
           ) : null}
         </div>
         <Button disabled={reviewActionDisabled} onPress={onReviewSubmit} variant="primary">
@@ -259,7 +259,7 @@ export function ReviewableReportDetail({
       </div>
 
       {hasFailedRecords ? (
-        <p className="bb-report-screen__footnote">Failed records remain recoverable review work.</p>
+        <p className="bt-report-screen__footnote">Failed records remain recoverable review work.</p>
       ) : null}
     </div>
   )

@@ -3,22 +3,22 @@ import { AppWordmark } from '../../../components/primitives/app-wordmark'
 
 export function EntryScreen() {
   return (
-    <section className="bb-entry">
+    <section className="bt-entry">
       <AppWordmark centered />
 
-      <div className="bb-entry__copy">
-        <h1 className="bb-entry__headline">Reports Workbench</h1>
-        <p className="bb-entry__support">
+      <div className="bt-entry__copy">
+        <h1 className="bt-entry__headline">Reports Workbench</h1>
+        <p className="bt-entry__support">
           Open recent reports and inspect records from desktop.
         </p>
       </div>
 
-      <div className="bb-entry__actions">
+      <div className="bt-entry__actions">
         <Button to="/reports" variant="primary">
           <span>Open Reports</span>
           <span aria-hidden="true">→</span>
         </Button>
-        <p className="bb-entry__note">Live access requires venue and user context.</p>
+        <p className="bt-entry__note">Live access requires venue and user context.</p>
       </div>
     </section>
   )

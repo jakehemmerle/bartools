@@ -32,7 +32,7 @@ Symptoms:
 - interactive primitives quietly start dictating layout
 
 Counter-pressure:
-- BARBACK-owned shell and primitive components
+- BARTOOLS-owned shell and primitive components
 - review against golden-set screenshots
 - no direct use of stock table, shell, card, or badge aesthetics
 
@@ -138,7 +138,7 @@ Fail the gate if:
 ## Gate B: Shell Fidelity
 
 Before list/detail feature work:
-- `/` and `/reports` feel like the same BARBACK product family
+- `/` and `/reports` feel like the same BARTOOLS product family
 - shell is dark-first
 - top bar and content canvas feel deliberate
 - shell matches the token contract

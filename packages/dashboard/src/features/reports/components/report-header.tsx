@@ -19,20 +19,20 @@ export function ReportHeader({
 
   if (variant === 'inline-chip') {
     return (
-      <header className="bb-report-header bb-report-header--inline">
-        <div className="bb-report-header__headline-row">
-          <h1 aria-label={heading} className="bb-page-title bb-page-title--detail">
-            <span aria-hidden="true" className="bb-report-header__heading-desktop">
+      <header className="bt-report-header bt-report-header--inline">
+        <div className="bt-report-header__headline-row">
+          <h1 aria-label={heading} className="bt-page-title bt-page-title--detail">
+            <span aria-hidden="true" className="bt-report-header__heading-desktop">
               {heading}
             </span>
-            <span aria-hidden="true" className="bb-report-header__heading-mobile">
+            <span aria-hidden="true" className="bt-report-header__heading-mobile">
               {mobileHeading}
             </span>
           </h1>
           <StatusChip status={status} />
         </div>
         {mobileSupportingLine ? (
-          <p aria-hidden="true" className="bb-report-header__mobile-support">
+          <p aria-hidden="true" className="bt-report-header__mobile-support">
             {mobileSupportingLine}
           </p>
         ) : null}
@@ -41,20 +41,20 @@ export function ReportHeader({
   }
 
   return (
-    <header className="bb-report-header">
-      <div className="bb-report-header__chips">
+    <header className="bt-report-header">
+      <div className="bt-report-header__chips">
         <StatusChip status={status} />
       </div>
-      <h1 aria-label={heading} className="bb-page-title bb-page-title--detail">
-        <span aria-hidden="true" className="bb-report-header__heading-desktop">
+      <h1 aria-label={heading} className="bt-page-title bt-page-title--detail">
+        <span aria-hidden="true" className="bt-report-header__heading-desktop">
           {heading}
         </span>
-        <span aria-hidden="true" className="bb-report-header__heading-mobile">
+        <span aria-hidden="true" className="bt-report-header__heading-mobile">
           {mobileHeading}
         </span>
       </h1>
       {mobileSupportingLine ? (
-        <p aria-hidden="true" className="bb-report-header__mobile-support">
+        <p aria-hidden="true" className="bt-report-header__mobile-support">
           {mobileSupportingLine}
         </p>
       ) : null}

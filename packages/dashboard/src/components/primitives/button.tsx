@@ -21,9 +21,9 @@ export function Button({
   ...props
 }: AppButtonProps) {
   const classes = [
-    'bb-button',
-    `bb-button--${variant}`,
-    fullWidth ? 'bb-button--full' : '',
+    'bt-button',
+    `bt-button--${variant}`,
+    fullWidth ? 'bt-button--full' : '',
     className,
   ]
     .filter(Boolean)
