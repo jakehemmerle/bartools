@@ -12,7 +12,7 @@ const meta = {
     <div style={{ minWidth: '280px' }}>
       <Select {...args}>
         <option value="main">Main Bar</option>
-        <option value="back">Back Bar</option>
+        <option value="backstock">Backstock</option>
         <option value="service">Service Well</option>
       </Select>
     </div>

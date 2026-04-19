@@ -35,7 +35,7 @@ export const baseReportsScenario = reportsScenarioSchema.parse({
       startedAt: '2026-04-11T16:12:00-05:00',
       completedAt: undefined,
       bottleCount: 9,
-      locationName: 'Back Bar',
+      locationName: 'Backstock',
     }),
     makeReportListItem({
       id: 'report-1000',

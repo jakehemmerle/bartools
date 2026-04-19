@@ -14,19 +14,29 @@
 **/__fixtures__
 **/tsconfig*.json
 **/*.md
+!tsconfig.base.json
+!packages/dashboard/tsconfig.json
+!packages/dashboard/tsconfig.app.json
+!packages/dashboard/tsconfig.node.json
+!packages/types/tsconfig.json
 
 # keep only package.json from non-backend workspaces (needed for bun lockfile)
 packages/mobile/**
 !packages/mobile/package.json
-packages/dashboard/**
-!packages/dashboard/package.json
 packages/ui/**
 !packages/ui/package.json
 packages/eval/**
 !packages/eval/package.json
 
+# trim dashboard build context to the runtime app surface
+packages/dashboard/coordination
+packages/dashboard/specs
+packages/dashboard/.storybook
+packages/dashboard/README.md
+
 # local-only
 infra/.pulumi
+infra/.cursor
 infra/node_modules
 .git
 .github

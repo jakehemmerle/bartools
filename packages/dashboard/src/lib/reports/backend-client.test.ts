@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ReportReviewInput } from './client'
+import { fixtureLocationListItems } from './client'
 import { createBackendReportsClient } from './backend-client'
+import { dashboardFixtureVenueId } from './runtime-config'
 
 const backendBaseUrl = 'https://bartools-backend-staging-zjausnxoyq-ue.a.run.app'
 
@@ -23,7 +25,7 @@ describe('backend reports client', () => {
     })
     expect(reports.map((report) => report.id)).toEqual(['report-newer', 'report-older'])
     expect(client.readiness.backendEnabled).toBe(true)
-    expect(client.readiness.blockedReason).toBe('review_submission_requires_user_context')
+    expect(client.readiness.blockedReason).toBe('none')
   })
 
   it('supports a relative base url for proxied local development', async () => {
@@ -38,14 +40,20 @@ describe('backend reports client', () => {
       headers: { Accept: 'application/json' },
       method: 'GET',
     })
-    expect(detail?.bottleRecords[0]?.imageUrl).toBe('/api/uploads/record-1.jpg')
+    expect(detail?.bottleRecords[0]?.imageUrl).toBe('/api/reports/report-1002/records/record-1/image')
   })
 
-  it('returns null for unknown reports and resolves relative image urls for detail payloads', async () => {
+  it('returns null for unknown reports and clears gs:// image urls for detail payloads', async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse({ error: 'report_not_found' }, { status: 404 }))
-      .mockResolvedValueOnce(jsonResponse(buildReportDetailResponse()))
+      .mockResolvedValueOnce(
+        jsonResponse(
+          buildReportDetailResponse({
+            imageUrl: 'gs://bartools-uploads-staging/demo-seed/IMG_3983.jpg',
+          }),
+        ),
+      )
 
     vi.stubGlobal('fetch', fetchMock)
 
@@ -56,7 +64,7 @@ describe('backend reports client', () => {
       id: 'report-1002',
       bottleRecords: [
         {
-          imageUrl: `${backendBaseUrl}/uploads/record-1.jpg`,
+          imageUrl: '',
         },
       ],
     })
@@ -87,10 +95,26 @@ describe('backend reports client', () => {
         createdAt: '2026-04-16T12:00:00.000Z',
       },
     ])
+
+    await expect(client.listVenueLocations(dashboardFixtureVenueId)).resolves.toEqual(
+      fixtureLocationListItems,
+    )
+
+    expect(fetchMock).toHaveBeenNthCalledWith(2, `${backendBaseUrl}/venues/venue-1/locations`, {
+      headers: { Accept: 'application/json' },
+      method: 'GET',
+    })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
-  it('posts review payloads without reshaping them and normalizes the returned detail', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(buildReviewedDetailResponse()))
+  it('posts review records and normalizes the returned detail', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse(
+        buildReviewedDetailResponse({
+          imageUrl: 'gs://bartools-uploads-staging/demo-seed/IMG_3983.jpg',
+        }),
+      ),
+    )
 
     vi.stubGlobal('fetch', fetchMock)
 
@@ -110,7 +134,7 @@ describe('backend reports client', () => {
       },
       method: 'POST',
     })
-    expect(detail.bottleRecords[0]?.imageUrl).toBe(`${backendBaseUrl}/uploads/record-1.jpg`)
+    expect(detail.bottleRecords[0]?.imageUrl).toBe('')
   })
 })
 
@@ -136,7 +160,7 @@ describe('backend reports client stream handling', () => {
 
     source?.emit('record.failed', {
       id: 'record-2',
-      imageUrl: '/uploads/record-2.jpg',
+      imageUrl: 'gs://bartools-uploads-staging/demo-seed/IMG_3982.jpg',
       bottleName: 'Unknown bottle',
       fillPercent: 0,
       corrected: false,
@@ -154,7 +178,7 @@ describe('backend reports client stream handling', () => {
       type: 'record.failed',
       data: expect.objectContaining({
         id: 'record-2',
-        imageUrl: `${backendBaseUrl}/uploads/record-2.jpg`,
+        imageUrl: '',
       }),
     })
     expect(onEvent).toHaveBeenNthCalledWith(2, {
@@ -206,7 +230,7 @@ function buildReportsResponse() {
       {
         id: 'report-older',
         status: 'created',
-        locationName: 'Back Bar',
+        locationName: 'Backstock',
         bottleCount: 2,
         photoCount: 2,
         processedCount: 0,
@@ -226,14 +250,18 @@ function buildReportsResponse() {
   }
 }
 
-function buildReportDetailResponse() {
+function buildReportDetailResponse({
+  imageUrl = '/reports/report-1002/records/record-1/image',
+}: {
+  imageUrl?: string
+} = {}) {
   return {
     id: 'report-1002',
     status: 'unreviewed',
     bottleRecords: [
       {
         id: 'record-1',
-        imageUrl: '/uploads/record-1.jpg',
+        imageUrl,
         bottleName: 'Wild Turkey 101',
         fillPercent: 40,
         corrected: false,
@@ -268,14 +296,18 @@ function buildLocationsResponse() {
   }
 }
 
-function buildReviewedDetailResponse() {
+function buildReviewedDetailResponse({
+  imageUrl = '/reports/report-1003/records/record-1/image',
+}: {
+  imageUrl?: string
+} = {}) {
   return {
     id: 'report-1003',
     status: 'reviewed',
     bottleRecords: [
       {
         id: 'record-1',
-        imageUrl: '/uploads/record-1.jpg',
+        imageUrl,
         bottleName: 'Campari',
         fillPercent: 60,
         corrected: true,

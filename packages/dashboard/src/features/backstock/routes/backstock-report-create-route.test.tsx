@@ -207,44 +207,39 @@ describe('Backstock report creation route: resilience', () => {
 })
 
 describe('Live backstock route guards', () => {
-  it('blocks live backstock loading until a venue id is configured', async () => {
-    const listVenueLocations = vi.fn()
+  it('loads live backstock locations without requiring a configured venue id', async () => {
+    const baseClient = createFixtureReportsClient()
+    const listVenueLocations = vi.fn(async (venueId: string) => {
+      void venueId
+      return baseClient.listVenueLocations('venue-1')
+    })
 
     renderAppRoutes({
       initialEntries: ['/reports/backstock/new'],
       reportsClient: {
-        ...createFixtureReportsClient(),
+        ...baseClient,
         listVenueLocations,
         readiness: {
           backendEnabled: true,
-          blockedReason: 'review_submission_requires_user_context',
-          message: 'Review submission requires user context.',
+          blockedReason: 'none',
+          message: 'Live reports are connected.',
         },
       },
     })
 
-    expect(
-      await screen.findByRole('heading', { name: 'Backstock Locations Unavailable' }),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText(
-        'Backstock locations need a configured venue context before live data can load here.',
-      ),
-    ).toBeInTheDocument()
-    expect(listVenueLocations).not.toHaveBeenCalled()
+    expect(await screen.findByRole('heading', { name: 'New Backstock Report' })).toBeInTheDocument()
+    expect(listVenueLocations).toHaveBeenCalledTimes(1)
   })
 
   it('keeps live-only backstock actions explicit about pending backend work', async () => {
-    vi.stubEnv('VITE_BARTOOLS_VENUE_ID', 'venue-1')
-
     renderAppRoutes({
       initialEntries: ['/reports/backstock/new'],
       reportsClient: {
         ...createFixtureReportsClient(),
         readiness: {
           backendEnabled: true,
-          blockedReason: 'review_submission_requires_user_context',
-          message: 'Review submission requires user context.',
+          blockedReason: 'none',
+          message: 'Live reports are connected.',
         },
       },
     })
