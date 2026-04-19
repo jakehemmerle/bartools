@@ -65,6 +65,9 @@ import {
   reviewReport,
   searchBottles,
   getLocations,
+  getVenueInventory,
+  getLocationInventory,
+  addInventoryItem,
   getReportStreamUrl,
   resolveImageUrl,
   ApiError,
@@ -142,6 +145,86 @@ describe('api client', () => {
     await getLocations('v-1')
 
     expect(lastCall().url).toContain('/venues/v-1/locations')
+  })
+
+  it('getVenueInventory GETs /venues/:venueId/inventory', async () => {
+    queueResponse({ items: [] })
+
+    const result = await getVenueInventory('v-1')
+
+    expect(lastCall().url).toContain('/venues/v-1/inventory')
+    expect(lastCall().init?.method ?? 'GET').toBe('GET')
+    expect(result.items).toEqual([])
+  })
+
+  it('getLocationInventory GETs /locations/:locationId/inventory', async () => {
+    queueResponse({ items: [{ id: 'inv-1' }] })
+
+    const result = await getLocationInventory('loc-1')
+
+    expect(lastCall().url).toContain('/locations/loc-1/inventory')
+    expect(lastCall().init?.method ?? 'GET').toBe('GET')
+    expect(result.items).toHaveLength(1)
+  })
+
+  it('addInventoryItem POSTs /inventory with JSON body and returns the created item', async () => {
+    queueResponse({
+      id: 'inv-1',
+      locationId: 'loc-1',
+      bottleId: 'b-1',
+      name: 'Buffalo Trace',
+      category: 'bourbon',
+      fillPercent: 50,
+    })
+
+    const result = await addInventoryItem({
+      locationId: 'loc-1',
+      bottleId: 'b-1',
+      fillPercent: 50,
+      notes: 'behind the well',
+    })
+
+    expect(lastCall().url).toMatch(/\/inventory$/)
+    expect(lastCall().init?.method).toBe('POST')
+    const body = JSON.parse(lastCall().init?.body as string)
+    expect(body).toEqual({
+      locationId: 'loc-1',
+      bottleId: 'b-1',
+      fillPercent: 50,
+      notes: 'behind the well',
+    })
+    expect(result.id).toBe('inv-1')
+  })
+
+  it('addInventoryItem omits notes when undefined', async () => {
+    queueResponse({ id: 'inv-2' })
+
+    await addInventoryItem({
+      locationId: 'loc-1',
+      bottleId: 'b-1',
+      fillPercent: 0,
+    })
+
+    const body = JSON.parse(lastCall().init?.body as string)
+    expect(body).toEqual({
+      locationId: 'loc-1',
+      bottleId: 'b-1',
+      fillPercent: 0,
+    })
+    expect(body.notes).toBeUndefined()
+  })
+
+  it('addInventoryItem propagates ApiError on 400 invalid_inventory_payload', async () => {
+    queueErrorResponse(400, '{"error":"invalid_inventory_payload"}')
+
+    try {
+      await addInventoryItem({ locationId: 'loc-1', bottleId: 'b-1', fillPercent: 50 })
+      expect(true).toBe(false)
+    } catch (e) {
+      expect(e).toBeInstanceOf(ApiError)
+      expect((e as ApiError).status).toBe(400)
+      expect((e as ApiError).body).toContain('invalid_inventory_payload')
+    }
   })
 
   it('uploadPhotos infers per-photo Content-Type and threads it through presign + PUT', async () => {

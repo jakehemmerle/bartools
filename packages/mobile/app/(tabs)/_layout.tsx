@@ -1,9 +1,11 @@
 import { Platform } from 'react-native'
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import { Tabs } from 'expo-router'
+import { BatchQueueProvider } from '../../lib/use-batch-queue'
 
 export default function TabLayout() {
   return (
+    <BatchQueueProvider>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -76,5 +78,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </BatchQueueProvider>
   )
 }

@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { View, Text, TextInput, ScrollView, FlatList, Pressable, StyleSheet } from 'react-native'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { View, Text, TextInput, ScrollView, FlatList, Pressable, StyleSheet, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
@@ -8,70 +8,49 @@ import { FilterChip } from '../../../components/FilterChip'
 import { BottleCard } from '../../../components/BottleCard'
 import { AlertBanner } from '../../../components/AlertBanner'
 import { AddToInventorySheet } from '../../../components/AddToInventorySheet'
-import { MOCK_BOTTLES, MOCK_INVENTORY, INVENTORY_FILTERS } from '../../../data/mockData'
-import type { Bottle } from '@bartools/types'
+import { INVENTORY_FILTERS } from '../../../data/mockData'
+import { getVenueInventory } from '../../../lib/api'
+import { DEFAULT_VENUE_ID } from '../../../lib/config'
+import { filterInventory, groupByCategory, type InventorySectionItem } from '../../../lib/inventory-view'
+import type { InventoryListItem } from '@bartools/types'
 
-type BottleWithFill = Bottle & { fillPercent: number }
-
-type SectionItem =
-  | { type: 'header'; category: string }
-  | { type: 'bottle'; data: BottleWithFill }
+type LoadState =
+  | { status: 'loading' }
+  | { status: 'ready'; items: InventoryListItem[] }
+  | { status: 'error' }
 
 export default function InventoryScreen() {
   const theme = useTheme()
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<string>('All Bottles')
   const [showAddSheet, setShowAddSheet] = useState(false)
+  const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' })
 
-  const bottlesWithFill = useMemo<BottleWithFill[]>(() => {
-    return MOCK_BOTTLES.map((bottle) => {
-      const inv = MOCK_INVENTORY.find((i) => i.bottleId === bottle.id)
-      return { ...bottle, fillPercent: inv ? inv.fillLevelTenths * 10 : 0 }
-    })
+  const fetchInventory = useCallback(() => {
+    setLoadState({ status: 'loading' })
+    getVenueInventory(DEFAULT_VENUE_ID)
+      .then((res) => setLoadState({ status: 'ready', items: res.items }))
+      .catch(() => setLoadState({ status: 'error' }))
   }, [])
 
-  const filteredBottles = useMemo(() => {
-    let result = bottlesWithFill
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data load on mount
+    fetchInventory()
+  }, [fetchInventory])
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase()
-      result = result.filter(
-        (b) => b.name.toLowerCase().includes(q),
-      )
-    }
+  const filtered = useMemo(() => {
+    const items = loadState.status === 'ready' ? loadState.items : []
+    return filterInventory(items, searchQuery, activeFilter)
+  }, [loadState, searchQuery, activeFilter])
 
-    // Filter by category
-    if (activeFilter !== 'All Bottles') {
-      const cat = activeFilter.toLowerCase()
-      result = result.filter((b) => b.category === cat)
-    }
+  const sectionData = useMemo<InventorySectionItem[]>(
+    () => groupByCategory(filtered),
+    [filtered],
+  )
 
-    return result
-  }, [bottlesWithFill, searchQuery, activeFilter])
+  const totalCount = filtered.length
 
-  const sectionData = useMemo<SectionItem[]>(() => {
-    // Group by category
-    const groups = new Map<string, BottleWithFill[]>()
-    for (const bottle of filteredBottles) {
-      const cat = bottle.category
-      if (!groups.has(cat)) groups.set(cat, [])
-      groups.get(cat)!.push(bottle)
-    }
-
-    const items: SectionItem[] = []
-    for (const [category, bottles] of groups) {
-      items.push({ type: 'header', category })
-      for (const bottle of bottles) {
-        items.push({ type: 'bottle', data: bottle })
-      }
-    }
-    return items
-  }, [filteredBottles])
-
-  const totalCount = filteredBottles.length
-
-  const renderItem = ({ item }: { item: SectionItem }) => {
+  const renderItem = ({ item }: { item: InventorySectionItem }) => {
     if (item.type === 'header') {
       return (
         <Text style={[styles.categoryHeader, { color: theme.textMuted }]}>
@@ -93,7 +72,7 @@ export default function InventoryScreen() {
     )
   }
 
-  const keyExtractor = (item: SectionItem) => {
+  const keyExtractor = (item: InventorySectionItem) => {
     if (item.type === 'header') return `header-${item.category}`
     return item.data.id
   }
@@ -145,7 +124,20 @@ export default function InventoryScreen() {
       </View>
 
       {/* Bottle list */}
-      {sectionData.length > 0 ? (
+      {loadState.status === 'loading' ? (
+        <View style={styles.emptyState}>
+          <ActivityIndicator color={theme.outline} />
+        </View>
+      ) : loadState.status === 'error' ? (
+        <View style={styles.emptyState}>
+          <Text style={[styles.emptyText, { color: theme.textMuted }]}>
+            Couldn't load inventory.
+          </Text>
+          <Pressable onPress={fetchInventory} style={styles.retryButton} accessibilityRole="button">
+            <Text style={[styles.retryText, { color: theme.primary }]}>Try again</Text>
+          </Pressable>
+        </View>
+      ) : sectionData.length > 0 ? (
         <FlatList
           data={sectionData}
           renderItem={renderItem}
@@ -257,12 +249,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
+    gap: 12,
   },
   emptyText: {
     fontFamily: 'Manrope',
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  retryButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  retryText: {
+    fontFamily: 'SpaceGrotesk',
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 2,
   },
   fab: {
     position: 'absolute',

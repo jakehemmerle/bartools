@@ -2,8 +2,10 @@ import { API_BASE_URL } from './config'
 import type {
   ReportDetail,
   ReportListItem,
+  ReportStatus,
   BottleSearchResult,
   LocationListItem,
+  InventoryListItem,
 } from '@bartools/types'
 
 // ---------------------------------------------------------------------------
@@ -71,11 +73,10 @@ type CreateReportResponse = {
   userId: string
   venueId: string
   locationId: string | null
-  status: string
+  status: ReportStatus
   photoCount: number
   processedCount: number
   startedAt: string
-  reviewedAt: string | null
 }
 
 export function createReport(
@@ -295,6 +296,41 @@ export function getLocations(
   venueId: string,
 ): Promise<{ locations: LocationListItem[] }> {
   return fetchJson(`/venues/${encodePath(venueId)}/locations`)
+}
+
+// ---------------------------------------------------------------------------
+// Inventory
+// ---------------------------------------------------------------------------
+
+export function getVenueInventory(
+  venueId: string,
+): Promise<{ items: InventoryListItem[] }> {
+  return fetchJson(`/venues/${encodePath(venueId)}/inventory`)
+}
+
+export function getLocationInventory(
+  locationId: string,
+): Promise<{ items: InventoryListItem[] }> {
+  return fetchJson(`/locations/${encodePath(locationId)}/inventory`)
+}
+
+export function addInventoryItem(input: {
+  locationId: string
+  bottleId: string
+  fillPercent: number
+  notes?: string
+}): Promise<InventoryListItem> {
+  const body: Record<string, unknown> = {
+    locationId: input.locationId,
+    bottleId: input.bottleId,
+    fillPercent: input.fillPercent,
+  }
+  if (input.notes !== undefined) body.notes = input.notes
+  return fetchJson('/inventory', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
 }
 
 // ---------------------------------------------------------------------------

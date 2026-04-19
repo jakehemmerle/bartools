@@ -7,16 +7,15 @@ import type { BottleSearchResult, ReportBottleRecord } from '@bartools/types'
 import { useReportStream } from '../lib/use-report-stream'
 import { reviewReport, isValidUuid } from '../lib/api'
 import { DEFAULT_USER_ID } from '../lib/config'
+import {
+  canSubmitReview,
+  isRecordMissingBottle,
+  type RecordEdit,
+} from '../lib/review-validation'
 import { useTheme } from '../theme/useTheme'
 import { RecordCard } from '../components/RecordCard'
 import { BottleSearchModal } from '../components/BottleSearchModal'
 import { FillLevelSlider } from '../components/FillLevelSlider'
-
-type RecordEdit = {
-  bottleId?: string
-  bottleName?: string
-  fillPercent?: number
-}
 
 export default function ReviewScreen() {
   const theme = useTheme()
@@ -31,6 +30,7 @@ export default function ReviewScreen() {
   const [submitting, setSubmitting] = useState(false)
 
   const isReady = status === 'ready_for_review'
+  const canSubmit = canSubmitReview(records, edits)
   const progressFraction = progress
     ? progress.photoCount > 0
       ? progress.processedCount / progress.photoCount
@@ -92,6 +92,7 @@ export default function ReviewScreen() {
   const renderRecord = useCallback(
     ({ item }: { item: ReportBottleRecord }) => {
       const edit = edits[item.id]
+      const missingBottle = isRecordMissingBottle(item, edit)
       return (
         <View style={styles.cardWrapper}>
           <RecordCard
@@ -99,7 +100,7 @@ export default function ReviewScreen() {
             editedFill={edit?.fillPercent}
             editedName={edit?.bottleName}
             onEdit={() => setSearchTarget(item.id)}
-
+            missingBottle={missingBottle}
           />
           {/* Inline fill edit — tap the fill bar area */}
           <Pressable
@@ -188,10 +189,19 @@ export default function ReviewScreen() {
           <Pressable
             style={({ pressed }) => [
               styles.confirmButton,
-              { backgroundColor: theme.primary, opacity: submitting ? 0.6 : pressed ? 0.9 : 1 },
+              {
+                backgroundColor: theme.primary,
+                opacity: !canSubmit
+                  ? 0.4
+                  : submitting
+                    ? 0.6
+                    : pressed
+                      ? 0.9
+                      : 1,
+              },
             ]}
             onPress={handleSubmitReview}
-            disabled={submitting}
+            disabled={submitting || !canSubmit}
           >
             {submitting ? (
               <ActivityIndicator color={theme.onPrimary} size="small" />

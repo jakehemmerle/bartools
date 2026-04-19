@@ -40,21 +40,23 @@ export function AddToInventorySheet({ visible, onDismiss }: Readonly<AddToInvent
               </View>
             </Pressable>
 
-            {/* Add Manually — disabled/coming soon */}
-            <View style={[styles.manualButton, { backgroundColor: theme.surfaceContainer, opacity: 0.8 }]}>
+            {/* Add Manually */}
+            <Pressable
+              style={({ pressed }) => [
+                styles.manualButton,
+                { backgroundColor: theme.surfaceContainer, opacity: pressed ? 0.9 : 1 },
+              ]}
+              onPress={() => { onDismiss(); router.push('/inventory/add-manually') }}
+              accessible accessibilityRole="button" accessibilityLabel="Add manually"
+            >
               <View style={[styles.iconCircle, { backgroundColor: theme.surfaceContainerHigh }]}>
-                <MaterialCommunityIcons name="note-edit-outline" size={28} color={`${theme.outline}80`} />
+                <MaterialCommunityIcons name="note-edit-outline" size={28} color={theme.onSurface} />
               </View>
               <View style={styles.manualTextContainer}>
-                <View style={styles.manualTitleRow}>
-                  <Text style={[styles.buttonTitle, { color: `${theme.outline}80` }]}>Add Manually</Text>
-                  <View style={[styles.comingSoonBadge, { borderColor: `${theme.outline}33` }]}>
-                    <Text style={[styles.comingSoonText, { color: `${theme.outline}80` }]}>Coming Soon</Text>
-                  </View>
-                </View>
-                <Text style={[styles.buttonSubtitle, { color: `${theme.outline}66` }]}>Enter bottle details by hand</Text>
+                <Text style={[styles.buttonTitle, { color: theme.onSurface }]}>Add Manually</Text>
+                <Text style={[styles.buttonSubtitle, { color: theme.onSurfaceVariant }]}>Enter bottle details by hand</Text>
               </View>
-            </View>
+            </Pressable>
 
             {/* Dismiss */}
             <Pressable onPress={onDismiss} style={styles.dismissButton} accessible accessibilityRole="button" accessibilityLabel="Dismiss">
@@ -80,9 +82,6 @@ const styles = StyleSheet.create({
   buttonTitle: { fontFamily: 'SpaceGrotesk', fontSize: 14, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
   buttonSubtitle: { fontFamily: 'Manrope', fontSize: 11, marginTop: 2 },
   manualTextContainer: { flex: 1 },
-  manualTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  comingSoonBadge: { borderWidth: 1, borderRadius: 2, paddingHorizontal: 8, paddingVertical: 2 },
-  comingSoonText: { fontFamily: 'SpaceGrotesk', fontSize: 9, fontWeight: '500', textTransform: 'uppercase', letterSpacing: 2, fontStyle: 'italic' },
   dismissButton: { paddingVertical: 16, alignItems: 'center', marginTop: 16 },
   dismissText: { fontFamily: 'SpaceGrotesk', fontSize: 12, fontWeight: '500', textTransform: 'uppercase', letterSpacing: 3 },
 })
