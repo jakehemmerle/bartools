@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "BarBack",
+    "name": "BarTools",
     "slug": "barback",
     "owner": "ray.ockenfels",
-    "scheme": "barback",
+    "scheme": "bartools",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -28,7 +28,7 @@
         "NSMicrophoneUsageDescription": "BarBack does not record audio. This key is required by the camera framework used to photograph bottles.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "6"
+      "buildNumber": "8"
     },
     "android": {
       "package": "com.bartools.barback",

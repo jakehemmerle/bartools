@@ -8,9 +8,9 @@ const PROD_BUNDLE_ID = 'com.bartools.barback'
 
 export default ({ config }: { config: Record<string, unknown> }) => ({
   ...config,
-  name: IS_STAGING ? 'BarBack (Staging)' : config.name ?? 'BarBack',
+  name: IS_STAGING ? 'BarTools (Staging)' : config.name ?? 'BarTools',
   slug: config.slug ?? 'barback',
-  scheme: IS_STAGING ? 'barback-staging' : config.scheme ?? 'barback',
+  scheme: IS_STAGING ? 'bartools-staging' : config.scheme ?? 'bartools',
   ios: {
     ...(config.ios as Record<string, unknown>),
     bundleIdentifier: IS_STAGING ? STAGING_BUNDLE_ID : PROD_BUNDLE_ID,
