@@ -4,10 +4,26 @@ import { db } from './db';
 import { inferenceJobs, reportRecords, reports, scans } from './schema';
 import { getBucketName } from './storage';
 
+// Permissive UUID format — matches Postgres's canonical UUID text representation
+// (8-4-4-4-12 hex). Zod 4's built-in `.uuid()` adds an RFC 4122 variant/version
+// check that rejects e.g. "00000000-0000-0000-0000-000000000001" (used by the
+// mobile client as a placeholder user/venue id), even though Postgres accepts
+// and round-trips it. Matching Postgres's permissiveness keeps the validator
+// in sync with what the database will actually store.
+const uuidLike = z
+  .string()
+  .regex(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    { message: 'invalid UUID format' },
+  );
+
 export const createReportSchema = z.object({
-  userId: z.string().uuid(),
-  venueId: z.string().uuid(),
-  locationId: z.string().uuid().optional(),
+  userId: uuidLike,
+  venueId: uuidLike,
+  // Accept both `null` (client sends when no location picked) and `undefined`
+  // (field omitted entirely). `.optional()` alone rejected `null`, causing
+  // every POST /reports from the mobile client to 400.
+  locationId: uuidLike.nullish(),
 });
 
 export type ReportScanInferencePayload = {

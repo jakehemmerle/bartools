@@ -26,6 +26,13 @@ const DEMO_VENUE = 'Demo Bar';
 const DEMO_LOCATIONS = ['Main Bar', 'Backstock'] as const;
 const DEMO_REPORT_NOTES_PREFIX = 'demo-seed';
 
+// The mobile client (packages/mobile/lib/config.ts) ships with these hardcoded
+// IDs as placeholders until real auth lands. Seeding the demo tenant with the
+// same UUIDs lets fresh installs hit POST /reports without a foreign-key
+// violation on users/venues.
+export const MOBILE_DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001';
+export const MOBILE_DEFAULT_VENUE_ID = '00000000-0000-0000-0000-000000000001';
+
 // ─── Bottle catalog ─────────────────────────────────────────────────
 
 const SIZE_MAP: Record<string, number> = {
@@ -118,7 +125,7 @@ export async function seedDemoTenant(): Promise<{ ids: DemoIds; created: number 
 
   const [userRow] = await db
     .insert(users)
-    .values({ email: DEMO_EMAIL, displayName: 'Demo User' })
+    .values({ id: MOBILE_DEFAULT_USER_ID, email: DEMO_EMAIL, displayName: 'Demo User' })
     .onConflictDoNothing({ target: users.email })
     .returning({ id: users.id });
 
@@ -142,7 +149,7 @@ export async function seedDemoTenant(): Promise<{ ids: DemoIds; created: number 
   } else {
     const [venueRow] = await db
       .insert(venues)
-      .values({ name: DEMO_VENUE })
+      .values({ id: MOBILE_DEFAULT_VENUE_ID, name: DEMO_VENUE })
       .returning({ id: venues.id });
     venueId = venueRow.id;
     created++;
