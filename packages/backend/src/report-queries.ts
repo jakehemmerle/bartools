@@ -8,6 +8,7 @@ import {
   maybeCorrectedValues,
   wasCorrected,
 } from './report-record-helpers';
+import { presignGet, getTtlSeconds } from './storage';
 
 export async function listReports() {
   const rows = await db
@@ -90,14 +91,9 @@ export async function getReportDetail(reportId: string) {
     .where(eq(reportRecords.reportId, reportId))
     .orderBy(scans.sortOrder, scans.scannedAt);
 
-  return {
-    id: header.id,
-    startedAt: toIso(header.startedAt),
-    completedAt: toIso(header.completedAt),
-    userId: header.userId ?? undefined,
-    userDisplayName: header.userDisplayName ?? undefined,
-    status: header.status,
-    bottleRecords: rows.map((row) => {
+  const ttl = getTtlSeconds();
+  const bottleRecords = await Promise.all(
+    rows.map(async (row) => {
       const finalBottleName =
         row.correctedBottleName ?? row.originalBottleName ?? 'Unknown bottle';
       const finalCategory = row.correctedCategory ?? row.originalCategory ?? undefined;
@@ -105,13 +101,13 @@ export async function getReportDetail(reportId: string) {
       const finalVolumeMl = row.correctedVolumeMl ?? row.originalVolumeMl ?? undefined;
       const finalFillTenths = row.correctedFillTenths ?? row.originalFillTenths ?? 0;
 
-      const imageUrl =
-        row.photoGcsBucket && row.photoGcsObject
-          ? `gs://${row.photoGcsBucket}/${row.photoGcsObject}`
-          : '';
+      const imageUrl = row.photoGcsObject
+        ? (await presignGet(row.photoGcsObject, ttl)).getUrl
+        : '';
 
       return {
         id: row.id,
+        bottleId: row.correctedBottleId ?? row.originalBottleId ?? undefined,
         imageUrl,
         bottleName: finalBottleName,
         category: finalCategory,
@@ -125,7 +121,17 @@ export async function getReportDetail(reportId: string) {
         originalModelOutput: maybeModelOutput(row),
         correctedValues: maybeCorrectedValues(row),
       };
-    }),
+    })
+  );
+
+  return {
+    id: header.id,
+    startedAt: toIso(header.startedAt),
+    completedAt: toIso(header.completedAt),
+    userId: header.userId ?? undefined,
+    userDisplayName: header.userDisplayName ?? undefined,
+    status: header.status,
+    bottleRecords,
   } satisfies ReportDetail;
 }
 

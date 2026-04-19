@@ -47,6 +47,24 @@ export async function presignPut(
   return { putUrl, expiresAt };
 }
 
+// Mirrors presignPut but produces a read-only signed URL so clients (mobile)
+// can GET the object over HTTPS. No contentType — GETs don't carry one.
+export async function presignGet(
+  object: string,
+  ttlSeconds: number
+): Promise<{ getUrl: string; expiresAt: Date }> {
+  const bucket = getStorage().bucket(getBucketName());
+  const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
+
+  const [getUrl] = await bucket.file(object).getSignedUrl({
+    version: 'v4',
+    action: 'read',
+    expires: expiresAt.getTime(),
+  });
+
+  return { getUrl, expiresAt };
+}
+
 export async function getObjectBytes(object: string): Promise<Uint8Array> {
   const bucket = getStorage().bucket(getBucketName());
   const [buffer] = await bucket.file(object).download();

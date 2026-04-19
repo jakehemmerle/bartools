@@ -15,6 +15,11 @@ import {
   searchBottles,
   submitReport,
 } from './report-service';
+import {
+  listInventoryForLocation,
+  listInventoryForVenue,
+  upsertInventoryItem,
+} from './inventory-queries';
 import { enqueueReportInference } from './queue';
 import { getBucketName, getTtlSeconds, presignPut } from './storage';
 
@@ -306,6 +311,54 @@ app.get('/bottles/search', async (c) => {
 app.get('/venues/:venueId/locations', async (c) => {
   const locations = await listVenueLocations(c.req.param('venueId'));
   return c.json({ locations });
+});
+
+app.get('/venues/:venueId/inventory', async (c) => {
+  const items = await listInventoryForVenue(c.req.param('venueId'));
+  return c.json({ items });
+});
+
+app.get('/locations/:locationId/inventory', async (c) => {
+  const items = await listInventoryForLocation(c.req.param('locationId'));
+  return c.json({ items });
+});
+
+const upsertInventorySchema = z.object({
+  locationId: z.string().uuid(),
+  bottleId: z.string().uuid(),
+  fillPercent: z.number().min(0).max(100),
+  notes: z.string().optional(),
+});
+
+app.post('/inventory', async (c) => {
+  const parsed = upsertInventorySchema.safeParse(await c.req.json());
+  if (!parsed.success) {
+    throw jsonError(400, 'invalid_inventory_payload');
+  }
+
+  // Round to nearest tenth, then clamp — upsertInventoryItem also clamps so
+  // this is defense in depth for future schema drift.
+  const fillLevelTenths = Math.max(
+    0,
+    Math.min(10, Math.round(parsed.data.fillPercent / 10))
+  );
+
+  try {
+    const item = await upsertInventoryItem({
+      locationId: parsed.data.locationId,
+      bottleId: parsed.data.bottleId,
+      fillLevelTenths,
+      notes: parsed.data.notes,
+    });
+    return c.json(item, 201);
+  } catch (error) {
+    if (error instanceof Error) {
+      if (['location_not_found', 'bottle_not_found'].includes(error.message)) {
+        throw jsonError(404, error.message);
+      }
+    }
+    throw error;
+  }
 });
 
 export default {

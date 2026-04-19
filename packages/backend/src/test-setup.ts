@@ -15,6 +15,24 @@ if (!process.env.GCS_BUCKET) {
 // packages/backend/data/uploads/<object> before exercising inference;
 // FakeFile.download() reads back from that path. In LIVE mode we skip the
 // stub so uploads/downloads hit real GCS with ADC.
+//
+// FakeFile records the most recent getSignedUrl() call config on a shared
+// globalThis slot so storage.test.ts can assert both PUT and GET paths
+// without installing its own module mock (which loses on modules that
+// were already imported before the test file ran).
+type RecordedSignedUrl = {
+  objectName: string;
+  config: {
+    version?: string;
+    action?: string;
+    contentType?: string;
+    expires?: number | Date | string;
+  };
+} | null;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(globalThis as any).__bartoolsLastSignedUrl = null as RecordedSignedUrl;
+
 if (!LIVE) {
   const UPLOAD_DIR = resolve(import.meta.dir, '../data/uploads');
 
@@ -25,7 +43,17 @@ if (!LIVE) {
         const buf = await readFile(resolve(UPLOAD_DIR, this.name));
         return [buf];
       }
-      async getSignedUrl(): Promise<[string]> {
+      async getSignedUrl(config?: {
+        version?: string;
+        action?: string;
+        contentType?: string;
+        expires?: number | Date | string;
+      }): Promise<[string]> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (globalThis as any).__bartoolsLastSignedUrl = {
+          objectName: this.name,
+          config: config ?? {},
+        } as RecordedSignedUrl;
         return [`https://storage.googleapis.com/test/${this.name}`];
       }
       async delete(): Promise<void> {}

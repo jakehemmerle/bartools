@@ -10,6 +10,7 @@ interface RecordCardProps {
   onEdit: () => void
   editedFill?: number
   editedName?: string
+  missingBottle?: boolean
 }
 
 const STATUS_COLORS: Record<string, { bg: string; fg: string; icon: string }> = {
@@ -19,7 +20,13 @@ const STATUS_COLORS: Record<string, { bg: string; fg: string; icon: string }> = 
   pending: { bg: '#a8a29e22', fg: '#a8a29e', icon: 'clock-outline' },
 }
 
-export function RecordCard({ record, onEdit, editedFill, editedName }: Readonly<RecordCardProps>) {
+export function RecordCard({
+  record,
+  onEdit,
+  editedFill,
+  editedName,
+  missingBottle = false,
+}: Readonly<RecordCardProps>) {
   const theme = useTheme()
   const fillPercent = editedFill ?? record.fillPercent
   const bottleName = editedName ?? record.bottleName
@@ -30,16 +37,34 @@ export function RecordCard({ record, onEdit, editedFill, editedName }: Readonly<
     <View style={[styles.card, { backgroundColor: theme.surfaceContainerHigh }]}>
       <View style={styles.row}>
         {/* Thumbnail */}
-        {resolvedImageUrl ? (
-          <Image
-            source={{ uri: resolvedImageUrl }}
-            style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer }]}
-          />
-        ) : (
-          <View style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer, alignItems: 'center', justifyContent: 'center' }]}>
-            <MaterialCommunityIcons name="image-off" size={24} color={theme.onSurfaceVariant} />
-          </View>
-        )}
+        <View style={styles.thumbnailWrapper}>
+          {resolvedImageUrl ? (
+            <Image
+              source={{ uri: resolvedImageUrl }}
+              style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer }]}
+            />
+          ) : (
+            <View style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer, alignItems: 'center', justifyContent: 'center' }]}>
+              <MaterialCommunityIcons name="image-off" size={24} color={theme.onSurfaceVariant} />
+            </View>
+          )}
+          {missingBottle ? (
+            <View
+              accessible
+              accessibilityLabel="Needs bottle selection"
+              style={[
+                styles.missingBadge,
+                { backgroundColor: theme.surfaceContainerHigh },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="alert-circle"
+                size={18}
+                color={theme.error}
+              />
+            </View>
+          ) : null}
+        </View>
 
         {/* Details */}
         <View style={styles.details}>
@@ -103,10 +128,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
+  thumbnailWrapper: {
+    position: 'relative',
+    width: 56,
+    height: 56,
+  },
   thumbnail: {
     width: 56,
     height: 56,
     borderRadius: 4,
+  },
+  missingBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   details: {
     flex: 1,

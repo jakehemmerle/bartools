@@ -34,4 +34,5 @@ export type {
   ReportStreamState,
   BottleSearchResult,
   LocationListItem,
+  InventoryListItem,
 } from './api';

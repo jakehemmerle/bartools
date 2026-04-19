@@ -1,7 +1,7 @@
 import { eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from './db';
-import { bottles, reportRecords, reports } from './schema';
+import { bottles, inventory, reportRecords, reports } from './schema';
 
 export const reviewRecordSchema = z.object({
   id: z.string().uuid(),
@@ -23,6 +23,7 @@ export async function reviewReport(
       .select({
         id: reports.id,
         status: reports.status,
+        locationId: reports.locationId,
       })
       .from(reports)
       .where(eq(reports.id, reportId))
@@ -39,6 +40,7 @@ export async function reviewReport(
     const existingRecords = await tx
       .select({
         id: reportRecords.id,
+        scanId: reportRecords.scanId,
         originalBottleId: reportRecords.originalBottleId,
         originalBottleName: reportRecords.originalBottleName,
         originalCategory: reportRecords.originalCategory,
@@ -106,6 +108,29 @@ export async function reviewReport(
           errorMessage: null,
         })
         .where(eq(reportRecords.id, existing.id));
+
+      // Upsert the current state of this bottle at the report's location.
+      // Skipped when the report has no locationId (older/adhoc reports); the
+      // cellar view is keyed on location so we have nowhere to put it.
+      if (report.locationId) {
+        await tx
+          .insert(inventory)
+          .values({
+            locationId: report.locationId,
+            bottleId: bottle.id,
+            fillLevelTenths: reviewed.fillTenths,
+            lastScanId: existing.scanId,
+            lastScannedAt: now,
+          })
+          .onConflictDoUpdate({
+            target: [inventory.locationId, inventory.bottleId],
+            set: {
+              fillLevelTenths: reviewed.fillTenths,
+              lastScanId: existing.scanId,
+              lastScannedAt: now,
+            },
+          });
+      }
     }
 
     await tx

@@ -19,6 +19,8 @@ describe('API response type shapes', () => {
       userId: 'user-1',
       userDisplayName: 'Jake',
       bottleCount: 12,
+      photoCount: 12,
+      processedCount: 12,
       status: 'reviewed',
     };
     expect(item.bottleCount).toBe(12);

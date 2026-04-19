@@ -6,20 +6,20 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import { CameraCapture } from '../../../components/camera-capture'
 import { useTheme } from '../../../theme/useTheme'
-import { useScanContext } from '../../../lib/scan-context'
+import { useBatchQueue } from '../../../lib/use-batch-queue'
 
 export default function InventoryScanScreen() {
   const theme = useTheme()
   const router = useRouter()
-  const { setPhotoUri } = useScanContext()
+  const { addPhoto, addPhotos } = useBatchQueue()
 
-  const handlePhotoTaken = useCallback((uri: string) => {
-    setPhotoUri(uri)
-    router.replace({
-      pathname: '/inventory/confirm',
-      params: { identified: 'true' },
-    })
-  }, [router, setPhotoUri])
+  const handlePhotoTaken = useCallback(
+    (uri: string) => {
+      addPhoto(uri)
+      router.replace('/(tabs)')
+    },
+    [router, addPhoto],
+  )
 
   const pickFromLibrary = useCallback(async () => {
     try {
@@ -30,19 +30,17 @@ export default function InventoryScanScreen() {
       }
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
+        allowsMultipleSelection: true,
         quality: 0.8,
       })
-      if (!result.canceled && result.assets[0]) {
-        setPhotoUri(result.assets[0].uri)
-        router.replace({
-          pathname: '/inventory/confirm',
-          params: { identified: 'true' },
-        })
+      if (!result.canceled && result.assets.length > 0) {
+        addPhotos(result.assets.map((a) => a.uri))
+        router.replace('/(tabs)')
       }
     } catch {
       Alert.alert('Error', 'Could not open photo library. Please try again.')
     }
-  }, [router, setPhotoUri])
+  }, [router, addPhotos])
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

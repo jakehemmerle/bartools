@@ -73,3 +73,18 @@ export type LocationListItem = {
   name: string;
   createdAt?: string;
 };
+
+export type InventoryListItem = {
+  id: string;
+  locationId: string;
+  locationName: string;
+  bottleId: string;
+  name: string;
+  category: ItemCategory;
+  subcategory?: string;
+  sizeMl?: number;
+  fillPercent: number;
+  lastScannedAt?: string;
+  notes?: string;
+  addedAt: string;
+};

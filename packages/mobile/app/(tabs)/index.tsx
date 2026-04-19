@@ -23,7 +23,6 @@ import { AppHeader } from '../../components/AppHeader'
 import { ReviewScanSheet } from '../../components/ReviewScanSheet'
 import { useTheme } from '../../theme/useTheme'
 import { typography, spacing, radii } from '../../theme/tokens'
-import { MOCK_LOCATIONS } from '../../data/mockData'
 import type { LocationListItem } from '@bartools/types'
 import barBackground from '../../assets/bar-background.png'
 
@@ -71,22 +70,26 @@ export default function CaptureScreen() {
     useBatchQueue()
   const [locations, setLocations] = useState<LocationListItem[]>([])
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
+  const [locationsError, setLocationsError] = useState(false)
   const [mode, setMode] = useState<CaptureMode>('queue')
   const [showReview, setShowReview] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const submittingRef = useRef<boolean>(false)
 
-  // Load locations from API with mock fallback
+  // Load locations from API. On failure, leave the list empty — no silent
+  // mock fallback. The submit gate below disables capture when no location is
+  // selected, so a bad /locations response becomes a visible failure.
   useEffect(() => {
     getLocations(DEFAULT_VENUE_ID)
       .then((res) => {
         setLocations(res.locations)
+        setLocationsError(false)
         if (res.locations.length > 0) setSelectedLocation(res.locations[0].id)
       })
       .catch(() => {
-        const fallback = MOCK_LOCATIONS.map((l) => ({ id: l.id, name: l.name }))
-        setLocations(fallback)
-        if (fallback.length > 0) setSelectedLocation(fallback[0].id)
+        setLocations([])
+        setLocationsError(true)
+        setSelectedLocation(null)
       })
   }, [])
 
@@ -111,13 +114,20 @@ export default function CaptureScreen() {
 
   const handleSubmit = useCallback(async () => {
     if (submittingRef.current) return
+    if (!selectedLocation) {
+      Alert.alert(
+        'Pick a location',
+        'Select a venue location before submitting your batch.',
+      )
+      return
+    }
     try {
       submittingRef.current = true
       setSubmitting(true)
       const report = await createReport(
         DEFAULT_USER_ID,
         DEFAULT_VENUE_ID,
-        selectedLocation ?? undefined,
+        selectedLocation,
       )
       await uploadPhotos(report.id, photos.map((p) => p.uri))
       await submitReport(report.id)
@@ -281,41 +291,49 @@ export default function CaptureScreen() {
         </View>
 
         {/* Location badges below capture row */}
-        <View style={styles.locationRow}>
-          {locations.map((loc) => {
-            const isSelected = selectedLocation === loc.id
-            return (
-              <TouchableOpacity
-                key={loc.id}
-                style={[
-                  styles.locationBadge,
-                  {
-                    backgroundColor: isSelected
-                      ? theme.primary
-                      : theme.surfaceContainerHigh,
-                    borderColor: isSelected
-                      ? theme.primary
-                      : theme.outlineVariant,
-                  },
-                ]}
-                onPress={() => setSelectedLocation(loc.id)}
-              >
-                <Text
+        {locationsError ? (
+          <View style={styles.locationRow}>
+            <Text style={[styles.locationErrorText, { color: theme.error }]}>
+              Couldn't load locations — submissions disabled.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.locationRow}>
+            {locations.map((loc) => {
+              const isSelected = selectedLocation === loc.id
+              return (
+                <TouchableOpacity
+                  key={loc.id}
                   style={[
-                    styles.locationBadgeText,
+                    styles.locationBadge,
                     {
-                      color: isSelected
-                        ? theme.onPrimary
-                        : theme.onSurfaceVariant,
+                      backgroundColor: isSelected
+                        ? theme.primary
+                        : theme.surfaceContainerHigh,
+                      borderColor: isSelected
+                        ? theme.primary
+                        : theme.outlineVariant,
                     },
                   ]}
+                  onPress={() => setSelectedLocation(loc.id)}
                 >
-                  {loc.name}
-                </Text>
-              </TouchableOpacity>
-            )
-          })}
-        </View>
+                  <Text
+                    style={[
+                      styles.locationBadgeText,
+                      {
+                        color: isSelected
+                          ? theme.onPrimary
+                          : theme.onSurfaceVariant,
+                      },
+                    ]}
+                  >
+                    {loc.name}
+                  </Text>
+                </TouchableOpacity>
+              )
+            })}
+          </View>
+        )}
       </View>
 
       {/* Review scan results sheet */}
@@ -523,6 +541,11 @@ const styles = StyleSheet.create({
     fontFamily: typography.labelFont,
     fontSize: 12,
     fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  locationErrorText: {
+    fontFamily: typography.labelFont,
+    fontSize: 12,
     letterSpacing: 0.5,
   },
 
