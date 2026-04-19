@@ -1,5 +1,11 @@
 // Type declarations for packages without bundled types
 
+declare module '*.png'
+declare module '*.jpg'
+declare module '*.jpeg'
+declare module '*.webp'
+declare module '*.svg'
+
 declare module 'react-native-sse' {
   export default class EventSource {
     constructor(url: string, options?: { headers?: Record<string, string> })

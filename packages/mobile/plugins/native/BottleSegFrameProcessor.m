@@ -1,8 +1,10 @@
 #import <VisionCamera/FrameProcessorPlugin.h>
 #import <VisionCamera/FrameProcessorPluginRegistry.h>
 
-#if __has_include("BarBack-Swift.h")
-#import "BarBack-Swift.h"
+#if __has_include("BarTools-Swift.h")
+#import "BarTools-Swift.h"
+#elif __has_include("BarToolsStaging-Swift.h")
+#import "BarToolsStaging-Swift.h"
 #else
 @class BottleSegFrameProcessor;
 #endif

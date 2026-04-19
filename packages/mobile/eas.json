@@ -34,23 +34,36 @@
     },
     "staging": {
       "extends": "base",
-      "distribution": "internal",
-      "ios": {
-        "simulator": false
-      },
-      "android": {
-        "buildType": "apk"
-      },
+      "distribution": "store",
+      "autoIncrement": true,
       "channel": "staging",
       "env": {
+        "APP_VARIANT": "staging",
         "EXPO_PUBLIC_BARTOOLS_API_URL": "https://bartools-backend-staging-zjausnxoyq-ue.a.run.app"
+      }
+    },
+    "staging-apk": {
+      "extends": "staging",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
       "extends": "base",
       "distribution": "store",
       "autoIncrement": true,
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_BARTOOLS_API_URL": "https://bartools-backend-prod-ovhqgvlj5q-ue.a.run.app"
+      }
+    },
+    "production-apk": {
+      "extends": "production",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {
@@ -61,6 +74,14 @@
       },
       "ios": {
         "ascAppId": "6762476579",
+        "ascApiKeyPath": "./AuthKey.p8",
+        "ascApiKeyIssuerId": "38efbc62-e5f6-4f50-9adf-d04d8b188130",
+        "ascApiKeyId": "BXUN39KMTG"
+      }
+    },
+    "staging": {
+      "ios": {
+        "ascAppId": "6762489654",
         "ascApiKeyPath": "./AuthKey.p8",
         "ascApiKeyIssuerId": "38efbc62-e5f6-4f50-9adf-d04d8b188130",
         "ascApiKeyId": "BXUN39KMTG"

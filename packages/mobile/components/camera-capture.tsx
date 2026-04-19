@@ -38,7 +38,7 @@ export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
       <View style={styles.centered}>
         <Text style={styles.title}>Camera Permission</Text>
         <Text style={styles.subtitle}>
-          Allow BarBack to access your camera to scan bottles.
+          Allow BarTools to access your camera to scan bottles.
         </Text>
         <TouchableOpacity
           style={styles.settingsButton}

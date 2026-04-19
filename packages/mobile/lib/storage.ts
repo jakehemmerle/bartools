@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const AGE_VERIFIED_KEY = 'barback:age_verified'
+const AGE_VERIFIED_KEY = 'bartools:age_verified'
 
 export async function getAgeVerified(): Promise<boolean> {
   const value = await AsyncStorage.getItem(AGE_VERIFIED_KEY)

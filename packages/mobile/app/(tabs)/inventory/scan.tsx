@@ -61,7 +61,7 @@ export default function InventoryScanScreen() {
           >
             <MaterialCommunityIcons name="arrow-left" size={24} color={theme.primary} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: theme.primary }]}>BarBack</Text>
+          <Text style={[styles.headerTitle, { color: theme.primary }]}>BarTools</Text>
         </View>
       </SafeAreaView>
 

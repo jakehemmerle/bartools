@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'barback:age_verified'
+const STORAGE_KEY = 'bartools:age_verified'
 const MINIMUM_AGE = 21
 
 export { STORAGE_KEY, MINIMUM_AGE }

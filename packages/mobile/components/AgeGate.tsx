@@ -50,7 +50,7 @@ export function AgeGate({ onVerified }: Readonly<AgeGateProps>) {
             Age Verification
           </Text>
           <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-            BarBack is an alcohol identification app. You must be at least 21
+            BarTools is an alcohol identification app. You must be at least 21
             years old to continue.
           </Text>
 
