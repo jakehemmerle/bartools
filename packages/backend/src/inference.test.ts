@@ -1,12 +1,11 @@
 import { mock } from 'bun:test';
-import { readFile } from 'node:fs/promises';
 
 // Set TESTING_E2E_CALLS_REAL_VLM_API=true to hit the real Claude/LangSmith
 // stack instead of the in-test mock. Requires CLAUDE_CODE_OAUTH_TOKEN (or
 // ANTHROPIC_API_KEY) and LANGSMITH_API_KEY to be set in the environment.
 const LIVE = process.env.TESTING_E2E_CALLS_REAL_VLM_API === 'true';
 
-// Mock must be set up before any import that loads @bartools/inference
+// Mock must be set up before any import that loads @bartools/inference.
 if (!LIVE) {
   mock.module('@bartools/inference', () => ({
     DEFAULT_MODEL: 'claude-sonnet-4-6',
@@ -23,28 +22,11 @@ if (!LIVE) {
   }));
 }
 
-// Mock GCS storage so inference reads bytes from the local test-uploads dir
-// (populated by copyTestPhoto) instead of a live bucket.
-mock.module('./storage', async () => {
-  const { TEST_BUCKET, diskPathForObject } = await import('./test-helpers');
-  return {
-    getBucketName: () => TEST_BUCKET,
-    getTtlSeconds: () => 300,
-    presignPut: async (object: string) => ({
-      putUrl: `http://test.invalid/${object}`,
-      expiresAt: new Date(Date.now() + 300_000),
-    }),
-    getObjectBytes: async (object: string): Promise<Uint8Array> => {
-      const buf = await readFile(diskPathForObject(object));
-      return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
-    },
-  };
-});
-
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
+import { describe, test, expect, beforeAll, beforeEach } from 'bun:test';
+import { copyFile, mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { eq } from 'drizzle-orm';
-import { client as langsmithClient } from '@bartools/inference';
-import { db, pool } from './db';
+import { db } from './db';
 import { processQueuedInferenceJob } from './inference';
 import {
   bottles,
@@ -55,53 +37,43 @@ import {
   scans,
 } from './schema';
 import {
-  cleanup,
-  copyTestPhoto,
-  seedBottleCatalog,
+  buildTestGcsObject,
   seedTestScenario,
   type TestIds,
-} from './test-helpers';
+} from './test-fixtures';
+import { seedBottles } from './seed';
 
-let testIds: TestIds;
-let bottleIds: string[] = [];
+const ASSETS_PHOTOS = resolve(import.meta.dir, '../../../assets/photos');
+const UPLOAD_DIR = resolve(import.meta.dir, '../data/uploads');
 
 describe('processQueuedInferenceJob', () => {
-  beforeAll(async () => {
-    const inserted = await seedBottleCatalog();
-    bottleIds = inserted.map((b) => b.id);
+  let testIds: TestIds;
 
-    const photo = await copyTestPhoto('test-report', 'IMG_3982.jpg');
-    testIds = await seedTestScenario({
-      object: photo.object,
-      bucket: photo.bucket,
-      diskPath: photo.diskPath,
-    });
+  beforeAll(async () => {
+    await mkdir(UPLOAD_DIR, { recursive: true });
   });
 
-  afterAll(async () => {
-    if (testIds) {
-      await cleanup({ ids: testIds, bottleIds });
-    }
-    if (LIVE) {
-      // LangSmith batches trace writes; flush before the process exits so the
-      // runBottleInference span gets its end event recorded (otherwise traces
-      // appear stuck in "running" forever).
-      await langsmithClient.awaitPendingTraceBatches();
-    }
-    await pool.end();
+  beforeEach(async () => {
+    // test-setup truncates everything except bottles; reseed the catalog.
+    await seedBottles();
+
+    const reportId = crypto.randomUUID();
+    const { bucket, object } = buildTestGcsObject(reportId, 'IMG_3982.jpg');
+
+    // test-setup's storage mock reads `data/uploads/{object}` from disk.
+    await mkdir(resolve(UPLOAD_DIR, object, '..'), { recursive: true });
+    await copyFile(resolve(ASSETS_PHOTOS, 'IMG_3982.jpg'), resolve(UPLOAD_DIR, object));
+
+    testIds = await seedTestScenario({ bucket, object });
   });
 
   test('processes a single photo and promotes report to unreviewed', async () => {
-    // Real inference may retry up to 4 times in runtime.ts
-    // so give it a generous budget when LIVE
-
     await processQueuedInferenceJob({
       jobId: testIds.jobId,
       reportId: testIds.reportId,
       scanId: testIds.scanId,
     });
 
-    // inferenceAttempts: 1 row created with correct metadata
     const [attempt] = await db
       .select()
       .from(inferenceAttempts)
@@ -117,7 +89,6 @@ describe('processQueuedInferenceJob', () => {
     expect(attempt.promptName).toBe('verbena-simple-eval');
 
     if (LIVE) {
-      // Real model: any valid name/volume pair, real commit hash from LangSmith
       const raw = attempt.rawResponse as { name: string; volume: number };
       expect(typeof raw.name).toBe('string');
       expect(raw.name.length).toBeGreaterThan(0);
@@ -131,7 +102,6 @@ describe('processQueuedInferenceJob', () => {
       expect(attempt.promptResolvedVersion).toBe('test-hash');
     }
 
-    // scans: bottleId and fill level set
     const [scan] = await db
       .select()
       .from(scans)
@@ -147,7 +117,6 @@ describe('processQueuedInferenceJob', () => {
       expect(scan.vlmFillTenths).toBe(7);
     }
 
-    // Catalog-matched bottle row
     const [matchedBottle] = await db
       .select()
       .from(bottles)
@@ -159,7 +128,6 @@ describe('processQueuedInferenceJob', () => {
       expect(matchedBottle.name).toBe('Hakushu 12Y');
     }
 
-    // reportRecords: status inferred with original_* fields
     const [record] = await db
       .select()
       .from(reportRecords)
@@ -181,7 +149,6 @@ describe('processQueuedInferenceJob', () => {
       expect(record.originalFillTenths).toBe(7);
     }
 
-    // inferenceJobs: succeeded
     const [job] = await db
       .select()
       .from(inferenceJobs)
@@ -192,7 +159,6 @@ describe('processQueuedInferenceJob', () => {
     expect(job.lastErrorCode).toBeNull();
     expect(job.lastErrorMessage).toBeNull();
 
-    // reports: auto-promoted to unreviewed by syncReportProgress
     const [report] = await db
       .select()
       .from(reports)

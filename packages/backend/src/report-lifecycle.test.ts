@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, afterAll, beforeEach, mock } from 'bun:test';
+import { describe, test, expect, beforeEach, mock } from 'bun:test';
 import { eq } from 'drizzle-orm';
 
 // addReportPhotos calls getBucketName() which reads process.env.GCS_BUCKET.
@@ -10,7 +10,7 @@ mock.module('./storage', () => ({
   getObjectBytes: async () => new Uint8Array(),
 }));
 
-import { db, pool } from './db';
+import { db } from './db';
 import { addReportPhotos } from './report-service';
 import { locations, reports, scans, users, venueMembers, venues } from './schema';
 
@@ -58,10 +58,6 @@ describe('addReportPhotos idempotency', () => {
 
   beforeEach(async () => {
     fx = await seedEmptyReport();
-  });
-
-  afterAll(async () => {
-    await pool.end();
   });
 
   test('replaying the same objects does not duplicate scans rows', async () => {
