@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:staging": "sh ./scripts/dev-staging.sh",
+    "deploy:railway": "sh ./scripts/deploy-railway.sh",
     "build": "tsc -b && vite build",
     "build-storybook": "storybook build",
     "lint": "eslint . && bun ./scripts/enforce-code-quality.mjs",

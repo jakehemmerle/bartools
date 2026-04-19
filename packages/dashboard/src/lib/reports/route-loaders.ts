@@ -47,8 +47,6 @@ export type BackstockCreateLoadResult =
 const reportsLoadErrorMessage = 'Reports could not be loaded right now. Try again in a moment.'
 const backstockLocationsLoadErrorMessage =
   'Backstock locations could not be loaded right now. Try again in a moment.'
-const backstockVenueContextErrorMessage =
-  'Backstock locations need a configured venue context before live data can load here.'
 
 export function createReportsListLoader(client: ReportsClient) {
   return function reportsListLoader(): ReportsListRouteData {
@@ -100,15 +98,6 @@ export function createBackstockCreateLoader(
   venueId: string | undefined,
 ) {
   return function backstockCreateLoader(): BackstockCreateRouteData {
-    if (client.readiness.backendEnabled && !venueId) {
-      return {
-        loadResult: Promise.resolve({
-          errorMessage: backstockVenueContextErrorMessage,
-          status: 'error',
-        }),
-      }
-    }
-
     return {
       loadResult: client
         .listVenueLocations(venueId ?? dashboardFixtureVenueId)

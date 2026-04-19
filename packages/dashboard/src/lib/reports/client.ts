@@ -12,6 +12,7 @@ import { sortReportsNewestFirst } from '../reports-view'
 export type ReportsIntegrationReadiness = {
   backendEnabled: boolean
   blockedReason:
+    | 'none'
     | 'venue_auth_context_required'
     | 'review_submission_requires_user_context'
   message: string
@@ -89,7 +90,7 @@ export const fixtureBottleSearchResults: BottleSearchResult[] = [
 
 export const fixtureLocationListItems: LocationListItem[] = [
   { id: 'location-1', name: 'Main Bar', createdAt: '2026-04-01T12:00:00-05:00' },
-  { id: 'location-2', name: 'Back Bar', createdAt: '2026-04-01T12:00:00-05:00' },
+  { id: 'location-2', name: 'Backstock', createdAt: '2026-04-01T12:00:00-05:00' },
 ]
 
 type FixtureState = {

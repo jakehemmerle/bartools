@@ -97,8 +97,7 @@ function LoadedReportDetailRoute({
   const [searchState, setSearchState] = useState<Record<string, RecordSearchState>>(() =>
     createInitialSearchState(initialDetail),
   )
-  const reviewerUserId =
-    configuredReviewerUserId ?? (!client.readiness.backendEnabled ? detail.userId ?? null : null)
+  const reviewerUserId = configuredReviewerUserId ?? detail.userId ?? null
   const reviewActionMode = reviewerUserId ? 'enabled' : 'disabled'
   const reviewReadinessMessage = reviewerUserId
     ? client.readiness.message

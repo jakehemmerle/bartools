@@ -1,0 +1,20 @@
+{
+	auto_https off
+	admin off
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode gzip zstd
+
+	route {
+		handle_path /api/* {
+			reverse_proxy {$BARTOOLS_API_PROXY_TARGET:https://bartools-backend-staging-zjausnxoyq-ue.a.run.app} {
+				header_up Host {upstream_hostport}
+			}
+		}
+
+		try_files {path} /index.html
+		file_server
+	}
+}

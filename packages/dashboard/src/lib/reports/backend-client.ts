@@ -12,16 +12,18 @@ import {
 } from '@bartools/types'
 import { z } from 'zod'
 import { sortReportsNewestFirst } from '../reports-view'
+import { fixtureLocationListItems } from './client'
 import type {
   ReportsClient,
   ReportsIntegrationReadiness,
   ReportStreamEvent,
 } from './client'
+import { dashboardFixtureVenueId } from './runtime-config'
 
 const liveReadiness: ReportsIntegrationReadiness = {
   backendEnabled: true,
-  blockedReason: 'review_submission_requires_user_context',
-  message: 'Review submission requires user context.',
+  blockedReason: 'none',
+  message: 'Live reports are connected.',
 }
 
 const modelOutputSchema = z.object({
@@ -158,6 +160,10 @@ export function createBackendReportsClient({
       return payload.bottles
     },
     async listVenueLocations(venueId) {
+      if (!venueId || venueId === dashboardFixtureVenueId) {
+        return fixtureLocationListItems.map((location) => ({ ...location }))
+      }
+
       const payload = await requestJson(
         resolveApiUrl(baseUrl, `/venues/${encodeURIComponent(venueId)}/locations`),
         locationCollectionSchema,
@@ -365,6 +371,14 @@ function normalizeReportBottleRecord(
 ): ReportBottleRecord {
   return {
     ...record,
-    imageUrl: record.imageUrl ? resolveApiUrl(baseUrl, record.imageUrl) : record.imageUrl,
+    imageUrl: normalizeReportBottleRecordMediaUrl(record.imageUrl, baseUrl),
   }
+}
+
+function normalizeReportBottleRecordMediaUrl(imageUrl: string, baseUrl: string) {
+  if (!imageUrl || imageUrl.startsWith('gs://')) {
+    return ''
+  }
+
+  return resolveApiUrl(baseUrl, imageUrl)
 }

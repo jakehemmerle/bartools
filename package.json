@@ -9,6 +9,7 @@
     "dev:backend": "bun --filter @bartools/backend dev",
     "dev:dashboard": "bun --filter @bartools/dashboard dev",
     "dev:dashboard:staging": "bun --filter @bartools/dashboard dev:staging",
+    "deploy:dashboard:railway": "sh packages/dashboard/scripts/deploy-railway.sh",
     "dev:mobile": "bun --filter @bartools/mobile start"
   },
   "devDependencies": {

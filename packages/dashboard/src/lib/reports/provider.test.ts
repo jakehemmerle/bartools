@@ -16,6 +16,6 @@ describe('reports client provider defaults', () => {
     })
 
     expect(client.readiness.backendEnabled).toBe(true)
-    expect(client.readiness.blockedReason).toBe('review_submission_requires_user_context')
+    expect(client.readiness.blockedReason).toBe('none')
   })
 })
