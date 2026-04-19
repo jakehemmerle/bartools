@@ -93,7 +93,7 @@ function addFolderResource(proj, filePath, targetUuid, groupKey) {
   const buildFileUuid = proj.generateUuid();
 
   // PBXFileReference entry — folder reference (Xcode bundles whole dir).
-  // path includes the parent dir ("BarBack/foo.mlpackage") because the BarBack
+  // path includes the parent dir ("BarTools/foo.mlpackage") because the BarTools
   // group has no path attribute, so paths are relative to project root.
   const fileRefSection = proj.hash.project.objects.PBXFileReference;
   fileRefSection[fileRefUuid] = {
@@ -105,7 +105,7 @@ function addFolderResource(proj, filePath, targetUuid, groupKey) {
   };
   fileRefSection[`${fileRefUuid}_comment`] = basename;
 
-  // Add to the BarBack group's children
+  // Add to the BarTools group's children
   const groups = proj.hash.project.objects.PBXGroup;
   const group = groups[groupKey];
   group.children = group.children || [];

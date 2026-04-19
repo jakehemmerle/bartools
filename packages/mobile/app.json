@@ -22,13 +22,13 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.bartools.barback",
       "infoPlist": {
-        "NSCameraUsageDescription": "BarBack uses the camera to photograph bottles for inventory identification.",
-        "NSPhotoLibraryUsageDescription": "BarBack accesses your photo library to import bottle photos for inventory.",
-        "NSLocationWhenInUseUsageDescription": "BarBack does not use your location. This key is required because a bundled dependency references the Location API.",
-        "NSMicrophoneUsageDescription": "BarBack does not record audio. This key is required by the camera framework used to photograph bottles.",
+        "NSCameraUsageDescription": "BarTools uses the camera to photograph bottles for inventory identification.",
+        "NSPhotoLibraryUsageDescription": "BarTools accesses your photo library to import bottle photos for inventory.",
+        "NSLocationWhenInUseUsageDescription": "BarTools does not use your location. This key is required because a bundled dependency references the Location API.",
+        "NSMicrophoneUsageDescription": "BarTools does not record audio. This key is required by the camera framework used to photograph bottles.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "8"
+      "buildNumber": "10"
     },
     "android": {
       "package": "com.bartools.barback",
@@ -63,14 +63,14 @@
       [
         "react-native-vision-camera",
         {
-          "cameraPermissionText": "BarBack uses the camera to photograph bottles for inventory identification.",
+          "cameraPermissionText": "BarTools uses the camera to photograph bottles for inventory identification.",
           "enableMicrophonePermission": false
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "BarBack accesses your photo library to import bottle photos for inventory."
+          "photosPermission": "BarTools accesses your photo library to import bottle photos for inventory."
         }
       ],
       "./plugins/with-privacy-manifest.cjs",
