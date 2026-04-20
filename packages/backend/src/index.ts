@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { streamSSE } from 'hono/streaming';
 import { z } from 'zod';
@@ -58,6 +59,20 @@ function jsonError(status: 400 | 401 | 404 | 409 | 500 | 503, message: string) {
   return new HTTPException(status, {
     message,
   });
+}
+
+function forwardedHeaderValue(value: string | undefined) {
+  return value?.split(',')[0]?.trim() || null;
+}
+
+function externalRequestOrigin(c: Context) {
+  const requestUrl = new URL(c.req.url);
+  const forwardedProto = forwardedHeaderValue(c.req.header('x-forwarded-proto'));
+  const forwardedHost = forwardedHeaderValue(c.req.header('x-forwarded-host'));
+  const host = forwardedHost ?? c.req.header('host') ?? requestUrl.host;
+  const protocol = forwardedProto ?? requestUrl.protocol.replace(/:$/, '');
+
+  return `${protocol}://${host}`;
 }
 
 app.onError((error, c) => {
@@ -191,7 +206,7 @@ app.post('/reports/:reportId/photos/complete', async (c) => {
 
 app.post('/reports/:reportId/submit', async (c) => {
   const reportId = c.req.param('reportId');
-  const taskTargetUrl = new URL('/internal/tasks/report-scan-inference', c.req.url).toString();
+  const taskTargetUrl = `${externalRequestOrigin(c)}/internal/tasks/report-scan-inference`;
 
   try {
     const jobs = await submitReport(reportId);
@@ -219,7 +234,7 @@ app.post('/reports/:reportId/submit', async (c) => {
 });
 
 app.post('/internal/tasks/report-scan-inference', async (c) => {
-  const audience = new URL(c.req.url).origin;
+  const audience = externalRequestOrigin(c);
   const authorized = await verifyCloudTaskRequest({
     authorization: c.req.header('authorization'),
     audience,
