@@ -19,13 +19,22 @@ function ResolvedProcessingRecord({ record }: { record: ReportBottleRecord }) {
     >
       <div className="bt-processing-record__media">
         {!showFallback ? (
-          <img
-            alt={record.bottleName}
-            height={96}
-            onError={handleError}
-            src={imageUrl}
-            width={72}
-          />
+          <a
+            aria-label={`Open ${record.bottleName} image in a new tab`}
+            className="bt-processing-record__media-link"
+            href={imageUrl}
+            rel="noopener noreferrer"
+            target="_blank"
+            title="Open full image in a new tab"
+          >
+            <img
+              alt={record.bottleName}
+              height={96}
+              onError={handleError}
+              src={imageUrl}
+              width={72}
+            />
+          </a>
         ) : (
           <div className="bt-processing-record__placeholder">◻</div>
         )}

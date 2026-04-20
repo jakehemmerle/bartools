@@ -21,6 +21,20 @@ const baseRecord: ReportBottleRecord = {
 }
 
 describe('RecordMedia', () => {
+  it('opens the full image in a new tab when media is available', () => {
+    renderWithRoute(<RecordMedia record={baseRecord} />, {
+      initialEntries: ['/reports/report-123'],
+      routePath: '/reports/:reportId',
+    })
+
+    expect(
+      screen.getByRole('link', { name: /Open Orphan Barrel Fanged Pursuit image in a new tab/i }),
+    ).toHaveAttribute('href', 'https://example.com/original.jpg')
+    expect(
+      screen.getByRole('link', { name: /Open Orphan Barrel Fanged Pursuit image in a new tab/i }),
+    ).toHaveAttribute('target', '_blank')
+  })
+
   it('shows the calm fallback when the image request fails outside a live report route', () => {
     renderWithRoute(<RecordMedia record={baseRecord} />, {
       initialEntries: ['/__review/report/unreviewed'],
@@ -56,6 +70,17 @@ describe('RecordMedia', () => {
 })
 
 describe('ProcessingRecord', () => {
+  it('opens the full image in a new tab when media is available', () => {
+    renderWithRoute(<ProcessingRecord record={baseRecord} />, {
+      initialEntries: ['/reports/report-123'],
+      routePath: '/reports/:reportId',
+    })
+
+    expect(
+      screen.getByRole('link', { name: /Open Orphan Barrel Fanged Pursuit image in a new tab/i }),
+    ).toHaveAttribute('href', 'https://example.com/original.jpg')
+  })
+
   it('falls back to the processing placeholder when an image request fails', () => {
     renderWithRoute(<ProcessingRecord record={baseRecord} />, {
       initialEntries: ['/reports/report-123'],
