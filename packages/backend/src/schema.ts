@@ -339,6 +339,7 @@ export const inventory = pgTable(
       .references(() => locations.id, { onDelete: 'cascade' }),
     bottleId: uuid('bottle_id').notNull().references(() => bottles.id),
     fillLevelTenths: integer('fill_level_tenths').notNull(), // 0..10
+    parThreshold: integer('par_threshold').notNull().default(3), // 0..10; 3 = 30%
     lastScanId: uuid('last_scan_id').references(() => scans.id),
     lastScannedAt: timestamp('last_scanned_at', { withTimezone: true }),
     notes: text('notes'),

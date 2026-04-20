@@ -17,6 +17,7 @@ const selectCols = {
   subcategory: bottles.subcategory,
   sizeMl: bottles.sizeMl,
   fillLevelTenths: inventory.fillLevelTenths,
+  parThreshold: inventory.parThreshold,
   lastScannedAt: inventory.lastScannedAt,
   notes: inventory.notes,
   addedAt: inventory.addedAt,
@@ -32,6 +33,7 @@ type InventoryRow = {
   subcategory: string | null;
   sizeMl: number | null;
   fillLevelTenths: number;
+  parThreshold: number;
   lastScannedAt: Date | null;
   notes: string | null;
   addedAt: Date;
@@ -48,6 +50,7 @@ function toListItem(row: InventoryRow): InventoryListItem {
     subcategory: row.subcategory ?? undefined,
     sizeMl: row.sizeMl ?? undefined,
     fillPercent: row.fillLevelTenths * 10,
+    parPercent: row.parThreshold * 10,
     lastScannedAt: toIso(row.lastScannedAt),
     notes: row.notes ?? undefined,
     addedAt: toIso(row.addedAt)!,

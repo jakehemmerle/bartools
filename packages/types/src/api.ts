@@ -92,7 +92,15 @@ export type InventoryListItem = {
   subcategory?: string;
   sizeMl?: number;
   fillPercent: number;
+  parPercent: number;
   lastScannedAt?: string;
   notes?: string;
   addedAt: string;
+};
+
+export type LowStockAlert = {
+  bottle: { id: string; name: string };
+  location: { id: string; name: string };
+  fillPercent: number;
+  parPercent: number;
 };
