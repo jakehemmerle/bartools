@@ -208,6 +208,11 @@
   color: var(--color-accent-soft);
 }
 
+.bt-backstock-mode-toggle__option:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
 .bt-backstock-mode-toggle__option:focus-visible {
   outline: 2px solid var(--color-accent-soft);
   outline-offset: 2px;

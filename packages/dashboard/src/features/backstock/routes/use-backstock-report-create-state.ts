@@ -25,12 +25,12 @@ type BackstockIntegrationState = ReturnType<typeof createBackstockIntegrationSta
 
 export function useBackstockReportCreateState() {
   const reportsClient = useReportsClient()
-  const restoredDraft = useMemo(() => loadPersistedBackstockDraft(), [])
-  const formState = useBackstockDraftState(restoredDraft)
   const integrationState = useMemo(
     () => createBackstockIntegrationState(reportsClient.readiness.backendEnabled),
     [reportsClient.readiness.backendEnabled],
   )
+  const restoredDraft = useMemo(() => loadPersistedBackstockDraft(), [])
+  const formState = useBackstockDraftState(restoredDraft, integrationState)
   const submissionReadiness = useMemo(
     () => buildBackstockSubmissionReadiness(formState.lineItems),
     [formState.lineItems],
@@ -47,7 +47,7 @@ export function useBackstockReportCreateState() {
     formState.submittedSummary === null &&
     (formState.locationId !== '' ||
       formState.sourcePhotos.length > 0 ||
-      formState.startMode !== 'photo' ||
+      formState.startMode !== integrationState.defaultStartMode ||
       formState.lineItems.some((lineItem) => !isBlankBackstockDraftLineItem(lineItem)))
 
   useBackstockDraftProtection({
@@ -211,6 +211,9 @@ function createBackstockDraftActions({
   }
 
   function handleStartModeChange(mode: BackstockStartMode) {
+    if (mode === 'photo' && !integrationState.photoDraftGenerationEnabled) {
+      return
+    }
     formState.setDraftStatusMessage(null)
     formState.setStartMode(mode)
   }
@@ -321,20 +324,29 @@ function submitBackstockDraft({
   formState.setSubmittedSummary(submissionReadiness.summary)
 }
 
-function useBackstockDraftState(restoredDraft: RestoredBackstockDraft | null) {
+function useBackstockDraftState(
+  restoredDraft: RestoredBackstockDraft | null,
+  integrationState: BackstockIntegrationState,
+) {
   const [startMode, setStartMode] = useState<BackstockStartMode>(
-    () => restoredDraft?.startMode ?? 'photo',
+    () =>
+      integrationState.photoDraftGenerationEnabled
+        ? restoredDraft?.startMode ?? integrationState.defaultStartMode
+        : 'manual',
   )
   const [locationId, setLocationId] = useState(() => restoredDraft?.locationId ?? '')
   const [sourcePhotos, setSourcePhotos] = useState<BackstockSourcePhoto[]>(
-    () => restoredDraft?.sourcePhotos ?? [],
+    () => (integrationState.photoDraftGenerationEnabled ? restoredDraft?.sourcePhotos ?? [] : []),
   )
   const [lineItems, setLineItems] = useState<BackstockDraftLineItem[]>(
     () => restoredDraft?.lineItems ?? [createBackstockDraftLineItem()],
   )
   const [generatingDraft, setGeneratingDraft] = useState(false)
   const [generatedPhotoSignature, setGeneratedPhotoSignature] = useState<string | null>(
-    () => restoredDraft?.generatedPhotoSignature ?? null,
+    () =>
+      integrationState.photoDraftGenerationEnabled
+        ? restoredDraft?.generatedPhotoSignature ?? null
+        : null,
   )
   const [submittedSummary, setSubmittedSummary] = useState<SubmittedBackstockSummary | null>(null)
   const [draftStatusMessage, setDraftStatusMessage] = useState<string | null>(() =>
@@ -364,6 +376,7 @@ function useBackstockDraftState(restoredDraft: RestoredBackstockDraft | null) {
 function createBackstockIntegrationState(backendEnabled: boolean) {
   if (!backendEnabled) {
     return {
+      defaultStartMode: 'photo' as const,
       integrationNotice: null,
       photoDraftGenerationEnabled: true,
       photoGenerationBlockedMessage: null,
@@ -373,6 +386,7 @@ function createBackstockIntegrationState(backendEnabled: boolean) {
   }
 
   return {
+    defaultStartMode: 'manual' as const,
     integrationNotice:
       'Live backstock creation is still waiting on backend support. Photo-generated drafts and final submission are not connected yet.',
     photoDraftGenerationEnabled: false,

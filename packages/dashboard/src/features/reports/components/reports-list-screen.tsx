@@ -10,18 +10,20 @@ type ReportsListScreenProps = {
   errorMessage?: string | null
   onRetry?: () => void
   reports: ReportListItem[] | null
+  showBackstockAction?: boolean
 }
 
 export function ReportsListScreen({
   errorMessage = null,
   onRetry,
   reports,
+  showBackstockAction = true,
 }: ReportsListScreenProps) {
   const rows = reports ? buildReportListRows(reports) : []
 
   return (
     <div className="bt-reports-screen">
-      <ReportsListHeader />
+      <ReportsListHeader showBackstockAction={showBackstockAction} />
 
       {errorMessage ? (
         <SurfaceCard className="bt-loading-panel" tone="low">
@@ -41,7 +43,7 @@ export function ReportsListScreen({
           <p className="bt-loading-panel__body">Loading recent reports.</p>
         </SurfaceCard>
       ) : rows.length === 0 ? (
-        <ReportsEmptyScreen />
+        <ReportsEmptyScreen showBackstockAction={showBackstockAction} />
       ) : (
         <section className="bt-reports-list">
           <div className="bt-reports-columns" aria-hidden="true">

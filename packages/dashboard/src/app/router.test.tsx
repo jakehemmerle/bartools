@@ -16,7 +16,7 @@ describe('app routing', () => {
   ])('redirects %s back to the reports workbench', async (route) => {
     renderAppRoutes({ initialEntries: [route] })
 
-    expect(await screen.findByRole('heading', { name: 'Reports' })).toBeInTheDocument()
+    expect(await screen.findByText('created')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Inventory' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Low Stock' })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Settings' })).not.toBeInTheDocument()

@@ -143,6 +143,47 @@ describe('Reports workbench routes: resilience', () => {
     expect(listReports).toHaveBeenCalledTimes(2)
   })
 
+  it('hides the backstock shortcut on the live reports list', async () => {
+    const baseClient = createFixtureReportsClient()
+
+    renderAppRoutes({
+      initialEntries: ['/reports'],
+      reportsClient: {
+        ...baseClient,
+        readiness: {
+          backendEnabled: true,
+          blockedReason: 'none' as const,
+          message: 'Live reports are connected.',
+        },
+      },
+    })
+
+    expect(await screen.findByText('created')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'New Backstock Report' })).not.toBeInTheDocument()
+  })
+
+  it('hides the backstock shortcut on the live empty state', async () => {
+    const baseClient = createFixtureReportsClient()
+
+    renderAppRoutes({
+      initialEntries: ['/reports'],
+      reportsClient: {
+        ...baseClient,
+        async listReports() {
+          return []
+        },
+        readiness: {
+          backendEnabled: true,
+          blockedReason: 'none' as const,
+          message: 'Live reports are connected.',
+        },
+      },
+    })
+
+    expect(await screen.findByText('No reports found. Recent reports will appear here once they are available.')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'New Backstock Report' })).not.toBeInTheDocument()
+  })
+
   it('shows a calm report unavailable state when report detail fails to load', async () => {
     const baseClient = createFixtureReportsClient()
     const user = userEvent.setup()
