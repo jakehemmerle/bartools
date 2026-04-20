@@ -5,7 +5,7 @@ config:
   bartools:minInstances: "0"
   bartools:maxInstances: "1"
   bartools:cpu: "1"
-  bartools:memory: 512Mi
+  bartools:memory: 1Gi
   bartools:databaseUrl:
     secure: v1:GufiGGvqP4dCATO+:R064hj1ZDZdQBV6J9PCHZm1kioJuGzXEjpoXiUQxxxowH3tU3YZxntTkAaUHqPXr23GN3XlBIA49omRiREX6RCdT7AxbMsnwxKGXyVjf4hrY+8ahKj95ps/vn3SRKTSX4kuhhuF37UP25DQWn/Ev1/YMqKJ8TErv7W9hFWSuierNgVDW6KR+9UKXMa4fmxXBY7IT98Z3DBfdNHsO+w4PdDDRFLY=
   bartools:claudeCodeOauthToken:
