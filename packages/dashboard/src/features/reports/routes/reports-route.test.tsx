@@ -30,6 +30,7 @@ describe('Reports workbench routes: baseline states', () => {
     expect(await screen.findByRole('heading', { name: 'Campari' })).toBeInTheDocument()
     expect(await screen.findByText('Original Model Output')).toBeInTheDocument()
     expect(screen.getByText('Final Corrected Values')).toBeInTheDocument()
+    expect(screen.getByText('Image unavailable')).toBeInTheDocument()
   })
 
   it('shows corrected comparison labels on reviewed reports', async () => {
@@ -37,6 +38,7 @@ describe('Reports workbench routes: baseline states', () => {
       initialEntries: ['/reports/report-1003'],
     })
 
+    expect(await screen.findByRole('img', { name: /Tito's Handmade Vodka/i })).toBeInTheDocument()
     expect((await screen.findAllByText('Original Model Output')).length).toBeGreaterThan(0)
     expect(screen.getAllByText('Final Corrected Values').length).toBeGreaterThan(0)
   })

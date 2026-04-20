@@ -1,0 +1,15 @@
+.bt-comparison-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.bt-comparison-card__media {
+  flex: 0 0 auto;
+}
+
+.bt-comparison-card__media .bt-record-media,
+.bt-comparison-card__media .bt-record-media--missing {
+  width: 52px;
+  height: 68px;
+}
