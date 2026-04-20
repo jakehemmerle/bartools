@@ -1,7 +1,6 @@
 import path from "node:path";
 
-const REPO_ROOT = path.resolve(import.meta.dir, "../../..");
-const CATALOG_CSV_PATH = "assets/verbena_simple.csv";
+const CATALOG_CSV_PATH = path.resolve(import.meta.dir, "../assets/verbena_simple.csv");
 
 export function parseCsvRows(text: string): string[][] {
   const stripped = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
@@ -72,8 +71,7 @@ let catalogNamesPromise: Promise<string[]> | null = null;
 
 export function loadCatalogBottleNames(): Promise<string[]> {
   if (!catalogNamesPromise) {
-    const abs = path.resolve(REPO_ROOT, CATALOG_CSV_PATH);
-    catalogNamesPromise = Bun.file(abs).text().then(parseCatalogBottleNames);
+    catalogNamesPromise = Bun.file(CATALOG_CSV_PATH).text().then(parseCatalogBottleNames);
   }
   return catalogNamesPromise;
 }

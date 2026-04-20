@@ -29,7 +29,7 @@ export { DEFAULT_MODEL, MAX_ATTEMPTS, VOLUME_ENUM, type Volume };
 
 /** Path constants relative to the repo root. */
 export const PATHS = {
-  csv: "assets/verbena_simple.csv",
+  csv: "packages/inference/assets/verbena_simple.csv",
   photosDir: "assets/photos",
   solutions: "assets/verbena_simple_solutions.jsonl",
   predictions: "assets/verbena_simple_predictions.jsonl",
