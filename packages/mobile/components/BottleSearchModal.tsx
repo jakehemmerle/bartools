@@ -23,14 +23,12 @@ export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<Bot
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
     const trimmed = q.trim()
-    if (!trimmed) {
-      setResults([])
-      setLoading(false)
-      return
-    }
-
     requestIdRef.current += 1
     const requestId = requestIdRef.current
+
+    // Empty query returns the first 20 bottles alphabetically — gives the user
+    // something to browse the moment the modal opens. No debounce in that case.
+    const delay = trimmed ? 300 : 0
 
     debounceRef.current = setTimeout(async () => {
       setLoading(true)
@@ -48,12 +46,11 @@ export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<Bot
           setLoading(false)
         }
       }
-    }, 300)
+    }, delay)
   }, [])
 
   useEffect(() => {
     if (visible) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- debounced search triggered by query/visible changes
       doSearch(query)
     }
     return () => {
@@ -96,6 +93,19 @@ export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<Bot
                 }}
                 autoFocus
               />
+              {query.length > 0 ? (
+                <Pressable
+                  onPress={() => {
+                    setQuery('')
+                    doSearch('')
+                  }}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear search"
+                >
+                  <MaterialCommunityIcons name="close-circle" size={25} color={theme.outline} />
+                </Pressable>
+              ) : null}
             </View>
 
             {/* Results */}
@@ -125,7 +135,7 @@ export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<Bot
               )}
               ListEmptyComponent={
                 <Text style={[styles.emptyText, { color: theme.outline }]}>
-                  {loading ? 'Searching...' : query ? 'No matches found' : 'Start typing to search'}
+                  {loading ? 'Searching...' : 'No matches found'}
                 </Text>
               }
             />
@@ -143,10 +153,10 @@ export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<Bot
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%' },
+  sheet: { borderTopLeftRadius: 24, borderTopRightRadius: 24, height: '80%' },
   handleContainer: { alignItems: 'center', paddingVertical: 12 },
   handle: { width: 48, height: 4, borderRadius: 2 },
-  content: { paddingHorizontal: 24, paddingBottom: 36, gap: 12 },
+  content: { flex: 1, paddingHorizontal: 24, paddingBottom: 36, gap: 12 },
   title: { fontFamily: 'Newsreader', fontSize: 22, fontWeight: '400' },
   searchRow: {
     flexDirection: 'row',
@@ -161,7 +171,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingVertical: 4,
   },
-  resultsList: { maxHeight: 300 },
+  resultsList: { flex: 1 },
   resultRow: {
     flexDirection: 'row',
     alignItems: 'center',

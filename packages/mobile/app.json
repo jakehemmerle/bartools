@@ -28,7 +28,7 @@
         "NSMicrophoneUsageDescription": "BarTools does not record audio. This key is required by the camera framework used to photograph bottles.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "11"
+      "buildNumber": "19"
     },
     "android": {
       "package": "com.bartools.barback",
@@ -41,7 +41,7 @@
       "permissions": [
         "android.permission.CAMERA"
       ],
-      "versionCode": 6
+      "versionCode": 8
     },
     "web": {
       "favicon": "./assets/favicon.png"

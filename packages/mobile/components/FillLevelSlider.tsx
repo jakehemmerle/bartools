@@ -73,7 +73,7 @@ export function FillLevelSlider({
         ) : null}
         <View
           ref={trackRef}
-          style={[styles.verticalTrack, { backgroundColor: theme.surfaceContainerHigh }]}
+          style={[styles.verticalTrack, { backgroundColor: '#000000' }]}
           onLayout={handleLayout}
           {...panResponder.panHandlers}
         >
@@ -87,20 +87,20 @@ export function FillLevelSlider({
 
   // Horizontal
   return (
-    <View style={[styles.horizontalContainer, { backgroundColor: theme.surfaceContainer, borderLeftColor: `${theme.tertiary}33` }]}>
+    <View style={[styles.horizontalContainer, { backgroundColor: theme.surfaceContainer, borderColor: theme.primary }]}>
       {label ? (
-        <Text style={[styles.horizontalLabel, { color: theme.tertiary }]}>{label}</Text>
+        <Text style={[styles.horizontalLabel, { color: theme.onSurfaceVariant }]}>{label}</Text>
       ) : null}
       <View style={styles.horizontalBody}>
         <View style={styles.sliderSection}>
           <View
             ref={trackRef}
-            style={[styles.horizontalTrack, { backgroundColor: theme.surfaceContainerHigh }]}
+            style={[styles.horizontalTrack, { backgroundColor: '#000000' }]}
             onLayout={handleLayout}
             {...panResponder.panHandlers}
           >
             <View style={[styles.horizontalFill, { width: `${clampedValue}%`, backgroundColor: theme.primary }]} />
-            <View style={[styles.thumb, { backgroundColor: theme.primary, left: `${clampedValue}%` }]} />
+            <View style={[styles.thumb, { backgroundColor: theme.primary, borderColor: theme.tertiary, left: `${clampedValue}%` }]} />
           </View>
           {showLabels ? (
             <View style={styles.labelsRow}>
@@ -110,22 +110,24 @@ export function FillLevelSlider({
             </View>
           ) : null}
         </View>
-        <View style={[styles.percentBox, { borderBottomColor: theme.outline }]}>
-          <Text style={[styles.percentValue, { color: theme.primary }]}>{clampedValue}</Text>
-          <Text style={[styles.percentSign, { color: theme.outline }]}>%</Text>
+        <View style={[styles.percentBox, { backgroundColor: '#000000', borderColor: theme.primary }]}>
+          <Text style={[styles.percentValue, { color: theme.onSurfaceVariant }]}>{clampedValue}</Text>
+          <Text style={[styles.percentSign, { color: theme.onSurfaceVariant }]}>%</Text>
         </View>
       </View>
     </View>
   )
 }
 
-const THUMB_SIZE = 16
+const TRACK_HEIGHT = 20
+const THUMB_SIZE = 30
 
 const styles = StyleSheet.create({
   // Horizontal
   horizontalContainer: {
     padding: 32,
-    borderLeftWidth: 2,
+    borderWidth: 1,
+    borderRadius: 10,
   },
   horizontalLabel: {
     fontFamily: 'SpaceGrotesk',
@@ -144,17 +146,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   horizontalTrack: {
-    height: 4,
-    borderRadius: 2,
+    height: TRACK_HEIGHT,
+    borderRadius: TRACK_HEIGHT / 2,
     position: 'relative',
-    justifyContent: 'center',
-    // Expand touch target without changing visual size
-    paddingVertical: 20,
-    marginVertical: -20,
+    overflow: 'visible',
   },
   horizontalFill: {
     height: '100%',
-    borderRadius: 2,
+    borderRadius: TRACK_HEIGHT / 2,
     position: 'absolute',
     left: 0,
     top: 0,
@@ -162,10 +161,11 @@ const styles = StyleSheet.create({
   thumb: {
     width: THUMB_SIZE,
     height: THUMB_SIZE,
+    borderRadius: THUMB_SIZE / 2,
+    borderWidth: 1.5,
     position: 'absolute',
+    top: (TRACK_HEIGHT - THUMB_SIZE) / 2,
     marginLeft: -THUMB_SIZE / 2,
-    marginTop: -THUMB_SIZE / 2 + 2,
-    // Square corners per Stitch design (no borderRadius)
   },
   labelsRow: {
     flexDirection: 'row',
@@ -180,21 +180,25 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   percentBox: {
-    width: 80,
+    minWidth: 80,
     alignItems: 'center',
-    borderBottomWidth: 1,
-    paddingBottom: 4,
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     flexDirection: 'row',
     justifyContent: 'center',
   },
   percentValue: {
     fontFamily: 'Newsreader',
-    fontSize: 30,
+    fontSize: 28,
+    lineHeight: 32,
   },
   percentSign: {
-    fontFamily: 'SpaceGrotesk',
-    fontSize: 12,
-    marginLeft: 2,
+    fontFamily: 'Newsreader',
+    fontSize: 16,
+    marginLeft: 3,
+    marginTop: 4,
   },
   percentLabel: {
     fontFamily: 'SpaceGrotesk',
@@ -222,21 +226,21 @@ const styles = StyleSheet.create({
     writingDirection: 'ltr',
   },
   verticalTrack: {
-    width: 8,
+    width: 3,
     height: 192,
-    borderRadius: 4,
+    borderRadius: 1.5,
     position: 'relative',
     overflow: 'visible',
   },
   verticalFill: {
     width: '100%',
-    borderRadius: 4,
+    borderRadius: 1.5,
     position: 'absolute',
     bottom: 0,
     left: 0,
   },
   verticalThumb: {
-    marginLeft: -4,
+    marginLeft: -THUMB_SIZE / 2 + 1.5,
     marginTop: 0,
     marginBottom: -THUMB_SIZE / 2,
     left: 0,

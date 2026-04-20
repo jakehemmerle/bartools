@@ -31,7 +31,7 @@ export default defineConfig([
   // React Native animation/gesture patterns use useRef(...).current at render
   // time (Animated.Value, PanResponder) — this is standard RN practice.
   {
-    files: ['components/FillLevelSlider.tsx', 'app/(tabs)/index.tsx'],
+    files: ['components/FillLevelSlider.tsx', 'components/PourPacifier.tsx', 'app/(tabs)/index.tsx'],
     rules: {
       'react-hooks/refs': 'off',
     },

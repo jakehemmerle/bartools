@@ -274,7 +274,7 @@ export default function CaptureScreen() {
             </Text>
           </Pressable>
 
-          {/* YOLO auto-capture — disabled until model is integrated */}
+          {/* YOLO auto-capture — hidden for this build; keep markup until Tier 2 lands.
           <Pressable
             disabled
             style={[
@@ -294,6 +294,7 @@ export default function CaptureScreen() {
               color={theme.onSurface}
             />
           </Pressable>
+          */}
         </View>
 
         {/* Location badges below capture row */}

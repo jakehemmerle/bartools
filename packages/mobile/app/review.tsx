@@ -1,12 +1,13 @@
 import { useState, useCallback, useMemo } from 'react'
-import { View, Text, TextInput, ScrollView, FlatList, Pressable, Alert, ActivityIndicator, StyleSheet } from 'react-native'
+import { View, Text, TextInput, ScrollView, FlatList, Pressable, Image, Modal, Alert, ActivityIndicator, StyleSheet, Dimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { ITEM_CATEGORIES, type BottleSearchResult, type ItemCategory, type ReportBottleRecord } from '@bartools/types'
 import { useReportStream } from '../lib/use-report-stream'
-import { reviewReport, isValidUuid } from '../lib/api'
+import { reviewReport, resolveImageUrl, isValidUuid } from '../lib/api'
 import { DEFAULT_USER_ID } from '../lib/config'
+import { PourPacifier } from '../components/PourPacifier'
 import {
   canSubmitReview,
   isRecordMissingBottle,
@@ -44,15 +45,11 @@ export default function ReviewScreen() {
   const [edits, setEdits] = useState<Record<string, RecordEdit>>({})
   const [searchTarget, setSearchTarget] = useState<string | null>(null)
   const [fillEditTarget, setFillEditTarget] = useState<string | null>(null)
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   const isReady = status === 'ready_for_review'
   const canSubmit = canSubmitReview(records, edits)
-  const progressFraction = progress
-    ? progress.photoCount > 0
-      ? progress.processedCount / progress.photoCount
-      : 0
-    : 0
 
   const handleBottleSelect = useCallback((bottle: BottleSearchResult) => {
     if (!searchTarget) return
@@ -125,7 +122,7 @@ export default function ReviewScreen() {
       })
       await reviewReport(reportId, DEFAULT_USER_ID, reviewRecords)
       Alert.alert('Review Complete', 'Inventory has been updated.', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)/inventory') },
+        { text: 'OK', onPress: () => router.replace('/(tabs)') },
       ])
     } catch {
       Alert.alert('Review Failed', 'Could not submit review. Please try again.')
@@ -156,6 +153,11 @@ export default function ReviewScreen() {
             editedFill={edit?.fillPercent}
             editedName={edit?.bottleName ?? (manualName ? edit?.bottle?.name : undefined)}
             onEdit={isViewMode ? undefined : () => setSearchTarget(item.id)}
+            onPress={
+              item.imageUrl
+                ? () => setLightboxUrl(resolveImageUrl(item.imageUrl))
+                : undefined
+            }
             missingBottle={!isViewMode && missingBottle}
           />
           {isViewMode ? null : (
@@ -170,7 +172,7 @@ export default function ReviewScreen() {
             </Pressable>
           )}
           {!isViewMode && fillEditTarget === item.id && fillRecord ? (
-            <View style={[styles.fillEditor, { backgroundColor: theme.surfaceContainer }]}>
+            <View style={styles.fillEditor}>
               <FillLevelSlider
                 value={fillRecord.fill}
                 onValueChange={(v) => handleFillChange(item.id, v)}
@@ -260,33 +262,6 @@ export default function ReviewScreen() {
         </Text>
       </View>
 
-      {/* Progress */}
-      {!isReady && progress ? (
-        <View style={styles.progressSection}>
-          <View style={[styles.progressBarBg, { backgroundColor: theme.surfaceContainerHigh }]}>
-            <View
-              style={[
-                styles.progressBarFill,
-                { backgroundColor: theme.primary, width: `${Math.round(progressFraction * 100)}%` },
-              ]}
-            />
-          </View>
-          <Text style={[styles.progressText, { color: theme.onSurfaceVariant }]}>
-            Processing {progress.processedCount} of {progress.photoCount}...
-          </Text>
-        </View>
-      ) : null}
-
-      {/* Status messages */}
-      {status === 'connecting' ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.primary} />
-          <Text style={[styles.statusText, { color: theme.onSurfaceVariant }]}>
-            Connecting to analysis stream...
-          </Text>
-        </View>
-      ) : null}
-
       {status === 'error' ? (
         <View style={styles.center}>
           <MaterialCommunityIcons name="alert-circle-outline" size={48} color={theme.error} />
@@ -299,15 +274,30 @@ export default function ReviewScreen() {
         </View>
       ) : null}
 
-      {/* Records list */}
-      {records.length > 0 ? (
-        <FlatList
-          data={records}
-          keyExtractor={(item) => item.id}
-          renderItem={renderRecord}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+      {/* Records list — flex grows to fill the space above the pacifier footer. */}
+      <View style={styles.listWrapper}>
+        {records.length > 0 ? (
+          <FlatList
+            data={records}
+            keyExtractor={(item) => item.id}
+            renderItem={renderRecord}
+            extraData={[edits, fillEditTarget]}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : null}
+      </View>
+
+      {/* Pacifier pinned to the bottom third while inference is still running. */}
+      {!isReady && status !== 'error' ? (
+        <View style={styles.pacifierFooter}>
+          <PourPacifier />
+          <Text style={[styles.pacifierCaption, { color: theme.onSurfaceVariant }]}>
+            {progress && progress.photoCount > 0
+              ? `Identifying ${Math.min(progress.processedCount + 1, progress.photoCount)} of ${progress.photoCount}...`
+              : 'Connecting to analysis stream...'}
+          </Text>
+        </View>
       ) : null}
 
       {/* Bottom action */}
@@ -348,6 +338,33 @@ export default function ReviewScreen() {
         onDismiss={() => setSearchTarget(null)}
         onSelect={handleBottleSelect}
       />
+
+      {/* Image lightbox — tap card to view, tap again to dismiss */}
+      <Modal
+        visible={lightboxUrl !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLightboxUrl(null)}
+      >
+        <Pressable style={styles.lightboxOverlay} onPress={() => setLightboxUrl(null)}>
+          {lightboxUrl ? (
+            <Image
+              source={{ uri: lightboxUrl }}
+              style={styles.lightboxImage}
+              resizeMode="contain"
+            />
+          ) : null}
+          <Pressable
+            onPress={() => setLightboxUrl(null)}
+            hitSlop={12}
+            style={styles.lightboxClose}
+            accessibilityRole="button"
+            accessibilityLabel="Close photo"
+          >
+            <MaterialCommunityIcons name="close" size={28} color="#FFFFFF" />
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -405,10 +422,48 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 8,
   },
+  listWrapper: {
+    flex: 1,
+  },
   listContent: {
     padding: 16,
     gap: 8,
     paddingBottom: 120,
+  },
+  pacifierFooter: {
+    height: Dimensions.get('window').height / 3,
+    justifyContent: 'center',
+    alignItems: 'stretch',
+    paddingBottom: 16,
+    gap: 8,
+  },
+  pacifierCaption: {
+    fontFamily: 'SpaceGrotesk',
+    fontSize: 11,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+  },
+  lightboxOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lightboxImage: {
+    width: '100%',
+    height: '100%',
+  },
+  lightboxClose: {
+    position: 'absolute',
+    top: 48,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardWrapper: {
     position: 'relative',
@@ -426,8 +481,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   fillEditor: {
-    padding: 12,
-    borderRadius: 8,
     marginTop: 4,
   },
   manualEditor: {

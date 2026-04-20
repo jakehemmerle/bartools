@@ -3,7 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
-  FlatList,
+  SectionList,
   Pressable,
   ActivityIndicator,
   RefreshControl,
@@ -23,9 +23,6 @@ import type { ReportListItem } from '@bartools/types'
 // ---------------------------------------------------------------------------
 
 type DateSection = { title: string; data: ReportListItem[] }
-type ReportListRow =
-  | { type: 'section'; title: string }
-  | { type: 'report'; item: ReportListItem }
 
 function shortId(id: string): string {
   return `#RPT-${id.slice(-4).toUpperCase()}`
@@ -65,17 +62,6 @@ function groupByDate(reports: ReportListItem[]): DateSection[] {
     map.set(key, list)
   }
   return Array.from(map, ([title, data]) => ({ title, data }))
-}
-
-function flattenDateSections(sections: DateSection[]): ReportListRow[] {
-  const rows: ReportListRow[] = []
-  for (const section of sections) {
-    rows.push({ type: 'section', title: section.title })
-    for (const item of section.data) {
-      rows.push({ type: 'report', item })
-    }
-  }
-  return rows
 }
 
 // ---------------------------------------------------------------------------
@@ -288,7 +274,6 @@ export default function ReportsScreen() {
   ).length
 
   const sections = groupByDate(reports)
-  const rows = flattenDateSections(sections)
 
   if (loading) {
     return (
@@ -327,11 +312,9 @@ export default function ReportsScreen() {
     >
       <AppHeader />
 
-      <FlatList
-        data={rows}
-        keyExtractor={(row) =>
-          row.type === 'section' ? `section-${row.title}` : row.item.id
-        }
+      <SectionList
+        sections={sections}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -360,15 +343,14 @@ export default function ReportsScreen() {
             </View>
           ) : null
         }
-        renderItem={({ item }) =>
-          item.type === 'section' ? (
+        renderSectionHeader={({ section }) => (
+          <View style={[styles.sectionHeaderWrapper, { backgroundColor: theme.background }]}>
             <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
-              {item.title}
+              {section.title}
             </Text>
-          ) : (
-            <ReportCard item={item.item} />
-          )
-        }
+          </View>
+        )}
+        renderItem={({ item }) => <ReportCard item={item} />}
         ListFooterComponent={
           <View style={styles.footer}>
             <MaterialCommunityIcons
@@ -427,14 +409,18 @@ const styles = StyleSheet.create({
   },
 
   // Section headers
+  sectionHeaderWrapper: {
+    marginHorizontal: -spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm + 5,
+    paddingBottom: spacing.lg - 5,
+  },
   sectionHeader: {
     fontFamily: typography.labelFont,
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 1,
-    marginBottom: spacing.lg,
-    marginTop: spacing.sm,
     opacity: 0.6,
   },
 

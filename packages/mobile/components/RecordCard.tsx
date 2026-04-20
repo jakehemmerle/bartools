@@ -1,4 +1,5 @@
-import { View, Text, Pressable, Image, StyleSheet } from 'react-native'
+import { useState } from 'react'
+import { View, Text, Pressable, Image, ActivityIndicator, StyleSheet } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import type { ReportBottleRecord } from '@bartools/types'
 import { resolveImageUrl } from '../lib/api'
@@ -8,6 +9,7 @@ import { FillLevelBar } from './FillLevelBar'
 interface RecordCardProps {
   record: ReportBottleRecord
   onEdit?: () => void
+  onPress?: () => void
   editedFill?: number
   editedName?: string
   missingBottle?: boolean
@@ -23,6 +25,7 @@ const STATUS_COLORS: Record<string, { bg: string; fg: string; icon: string }> = 
 export function RecordCard({
   record,
   onEdit,
+  onPress,
   editedFill,
   editedName,
   missingBottle = false,
@@ -32,17 +35,40 @@ export function RecordCard({
   const bottleName = editedName ?? record.bottleName
   const statusStyle = STATUS_COLORS[record.status] ?? STATUS_COLORS.pending
   const resolvedImageUrl = resolveImageUrl(record.imageUrl)
+  const [imgLoading, setImgLoading] = useState(Boolean(resolvedImageUrl))
+
+  const Root = onPress ? Pressable : View
+  const rootProps = onPress
+    ? {
+        onPress,
+        accessibilityRole: 'button' as const,
+        accessibilityLabel: `View photo of ${bottleName}`,
+      }
+    : {}
 
   return (
-    <View style={[styles.card, { backgroundColor: theme.surfaceContainerHigh }]}>
+    <Root
+      {...rootProps}
+      style={[styles.card, { backgroundColor: theme.surfaceContainerHigh }]}
+    >
       <View style={styles.row}>
         {/* Thumbnail */}
         <View style={styles.thumbnailWrapper}>
           {resolvedImageUrl ? (
-            <Image
-              source={{ uri: resolvedImageUrl }}
-              style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer }]}
-            />
+            <>
+              <Image
+                source={{ uri: resolvedImageUrl }}
+                style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer }]}
+                onLoadStart={() => setImgLoading(true)}
+                onLoadEnd={() => setImgLoading(false)}
+                onError={() => setImgLoading(false)}
+              />
+              {imgLoading ? (
+                <View style={styles.thumbnailOverlay}>
+                  <ActivityIndicator color={theme.primary} size="small" />
+                </View>
+              ) : null}
+            </>
           ) : (
             <View style={[styles.thumbnail, { backgroundColor: theme.surfaceContainer, alignItems: 'center', justifyContent: 'center' }]}>
               <MaterialCommunityIcons name="image-off" size={24} color={theme.onSurfaceVariant} />
@@ -115,7 +141,7 @@ export function RecordCard({
           {fillPercent}%
         </Text>
       </View>
-    </View>
+    </Root>
   )
 }
 
@@ -139,6 +165,16 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 4,
+  },
+  thumbnailOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 56,
+    height: 56,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   missingBadge: {
     position: 'absolute',
