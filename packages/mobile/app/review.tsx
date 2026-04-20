@@ -65,6 +65,26 @@ export default function ReviewScreen() {
     setSearchTarget(null)
   }, [searchTarget])
 
+  // Used when the user can't find a match in the search modal and opts to
+  // create a new catalog entry. Seeds a minimal manual bottle with the typed
+  // name; the user can then refine category/size in the inline editor.
+  const handleAddAsNew = useCallback((name: string) => {
+    if (!searchTarget) return
+    setEdits((prev) => ({
+      ...prev,
+      [searchTarget]: {
+        ...prev[searchTarget],
+        bottleId: undefined,
+        bottleName: undefined,
+        bottle: {
+          name,
+          category: 'other' as ItemCategory,
+        },
+      },
+    }))
+    setSearchTarget(null)
+  }, [searchTarget])
+
   const handleManualBottleChange = useCallback((
     recordId: string,
     patch: { name?: string; category?: ItemCategory; sizeMlText?: string },
@@ -181,7 +201,36 @@ export default function ReviewScreen() {
               />
             </View>
           ) : null}
-          {!isViewMode && !hasCatalogBottle ? (
+          {/* Unidentified record (no catalog match, user hasn't confirmed a manual
+              entry yet): show a compact "tap to choose" tile that opens the fuzzy
+              search modal. The modal carries an "Add as new" affordance so the
+              user only drops into manual entry once they've confirmed the bottle
+              truly isn't in the catalog. */}
+          {!isViewMode && !hasCatalogBottle && !edit?.bottle ? (
+            item.status === 'pending' ? (
+              // Still running VLM — don't prompt yet; the status is unknown,
+              // not "unidentified".
+              <View style={[styles.unidentifiedBanner, { borderColor: theme.outline }]}>
+                <ActivityIndicator size="small" color={theme.outline} />
+                <Text style={[styles.unidentifiedText, { color: theme.outline }]}>
+                  Identifying bottle...
+                </Text>
+              </View>
+            ) : (
+              <Pressable
+                onPress={() => setSearchTarget(item.id)}
+                style={[styles.unidentifiedBanner, { borderColor: theme.primary }]}
+                accessibilityRole="button"
+                accessibilityLabel="Identify this bottle"
+              >
+                <MaterialCommunityIcons name="help-circle-outline" size={18} color={theme.primary} />
+                <Text style={[styles.unidentifiedText, { color: theme.primary }]}>
+                  Bottle not identified — tap to choose
+                </Text>
+              </Pressable>
+            )
+          ) : null}
+          {!isViewMode && !hasCatalogBottle && edit?.bottle ? (
             <View style={[styles.manualEditor, { backgroundColor: theme.surfaceContainer }]}>
               <Text style={[styles.manualLabel, { color: theme.primary }]}>
                 Manual Bottle
@@ -300,8 +349,10 @@ export default function ReviewScreen() {
         </View>
       ) : null}
 
-      {/* Bottom action */}
-      {isReady && !isViewMode ? (
+      {/* Bottom action — appears as soon as every record has a bottle resolved,
+          whether by VLM or manual entry, so power users can confirm ahead of
+          the backend finishing. */}
+      {canSubmit && !isViewMode ? (
         <View style={[styles.bottomAction, { backgroundColor: theme.surfaceContainerLow }]}>
           <Pressable
             style={({ pressed }) => [
@@ -337,6 +388,7 @@ export default function ReviewScreen() {
         visible={searchTarget !== null}
         onDismiss={() => setSearchTarget(null)}
         onSelect={handleBottleSelect}
+        onAddAsNew={handleAddAsNew}
       />
 
       {/* Image lightbox — tap card to view, tap again to dismiss */}
@@ -482,6 +534,23 @@ const styles = StyleSheet.create({
   },
   fillEditor: {
     marginTop: 4,
+  },
+  unidentifiedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    padding: 12,
+    marginTop: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+  },
+  unidentifiedText: {
+    fontFamily: 'SpaceGrotesk',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    flex: 1,
   },
   manualEditor: {
     padding: 12,
