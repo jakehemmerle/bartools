@@ -3,11 +3,12 @@ import { z } from 'zod';
 import { db } from './db';
 import { inferenceJobs, reportRecords, reports, scans } from './schema';
 import { getBucketName } from './storage';
+import { uuid } from './validators';
 
 export const createReportSchema = z.object({
-  userId: z.string().uuid(),
-  venueId: z.string().uuid(),
-  locationId: z.string().uuid().optional(),
+  userId: uuid(),
+  venueId: uuid(),
+  locationId: uuid().optional(),
 });
 
 export type ReportScanInferencePayload = {

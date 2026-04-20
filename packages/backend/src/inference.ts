@@ -18,13 +18,14 @@ import {
   scans,
 } from './schema';
 import { getObjectBytes } from './storage';
+import { uuid } from './validators';
 
 export const reportScanInferenceTopic = 'report.scan.inference';
 
 export const reportScanInferencePayloadSchema = z.object({
-  jobId: z.string().uuid(),
-  reportId: z.string().uuid(),
-  scanId: z.string().uuid(),
+  jobId: uuid(),
+  reportId: uuid(),
+  scanId: uuid(),
 });
 
 type PromptCache = {
