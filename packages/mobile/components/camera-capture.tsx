@@ -30,7 +30,8 @@ export function CameraCapture({ onPhotoTaken }: CameraCaptureProps) {
   const takePhoto = useCallback(async () => {
     if (!cameraRef.current) return;
     const photo: PhotoFile = await cameraRef.current.takePhoto();
-    onPhotoTaken(`file://${photo.path}`);
+    const uri = photo.path.startsWith('file://') ? photo.path : `file://${photo.path}`;
+    onPhotoTaken(uri);
   }, [onPhotoTaken]);
 
   if (!hasPermission) {

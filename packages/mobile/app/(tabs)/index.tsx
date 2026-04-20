@@ -16,6 +16,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
 import { useBatchQueue } from '../../lib/use-batch-queue'
 import { createReport, uploadPhotos, submitReport, getLocations } from '../../lib/api'
+import { persistPhoto } from '../../lib/persist-photo'
 import { DEFAULT_USER_ID, DEFAULT_VENUE_ID } from '../../lib/config'
 import { CameraCapture } from '../../components/camera-capture'
 import { BatchQueue } from '../../components/batch-queue'
@@ -94,8 +95,9 @@ export default function CaptureScreen() {
   }, [])
 
   const handlePhotoTaken = useCallback(
-    (uri: string) => {
-      addPhoto(uri)
+    async (uri: string) => {
+      const persisted = await persistPhoto(uri)
+      addPhoto(persisted)
       setMode('queue')
     },
     [addPhoto],
@@ -108,7 +110,10 @@ export default function CaptureScreen() {
       quality: 0.8,
     })
     if (!result.canceled) {
-      addPhotos(result.assets.map((a) => a.uri))
+      const persisted = await Promise.all(
+        result.assets.map((a) => persistPhoto(a.uri)),
+      )
+      addPhotos(persisted)
     }
   }, [addPhotos])
 
@@ -134,7 +139,8 @@ export default function CaptureScreen() {
       setShowReview(false)
       clear()
       router.push({ pathname: '/review', params: { reportId: report.id } })
-    } catch {
+    } catch (err) {
+      console.log('[submit] failed:', err instanceof Error ? `${err.name}: ${err.message}` : String(err))
       Alert.alert(
         'Submission Failed',
         'Could not submit photos for analysis. Please try again.',

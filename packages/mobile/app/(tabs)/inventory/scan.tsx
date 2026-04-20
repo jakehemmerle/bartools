@@ -7,6 +7,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { CameraCapture } from '../../../components/camera-capture'
 import { useTheme } from '../../../theme/useTheme'
 import { useBatchQueue } from '../../../lib/use-batch-queue'
+import { persistPhoto } from '../../../lib/persist-photo'
 
 export default function InventoryScanScreen() {
   const theme = useTheme()
@@ -14,8 +15,9 @@ export default function InventoryScanScreen() {
   const { addPhoto, addPhotos } = useBatchQueue()
 
   const handlePhotoTaken = useCallback(
-    (uri: string) => {
-      addPhoto(uri)
+    async (uri: string) => {
+      const persisted = await persistPhoto(uri)
+      addPhoto(persisted)
       router.replace('/(tabs)')
     },
     [router, addPhoto],
@@ -34,7 +36,10 @@ export default function InventoryScanScreen() {
         quality: 0.8,
       })
       if (!result.canceled && result.assets.length > 0) {
-        addPhotos(result.assets.map((a) => a.uri))
+        const persisted = await Promise.all(
+          result.assets.map((a) => persistPhoto(a.uri)),
+        )
+        addPhotos(persisted)
         router.replace('/(tabs)')
       }
     } catch {
