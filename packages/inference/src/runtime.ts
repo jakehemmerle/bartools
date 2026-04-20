@@ -13,6 +13,20 @@ import { DEFAULT_MODEL, MAX_ATTEMPTS, VOLUME_ENUM } from "./types";
 
 const VALID_VOLUMES: ReadonlySet<number> = new Set<number>(VOLUME_ENUM);
 const VOLUME_GRID_EPSILON = 1e-9;
+const SDK_STDERR_MAX_CHARS = 4000;
+
+function appendDiagnosticTail(current: string, chunk: string): string {
+  const next = current + chunk;
+  return next.length > SDK_STDERR_MAX_CHARS
+    ? next.slice(next.length - SDK_STDERR_MAX_CHARS)
+    : next;
+}
+
+function redactDiagnostic(value: string): string {
+  return value
+    .replace(/sk-ant-[A-Za-z0-9_-]+/g, "[redacted]")
+    .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, "Bearer [redacted]");
+}
 
 export function validateAnswer(
   name: string,
@@ -62,6 +76,7 @@ async function runBottleInferenceImpl(
   const validNames = new Set(input.validNames ?? (await loadCatalogBottleNames()));
   let attempts = 0;
   let answer: InferenceResult | null = null;
+  let stderrTail = "";
   const triedInvalid: string[] = [];
 
   const submitAnswer = tool(
@@ -156,22 +171,43 @@ async function runBottleInferenceImpl(
     },
   };
 
-  const q = query({
-    prompt: asyncIter([userMessage]),
-    options: {
-      systemPrompt: input.systemPrompt,
-      model: input.model ?? DEFAULT_MODEL,
-      tools: [],
-      mcpServers: { eval: mcpServer },
-      allowedTools: ["mcp__eval__submit_answer"],
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
-      persistSession: false,
-    },
-  });
+  try {
+    const q = query({
+      prompt: asyncIter([userMessage]),
+      options: {
+        systemPrompt: input.systemPrompt,
+        model: input.model ?? DEFAULT_MODEL,
+        tools: [],
+        mcpServers: { eval: mcpServer },
+        allowedTools: ["mcp__eval__submit_answer"],
+        permissionMode: "bypassPermissions",
+        allowDangerouslySkipPermissions: true,
+        persistSession: false,
+        env: {
+          CLAUDE_CONFIG_DIR: process.env.CLAUDE_CONFIG_DIR ?? "/tmp/.claude",
+          HOME: process.env.HOME ?? "/tmp",
+        },
+        stderr: (data) => {
+          stderrTail = appendDiagnosticTail(stderrTail, data);
+        },
+      },
+    });
 
-  for await (const event of q) {
-    void event;
+    for await (const event of q) {
+      void event;
+    }
+  } catch (error) {
+    if (answer) {
+      return answer;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    const diagnostic = redactDiagnostic(stderrTail).trim();
+    return {
+      name: "",
+      volume: 0,
+      error: diagnostic ? `${message}: ${diagnostic}` : message,
+    };
   }
 
   if (answer) {
