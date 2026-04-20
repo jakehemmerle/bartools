@@ -1,6 +1,6 @@
 .bt-comparison-card__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-lg);
 }
 
@@ -10,6 +10,16 @@
 
 .bt-comparison-card__media .bt-record-media,
 .bt-comparison-card__media .bt-record-media--missing {
+  width: 112px;
+  height: 150px;
+}
+
+.bt-comparison-card__hero-header {
+  align-items: center;
+}
+
+.bt-comparison-card__hero-header .bt-comparison-card__media .bt-record-media,
+.bt-comparison-card__hero-header .bt-comparison-card__media .bt-record-media--missing {
   width: 52px;
   height: 68px;
 }
