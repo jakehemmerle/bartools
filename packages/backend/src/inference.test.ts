@@ -77,11 +77,12 @@ describe('processQueuedInferenceJob', () => {
   });
 
   test('processes a single photo and promotes report to unreviewed', async () => {
-    await processQueuedInferenceJob({
+    const result = await processQueuedInferenceJob({
       jobId: testIds.jobId,
       reportId: testIds.reportId,
       scanId: testIds.scanId,
     });
+    expect(result).toEqual({ status: 'processed' });
 
     const [attempt] = await db
       .select()
@@ -183,11 +184,12 @@ describe('processQueuedInferenceJob', () => {
     if (LIVE) return;
     nextInferenceError = new Error('simulated worker crash');
 
-    await processQueuedInferenceJob({
+    const result = await processQueuedInferenceJob({
       jobId: testIds.jobId,
       reportId: testIds.reportId,
       scanId: testIds.scanId,
     });
+    expect(result).toEqual({ status: 'processed' });
 
     const [job] = await db
       .select()
@@ -212,6 +214,29 @@ describe('processQueuedInferenceJob', () => {
       .where(eq(reports.id, testIds.reportId));
     expect(report.status).toBe('unreviewed');
     expect(report.processedCount).toBe(1);
+  });
+
+  test('returns busy for a fresh running job without starting duplicate inference', async () => {
+    const startedAt = new Date();
+    await db
+      .update(inferenceJobs)
+      .set({ status: 'running', startedAt, updatedAt: startedAt })
+      .where(eq(inferenceJobs.id, testIds.jobId));
+
+    const result = await processQueuedInferenceJob({
+      jobId: testIds.jobId,
+      reportId: testIds.reportId,
+      scanId: testIds.scanId,
+    });
+
+    expect(result).toEqual({ status: 'busy' });
+    expect(lastRunBottleInferenceInput).toBeNull();
+
+    const attempts = await db
+      .select()
+      .from(inferenceAttempts)
+      .where(eq(inferenceAttempts.jobId, testIds.jobId));
+    expect(attempts).toHaveLength(0);
   });
 
   test('marks stale running jobs failed so reports can leave processing', async () => {

@@ -21,9 +21,14 @@ import {
   upsertInventoryItem,
 } from './inventory-queries';
 import { manualBottleSchema } from './bottle-queries';
-import { failStaleInferenceJobs } from './inference';
+import {
+  failStaleInferenceJobs,
+  processQueuedInferenceJob,
+  reportScanInferencePayloadSchema,
+} from './inference';
 import { enqueueReportInference } from './queue';
 import { getBucketName, getTtlSeconds, presignGet, presignPut } from './storage';
+import { verifyCloudTaskRequest } from './task-auth';
 import { uuid } from './validators';
 
 const app = new Hono();
@@ -49,7 +54,7 @@ process.on('uncaughtException', (error) => {
   throw error;
 });
 
-function jsonError(status: 400 | 404 | 409 | 500, message: string) {
+function jsonError(status: 400 | 401 | 404 | 409 | 500 | 503, message: string) {
   return new HTTPException(status, {
     message,
   });
@@ -186,11 +191,12 @@ app.post('/reports/:reportId/photos/complete', async (c) => {
 
 app.post('/reports/:reportId/submit', async (c) => {
   const reportId = c.req.param('reportId');
+  const taskTargetUrl = new URL('/internal/tasks/report-scan-inference', c.req.url).toString();
 
   try {
     const jobs = await submitReport(reportId);
     const enqueueResults = await Promise.all(
-      jobs.map((job) => enqueueReportInference(job))
+      jobs.map((job) => enqueueReportInference(job, { targetUrl: taskTargetUrl }))
     );
 
     return c.json({
@@ -210,6 +216,30 @@ app.post('/reports/:reportId/submit', async (c) => {
     }
     throw error;
   }
+});
+
+app.post('/internal/tasks/report-scan-inference', async (c) => {
+  const audience = new URL(c.req.url).origin;
+  const authorized = await verifyCloudTaskRequest({
+    authorization: c.req.header('authorization'),
+    audience,
+    expectedEmail: process.env.CLOUD_TASKS_OIDC_SERVICE_ACCOUNT_EMAIL,
+  });
+  if (!authorized) {
+    throw jsonError(401, 'unauthorized_task_request');
+  }
+
+  const parsed = reportScanInferencePayloadSchema.safeParse(await c.req.json().catch(() => null));
+  if (!parsed.success) {
+    throw jsonError(400, 'invalid_task_payload');
+  }
+
+  const result = await processQueuedInferenceJob(parsed.data);
+  if (result?.status === 'busy') {
+    throw jsonError(503, 'inference_job_already_running');
+  }
+
+  return c.body(null, 204);
 });
 
 app.get('/reports', async (c) => {

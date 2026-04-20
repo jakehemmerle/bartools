@@ -1,4 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
+import * as gcp from '@pulumi/gcp';
 import { enableApis } from './src/apis';
 import { createArtifactRegistry } from './src/registry';
 import { createServiceAccount } from './src/service-account';
@@ -6,6 +7,7 @@ import { createBackendSecret } from './src/secret';
 import { createUploadsBucket } from './src/storage';
 import { buildAndPushImage } from './src/image';
 import { createCloudRunService } from './src/run';
+import { createReportInferenceQueue } from './src/tasks';
 import { execSync } from 'node:child_process';
 
 const gcpConfig = new pulumi.Config('gcp');
@@ -84,6 +86,15 @@ const image = buildAndPushImage({
   repositoryName: registry.repositoryId,
 });
 
+const reportInferenceQueue = createReportInferenceQueue({
+  project,
+  region,
+  env,
+  serviceAccountEmail: serviceAccount.email,
+  serviceAccountName: serviceAccount.name,
+  dependsOn: apiServices,
+});
+
 const runService = createCloudRunService({
   project,
   region,
@@ -94,6 +105,12 @@ const runService = createCloudRunService({
   claudeCodeOauthTokenSecretId: claudeCodeOauthTokenSecret.secretId,
   langsmithApiKeySecretId: langsmithApiKeySecret.secretId,
   gcsBucketName: uploadsBucket.name,
+  cloudTasks: {
+    projectId: project,
+    location: region,
+    queueId: reportInferenceQueue.queueId,
+    oidcServiceAccountEmail: serviceAccount.email,
+  },
   minInstances,
   maxInstances,
   cpu,
@@ -102,7 +119,16 @@ const runService = createCloudRunService({
     databaseUrlSecret.version,
     claudeCodeOauthTokenSecret.version,
     langsmithApiKeySecret.version,
+    reportInferenceQueue.queue,
   ],
+});
+
+new gcp.cloudrunv2.ServiceIamMember(`backend-task-invoker`, {
+  project,
+  location: region,
+  name: runService.name,
+  role: 'roles/run.invoker',
+  member: pulumi.interpolate`serviceAccount:${serviceAccount.email}`,
 });
 
 export const serviceName = runService.name;
@@ -110,3 +136,4 @@ export const serviceUrl = runService.uri;
 export const healthUrl = pulumi.interpolate`${runService.uri}/health`;
 export const imageRef = image.ref;
 export const uploadsBucketName = uploadsBucket.name;
+export const reportInferenceQueueName = reportInferenceQueue.queue.name;

@@ -38,12 +38,20 @@ type PromptCache = {
 let promptCache: PromptCache | null = null;
 const promptCacheTtlMs = 30_000;
 const DEFAULT_STALE_INFERENCE_JOB_MS = 10 * 60_000;
+const DEFAULT_INFERENCE_JOB_RETRY_AFTER_MS = 2 * 60_000;
 
 function getStaleInferenceJobMs(): number {
   const raw = process.env.INFERENCE_JOB_STALE_AFTER_MS;
   if (!raw) return DEFAULT_STALE_INFERENCE_JOB_MS;
   const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_STALE_INFERENCE_JOB_MS;
+}
+
+function getInferenceJobRetryAfterMs(): number {
+  const raw = process.env.INFERENCE_JOB_RETRY_AFTER_MS;
+  if (!raw) return DEFAULT_INFERENCE_JOB_RETRY_AFTER_MS;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_INFERENCE_JOB_RETRY_AFTER_MS;
 }
 
 async function resolvePrompt() {
@@ -215,7 +223,7 @@ export async function processQueuedInferenceJob(
   const payload = reportScanInferencePayloadSchema.parse(payloadInput);
 
   try {
-    await processQueuedInferenceJobUnchecked(payload);
+    return await processQueuedInferenceJobUnchecked(payload);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Unhandled report inference failure', {
@@ -241,36 +249,54 @@ export async function processQueuedInferenceJob(
         errorMessage: failError instanceof Error ? failError.message : String(failError),
       });
     }
+
+    return { status: 'processed' as const };
   }
 }
 
 async function processQueuedInferenceJobUnchecked(
   payload: z.infer<typeof reportScanInferencePayloadSchema>
 ) {
-  const [job] = await db
-    .select({
-      id: inferenceJobs.id,
-      status: inferenceJobs.status,
-      reportId: inferenceJobs.reportId,
-      scanId: inferenceJobs.scanId,
-    })
-    .from(inferenceJobs)
-    .where(eq(inferenceJobs.id, payload.jobId))
-    .limit(1);
-
-  if (!job || (job.status !== 'queued' && job.status !== 'running')) {
-    return;
-  }
-
   const startedAt = new Date();
-  await db
+  const retryCutoff = new Date(startedAt.getTime() - getInferenceJobRetryAfterMs());
+  const [job] = await db
     .update(inferenceJobs)
     .set({
       status: 'running',
       startedAt,
       updatedAt: startedAt,
     })
-    .where(eq(inferenceJobs.id, payload.jobId));
+    .where(
+      and(
+        eq(inferenceJobs.id, payload.jobId),
+        or(
+          eq(inferenceJobs.status, 'queued'),
+          and(eq(inferenceJobs.status, 'running'), lt(inferenceJobs.startedAt, retryCutoff))
+        )
+      )
+    )
+    .returning({
+      id: inferenceJobs.id,
+      status: inferenceJobs.status,
+      reportId: inferenceJobs.reportId,
+      scanId: inferenceJobs.scanId,
+    });
+
+  if (!job) {
+    const [current] = await db
+      .select({
+        status: inferenceJobs.status,
+      })
+      .from(inferenceJobs)
+      .where(eq(inferenceJobs.id, payload.jobId))
+      .limit(1);
+
+    if (current?.status === 'running') {
+      return { status: 'busy' as const };
+    }
+
+    return { status: 'ignored' as const };
+  }
 
   const [attemptCountRow] = await db
     .select({ count: count(inferenceAttempts.id) })
@@ -315,7 +341,7 @@ async function processQueuedInferenceJobUnchecked(
       errorCode: 'scan_not_found',
       errorMessage: 'Scan could not be found for this job.',
     });
-    return;
+    return { status: 'processed' as const };
   }
 
   const catalog = await db
@@ -342,7 +368,7 @@ async function processQueuedInferenceJobUnchecked(
       errorCode: 'catalog_empty',
       errorMessage: 'Bottle catalog is empty.',
     });
-    return;
+    return { status: 'processed' as const };
   }
 
   let imageBytes: Uint8Array;
@@ -363,7 +389,7 @@ async function processQueuedInferenceJobUnchecked(
       errorCode: 'photo_missing',
       errorMessage,
     });
-    return;
+    return { status: 'processed' as const };
   }
 
   const possibleBottleNames = catalog.map((b) => b.name);
@@ -401,7 +427,7 @@ async function processQueuedInferenceJobUnchecked(
       errorCode: 'model_error',
       errorMessage: result.error,
     });
-    return;
+    return { status: 'processed' as const };
   }
 
   const matchedBottle = catalog.find((bottle) => bottle.name === result.name);
@@ -429,7 +455,7 @@ async function processQueuedInferenceJobUnchecked(
       errorCode: 'catalog_miss',
       errorMessage,
     });
-    return;
+    return { status: 'processed' as const };
   }
 
   const finishedAt = new Date();
@@ -493,4 +519,5 @@ async function processQueuedInferenceJobUnchecked(
   });
 
   await syncReportProgress(payload.reportId);
+  return { status: 'processed' as const };
 }

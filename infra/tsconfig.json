@@ -4,6 +4,7 @@
     "target": "es2022",
     "module": "commonjs",
     "moduleResolution": "node",
+    "ignoreDeprecations": "5.0",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,

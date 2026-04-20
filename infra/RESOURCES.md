@@ -43,6 +43,7 @@ gcloud run services describe bartools-backend-<env> \
 | Artifact Registry repo    | `us-east1-docker.pkg.dev/bartools-staging/bartools`  | `us-east1-docker.pkg.dev/bartools-prod/bartools` |
 | Image name                | `backend:<git-short-sha>`                            | `backend:<git-short-sha>`                   |
 | GCS uploads bucket        | `bartools-uploads-staging`                           | `bartools-uploads-prod`                     |
+| Cloud Tasks queue         | `bartools-report-inference-staging`                  | `bartools-report-inference-prod`            |
 
 ### GCP consoles
 
@@ -137,6 +138,53 @@ gcloud storage buckets list --project bartools-<env> --format='value(name)' \
   | grep bartools-uploads
 ```
 
+## Cloud Tasks inference queue
+
+One regional queue per env dispatches report scan inference jobs back to the
+backend. The mobile submit path only creates durable DB jobs and enqueues HTTP
+tasks; inferencing happens when Cloud Tasks calls the internal worker endpoint.
+
+| Field                      | staging                                      | prod                                      |
+| -------------------------- | -------------------------------------------- | ----------------------------------------- |
+| Queue name                 | `bartools-report-inference-staging`          | `bartools-report-inference-prod`          |
+| Location                   | `us-east1`                                   | `us-east1`                                |
+| Target endpoint            | `/internal/tasks/report-scan-inference`      | same                                      |
+| Max concurrent dispatches  | `1`                                          | `1`                                       |
+| Max dispatch rate          | `1/s`                                        | `1/s`                                     |
+| Max attempts               | `5`                                          | `5`                                       |
+| Dispatch timeout           | `900s`                                       | `900s`                                    |
+| OIDC service account       | `bartools-backend-staging@bartools-staging.iam.gserviceaccount.com` | `bartools-backend-prod@bartools-prod.iam.gserviceaccount.com` |
+
+Cloud Tasks requires an App Engine application in the project. Its location is
+created as `us-east1` and is effectively immutable for the lifetime of the GCP
+project.
+
+### IAM bindings
+
+- `roles/cloudtasks.enqueuer` on the queue -> `serviceAccount:bartools-backend-<env>@bartools-<env>.iam.gserviceaccount.com`
+- `roles/iam.serviceAccountUser` on the backend service account -> the same service account as member. Required so the backend can enqueue an OIDC-authenticated HTTP task using its own identity.
+- `roles/run.invoker` on the backend Cloud Run service -> the same service account as member. The service is still public for mobile/web APIs, but the internal task endpoint additionally verifies the Cloud Tasks OIDC token and expected email.
+
+### Env vars delivered to the backend container
+
+Plain env vars on the Cloud Run service:
+
+- `CLOUD_TASKS_PROJECT_ID` <- `bartools-<env>`
+- `CLOUD_TASKS_LOCATION` <- `us-east1`
+- `CLOUD_TASKS_QUEUE_ID` <- `bartools-report-inference-<env>`
+- `CLOUD_TASKS_OIDC_SERVICE_ACCOUNT_EMAIL` <- `bartools-backend-<env>@bartools-<env>.iam.gserviceaccount.com`
+
+### Re-derive queue name
+
+```bash
+pulumi -C infra stack output reportInferenceQueueName --stack <env>
+
+# or via gcloud
+gcloud tasks queues list \
+  --location us-east1 --project bartools-<env> \
+  --format='value(name)'
+```
+
 ## Pulumi
 
 | Field                 | Value                                                         |
@@ -161,6 +209,7 @@ pulumi -C infra stack output healthUrl --stack <env>
 pulumi -C infra stack output imageUri --stack <env>
 pulumi -C infra stack output serviceName --stack <env>
 pulumi -C infra stack output uploadsBucketName --stack <env>
+pulumi -C infra stack output reportInferenceQueueName --stack <env>
 ```
 
 ## CLI tools quick reference
@@ -176,6 +225,7 @@ pulumi -C infra stack output uploadsBucketName --stack <env>
 | List Cloud Run services        | `gcloud run services list --project bartools-<env>`                     |
 | List Artifact Registry images  | `gcloud artifacts docker images list us-east1-docker.pkg.dev/bartools-<env>/bartools` |
 | List uploads bucket contents   | `gcloud storage ls gs://bartools-uploads-<env>/`                        |
+| List inference tasks           | `gcloud tasks list --queue=bartools-report-inference-<env> --location=us-east1 --project=bartools-<env>` |
 
 ## Infra file map
 
@@ -194,6 +244,7 @@ infra/
 │   ├── secret.ts           # Secret Manager secret + IAM member
 │   ├── storage.ts          # gcp.storage.Bucket + bucket IAM + SA tokenCreator
 │   ├── image.ts            # docker-build.Image (build context = repo root)
+│   ├── tasks.ts            # App Engine app + Cloud Tasks queue + task IAM
 │   └── run.ts              # gcp.cloudrunv2.Service + public invoker binding
 ├── scripts/
 │   ├── _env.sh             # sets PULUMI_CONFIG_PASSPHRASE_FILE (sourced by all)

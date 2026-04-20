@@ -4,6 +4,7 @@ import {
   reportScanInferencePayloadSchema,
   reportScanInferenceTopic,
 } from './inference';
+import { enqueueCloudTask } from './cloud-tasks';
 
 // Motia's enqueue() connects to an engine at III_URL (defaults to
 // ws://localhost:49134 in dev). When the URL isn't set (e.g. on Cloud Run),
@@ -15,8 +16,26 @@ export async function enqueueReportInference(input: {
   jobId: string;
   reportId: string;
   scanId: string;
-}) {
+}, opts: { targetUrl?: string } = {}) {
   const payload = reportScanInferencePayloadSchema.parse(input);
+  let cloudTaskFailed = false;
+
+  if (opts.targetUrl) {
+    try {
+      const cloudTask = await enqueueCloudTask(payload, { targetUrl: opts.targetUrl });
+      if (cloudTask) {
+        return cloudTask;
+      }
+    } catch (error) {
+      console.error('Cloud Tasks enqueue failed; falling back to local inference queue', {
+        jobId: payload.jobId,
+        reportId: payload.reportId,
+        scanId: payload.scanId,
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
+      cloudTaskFailed = true;
+    }
+  }
 
   if (USE_MOTIA) {
     try {
@@ -25,7 +44,7 @@ export async function enqueueReportInference(input: {
         data: payload,
         messageGroupId: payload.reportId,
       });
-      return { mode: 'motia' as const };
+      return { mode: cloudTaskFailed ? 'motia_fallback' : 'motia' as const };
     } catch {
       // fall through to local
     }
@@ -41,5 +60,5 @@ export async function enqueueReportInference(input: {
       });
     });
   });
-  return { mode: 'local' as const };
+  return { mode: cloudTaskFailed ? 'local_fallback' : 'local' as const };
 }

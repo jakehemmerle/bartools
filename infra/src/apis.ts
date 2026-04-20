@@ -3,6 +3,8 @@ import * as gcp from '@pulumi/gcp';
 const REQUIRED_APIS = [
   'run.googleapis.com',
   'artifactregistry.googleapis.com',
+  'appengine.googleapis.com',
+  'cloudtasks.googleapis.com',
   'secretmanager.googleapis.com',
   'iam.googleapis.com',
   'iamcredentials.googleapis.com',

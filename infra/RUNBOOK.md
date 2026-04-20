@@ -161,6 +161,63 @@ gcloud run services update bartools-backend-<env> \
 # revert with: --ingress all
 ```
 
+## Cloud Tasks inference
+
+Report submit creates DB-backed inference jobs and enqueues one Cloud Task per
+scan. Cloud Tasks calls `POST /internal/tasks/report-scan-inference` with an
+OIDC token minted for the backend service account. The endpoint validates the
+token before claiming and processing the job.
+
+### Inspect the queue
+
+```bash
+gcloud tasks queues describe bartools-report-inference-<env> \
+  --location us-east1 --project bartools-<env>
+
+gcloud tasks list \
+  --queue=bartools-report-inference-<env> \
+  --location us-east1 --project bartools-<env>
+```
+
+### Watch task dispatch logs
+
+```bash
+gcloud logging read \
+  'resource.type="cloud_tasks_queue"
+   AND resource.labels.queue_id="bartools-report-inference-<env>"' \
+  --project bartools-<env> --limit 50 \
+  --format='value(timestamp,severity,jsonPayload.status,textPayload)'
+```
+
+### Retry a stuck queued job
+
+If a report is still `processing`, first check whether there are pending Cloud
+Tasks and whether any inference jobs are already `running`. Fresh `running`
+jobs intentionally return HTTP 503 to Cloud Tasks so the same task retries
+later instead of starting duplicate inferencing.
+
+```bash
+gcloud tasks list \
+  --queue=bartools-report-inference-<env> \
+  --location us-east1 --project bartools-<env>
+
+gcloud run services logs read bartools-backend-<env> \
+  --region us-east1 --project bartools-<env> --limit 100 \
+  | grep -E 'Cloud Tasks|inference|report-scan'
+```
+
+### Recreate a missing queue
+
+The queue is managed by Pulumi:
+
+```bash
+source infra/scripts/_env.sh
+pulumi -C infra up --stack <env> --yes
+```
+
+Do not delete the App Engine application. Cloud Tasks requires it, and the App
+Engine application location is effectively permanent for the GCP project.
+
 ## Neon
 
 ### Create an ad-hoc branch for a spike

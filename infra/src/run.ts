@@ -16,6 +16,12 @@ export function createCloudRunService(opts: {
   claudeCodeOauthTokenSecretId: pulumi.Output<string>;
   langsmithApiKeySecretId: pulumi.Output<string>;
   gcsBucketName: pulumi.Input<string>;
+  cloudTasks?: {
+    projectId: string;
+    location: string;
+    queueId: string;
+    oidcServiceAccountEmail: pulumi.Output<string>;
+  };
   minInstances: number;
   maxInstances: number;
   cpu: string;
@@ -36,6 +42,7 @@ export function createCloudRunService(opts: {
           minInstanceCount: opts.minInstances,
           maxInstanceCount: opts.maxInstances,
         },
+        timeout: '900s',
         containers: [
           {
             image: opts.imageUri,
@@ -49,6 +56,17 @@ export function createCloudRunService(opts: {
               { name: 'BARTOOLS_ENV', value: opts.env },
               { name: 'GCS_BUCKET', value: pulumi.output(opts.gcsBucketName) },
               { name: 'GCS_PRESIGNED_PUT_TTL_SECONDS', value: '300' },
+              ...(opts.cloudTasks
+                ? [
+                    { name: 'CLOUD_TASKS_PROJECT_ID', value: opts.cloudTasks.projectId },
+                    { name: 'CLOUD_TASKS_LOCATION', value: opts.cloudTasks.location },
+                    { name: 'CLOUD_TASKS_QUEUE_ID', value: opts.cloudTasks.queueId },
+                    {
+                      name: 'CLOUD_TASKS_OIDC_SERVICE_ACCOUNT_EMAIL',
+                      value: opts.cloudTasks.oidcServiceAccountEmail,
+                    },
+                  ]
+                : []),
               secretEnv('DATABASE_URL', opts.databaseUrlSecretId),
               secretEnv('CLAUDE_CODE_OAUTH_TOKEN', opts.claudeCodeOauthTokenSecretId),
               secretEnv('LANGSMITH_API_KEY', opts.langsmithApiKeySecretId),
