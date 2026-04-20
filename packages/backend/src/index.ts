@@ -20,6 +20,7 @@ import {
   listInventoryForVenue,
   upsertInventoryItem,
 } from './inventory-queries';
+import { listLowStockAlerts } from './low-stock-queries';
 import { manualBottleSchema } from './bottle-queries';
 import { enqueueReportInference } from './queue';
 import { getBucketName, getTtlSeconds, presignGet, presignPut } from './storage';
@@ -332,6 +333,11 @@ app.get('/venues/:venueId/locations', async (c) => {
 app.get('/venues/:venueId/inventory', async (c) => {
   const items = await listInventoryForVenue(c.req.param('venueId'));
   return c.json({ items });
+});
+
+app.get('/venues/:venueId/low-stock', async (c) => {
+  const alerts = await listLowStockAlerts(c.req.param('venueId'));
+  return c.json({ alerts });
 });
 
 app.get('/locations/:locationId/inventory', async (c) => {

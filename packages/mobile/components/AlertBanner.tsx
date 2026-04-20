@@ -1,17 +1,41 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { View, Text, Pressable, Modal, ScrollView, StyleSheet } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import type { LowStockAlert } from '@bartools/types'
 import { useTheme } from '../theme/useTheme'
 import { AlertCard } from './AlertCard'
 import { GradientButton } from './GradientButton'
-import { MOCK_LOW_STOCK_ALERTS } from '../data/mockData'
+import { getVenueLowStockAlerts } from '../lib/api'
+import { DEFAULT_VENUE_ID } from '../lib/config'
 
 export function AlertBanner() {
   const theme = useTheme()
   const [showModal, setShowModal] = useState(false)
-  const alertCount = MOCK_LOW_STOCK_ALERTS.length
+  const [alerts, setAlerts] = useState<LowStockAlert[]>([])
+  const [loaded, setLoaded] = useState(false)
 
-  if (alertCount === 0) return null
+  useEffect(() => {
+    let cancelled = false
+    getVenueLowStockAlerts(DEFAULT_VENUE_ID)
+      .then((res) => {
+        if (cancelled) return
+        setAlerts(res.alerts)
+        setLoaded(true)
+      })
+      .catch((err) => {
+        if (cancelled) return
+        // Error-path: don't nag users with a fake banner — log and stay hidden.
+        console.warn('AlertBanner: failed to fetch low-stock alerts', err)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Hide while loading, on error (loaded stays false), or when empty.
+  if (!loaded || alerts.length === 0) return null
+
+  const alertCount = alerts.length
 
   return (
     <>
@@ -60,13 +84,13 @@ export function AlertBanner() {
               </View>
 
               {/* Alert list */}
-              {MOCK_LOW_STOCK_ALERTS.map(alert => (
+              {alerts.map(alert => (
                 <AlertCard
                   key={`${alert.bottle.id}-${alert.location.id}`}
                   bottleName={alert.bottle.name}
                   location={alert.location.name}
                   fillPercent={alert.fillPercent}
-                  parThreshold={alert.parThreshold}
+                  parThreshold={alert.parPercent}
                 />
               ))}
 

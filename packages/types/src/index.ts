@@ -36,4 +36,5 @@ export type {
   ManualBottleInput,
   LocationListItem,
   InventoryListItem,
+  LowStockAlert,
 } from './api';

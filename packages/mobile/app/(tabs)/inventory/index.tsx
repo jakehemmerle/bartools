@@ -9,10 +9,14 @@ import { FilterChip } from '../../../components/FilterChip'
 import { BottleCard } from '../../../components/BottleCard'
 import { AlertBanner } from '../../../components/AlertBanner'
 import { AddToInventorySheet } from '../../../components/AddToInventorySheet'
-import { INVENTORY_FILTERS } from '../../../data/mockData'
 import { getVenueInventory } from '../../../lib/api'
 import { DEFAULT_VENUE_ID } from '../../../lib/config'
-import { filterInventory, groupByCategory, type InventorySectionItem } from '../../../lib/inventory-view'
+import {
+  deriveCategories,
+  filterInventory,
+  groupByCategory,
+  type InventorySectionItem,
+} from '../../../lib/inventory-view'
 import type { InventoryListItem } from '@bartools/types'
 
 type LoadState =
@@ -40,10 +44,14 @@ export default function InventoryScreen() {
     }, [fetchInventory]),
   )
 
-  const filtered = useMemo(() => {
-    const items = loadState.status === 'ready' ? loadState.items : []
-    return filterInventory(items, searchQuery, activeFilter)
-  }, [loadState, searchQuery, activeFilter])
+  const items = loadState.status === 'ready' ? loadState.items : []
+
+  const categories = useMemo(() => deriveCategories(items), [items])
+
+  const filtered = useMemo(
+    () => filterInventory(items, searchQuery, activeFilter),
+    [items, searchQuery, activeFilter],
+  )
 
   const sectionData = useMemo<InventorySectionItem[]>(
     () => groupByCategory(filtered),
@@ -109,7 +117,7 @@ export default function InventoryScreen() {
           contentContainerStyle={styles.filtersContent}
           style={styles.filtersRow}
         >
-          {INVENTORY_FILTERS.map((filter) => (
+          {categories.map((filter) => (
             <FilterChip
               key={filter}
               label={filter}

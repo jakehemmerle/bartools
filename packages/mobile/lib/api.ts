@@ -6,6 +6,7 @@ import type {
   BottleSearchResult,
   LocationListItem,
   InventoryListItem,
+  LowStockAlert,
   ManualBottleInput,
 } from '@bartools/types'
 
@@ -308,6 +309,12 @@ export function getVenueInventory(
   venueId: string,
 ): Promise<{ items: InventoryListItem[] }> {
   return fetchJson(`/venues/${encodePath(venueId)}/inventory`)
+}
+
+export function getVenueLowStockAlerts(
+  venueId: string,
+): Promise<{ alerts: LowStockAlert[] }> {
+  return fetchJson(`/venues/${encodePath(venueId)}/low-stock`)
 }
 
 export function getLocationInventory(

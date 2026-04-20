@@ -111,8 +111,32 @@ describe('listInventoryForVenue', () => {
       subcategory: 'bottled-in-bond',
       sizeMl: 750,
       fillPercent: 70,
+      parPercent: 30,
     });
     expect(typeof result[0].addedAt).toBe('string');
+  });
+
+  test('surfaces custom parThreshold as parPercent (tenths * 10)', async () => {
+    const fx = await seedVenue(['Main Bar']);
+    const bottle = await seedBottle({
+      name: 'Custom Par',
+      category: 'gin',
+      sizeMl: 750,
+    });
+
+    await db
+      .insert(inventory)
+      .values({
+        locationId: fx.locationIds[0],
+        bottleId: bottle.id,
+        fillLevelTenths: 6,
+        parThreshold: 5,
+      });
+
+    const result = await listInventoryForVenue(fx.venueId);
+    expect(result).toHaveLength(1);
+    expect(result[0].parPercent).toBe(50);
+    expect(result[0].fillPercent).toBe(60);
   });
 
   test('multi-location rows are ordered by category then name', async () => {

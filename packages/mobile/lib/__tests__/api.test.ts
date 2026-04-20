@@ -66,6 +66,7 @@ import {
   searchBottles,
   getLocations,
   getVenueInventory,
+  getVenueLowStockAlerts,
   getLocationInventory,
   addInventoryItem,
   getReportStreamUrl,
@@ -155,6 +156,31 @@ describe('api client', () => {
     expect(lastCall().url).toContain('/venues/v-1/inventory')
     expect(lastCall().init?.method ?? 'GET').toBe('GET')
     expect(result.items).toEqual([])
+  })
+
+  it('getVenueLowStockAlerts GETs /venues/:venueId/low-stock', async () => {
+    queueResponse({
+      alerts: [
+        {
+          bottle: { id: 'b-1', name: 'Low Bottle' },
+          location: { id: 'loc-1', name: 'Main Bar' },
+          fillPercent: 10,
+          parPercent: 30,
+        },
+      ],
+    })
+
+    const result = await getVenueLowStockAlerts('v-1')
+
+    expect(lastCall().url).toContain('/venues/v-1/low-stock')
+    expect(lastCall().init?.method ?? 'GET').toBe('GET')
+    expect(result.alerts).toHaveLength(1)
+    expect(result.alerts[0]).toEqual({
+      bottle: { id: 'b-1', name: 'Low Bottle' },
+      location: { id: 'loc-1', name: 'Main Bar' },
+      fillPercent: 10,
+      parPercent: 30,
+    })
   })
 
   it('getLocationInventory GETs /locations/:locationId/inventory', async () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test'
 import type { InventoryListItem } from '@bartools/types'
-import { filterInventory, groupByCategory } from '../inventory-view'
+import { deriveCategories, filterInventory, groupByCategory } from '../inventory-view'
 
 function item(partial: Partial<InventoryListItem>): InventoryListItem {
   return {
@@ -98,5 +98,42 @@ describe('groupByCategory', () => {
     ]
     const result = groupByCategory(items)
     expect(result.filter((r) => r.type === 'header')).toHaveLength(2)
+  })
+})
+
+describe('deriveCategories', () => {
+  it('returns only "All Bottles" for empty input', () => {
+    expect(deriveCategories([])).toEqual(['All Bottles'])
+  })
+
+  it('returns "All Bottles" plus a single Title-Cased category', () => {
+    const items = [
+      item({ id: 'a', category: 'bourbon' }),
+      item({ id: 'b', category: 'bourbon' }),
+    ]
+    expect(deriveCategories(items)).toEqual(['All Bottles', 'Bourbon'])
+  })
+
+  it('de-duplicates and alphabetises multiple categories', () => {
+    const items = [
+      item({ id: 'a', category: 'gin' }),
+      item({ id: 'b', category: 'bourbon' }),
+      item({ id: 'c', category: 'bourbon' }),
+    ]
+    expect(deriveCategories(items)).toEqual(['All Bottles', 'Bourbon', 'Gin'])
+  })
+
+  it('Title-Cases lowercase categories (first letter upper, rest as-is)', () => {
+    const items = [item({ id: 'a', category: 'gin' })]
+    expect(deriveCategories(items)).toEqual(['All Bottles', 'Gin'])
+  })
+
+  it('de-duplicates categories with identical casing', () => {
+    const items = [
+      item({ id: 'a', category: 'bourbon' }),
+      item({ id: 'b', category: 'bourbon' }),
+      item({ id: 'c', category: 'bourbon' }),
+    ]
+    expect(deriveCategories(items)).toEqual(['All Bottles', 'Bourbon'])
   })
 })

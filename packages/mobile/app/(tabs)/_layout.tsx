@@ -45,6 +45,8 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="cube-scan" color={color} size={size} />
           ),
+          // Hidden until the live-scan flow is ready; screen file kept for later.
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -55,6 +57,8 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="liquor" color={color} size={size} />
           ),
+          // Hidden for now; screens + add-manually flow kept for later.
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -75,6 +79,8 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="cog" color={color} size={size} />
           ),
+          // Hidden until auth/settings surface is real; screen file kept for later.
+          href: null,
         }}
       />
     </Tabs>
