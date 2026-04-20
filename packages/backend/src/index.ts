@@ -240,6 +240,7 @@ app.get('/reports/:reportId/stream', async (c) => {
     let lastReportStatus = '';
     let aborted = false;
     let lastStaleSweepAt = 0;
+    let lastWriteAt = 0;
 
     const writeSSE = async (event: {
       event: string;
@@ -248,6 +249,7 @@ app.get('/reports/:reportId/stream', async (c) => {
       if (aborted) return false;
       try {
         await stream.writeSSE(event);
+        lastWriteAt = Date.now();
         return true;
       } catch (error) {
         if (isClientDisconnectError(error)) {
@@ -337,6 +339,14 @@ app.get('/reports/:reportId/stream', async (c) => {
           data: JSON.stringify(state.report),
         });
         break;
+      }
+
+      if (Date.now() - lastWriteAt > 5_000) {
+        const sent = await writeSSE({
+          event: 'report.heartbeat',
+          data: JSON.stringify({ reportId, at: new Date().toISOString() }),
+        });
+        if (!sent) break;
       }
 
       await stream.sleep(750);
