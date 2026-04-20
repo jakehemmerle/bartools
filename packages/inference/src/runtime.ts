@@ -180,8 +180,7 @@ async function runBottleInferenceImpl(
         tools: [],
         mcpServers: { eval: mcpServer },
         allowedTools: ["mcp__eval__submit_answer"],
-        permissionMode: "bypassPermissions",
-        allowDangerouslySkipPermissions: true,
+        permissionMode: "dontAsk",
         persistSession: false,
         env: {
           CLAUDE_CONFIG_DIR: process.env.CLAUDE_CONFIG_DIR ?? "/tmp/.claude",
