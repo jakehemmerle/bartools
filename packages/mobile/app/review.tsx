@@ -33,8 +33,12 @@ const MANUAL_CATEGORY_CHOICES = [
 export default function ReviewScreen() {
   const theme = useTheme()
   const router = useRouter()
-  const { reportId: rawReportId } = useLocalSearchParams<{ reportId: string }>()
+  const { reportId: rawReportId, mode } = useLocalSearchParams<{
+    reportId: string
+    mode?: string
+  }>()
   const reportId = rawReportId && isValidUuid(rawReportId) ? rawReportId : null
+  const isViewMode = mode === 'view'
   const { status, progress, records, error } = useReportStream(reportId)
 
   const [edits, setEdits] = useState<Record<string, RecordEdit>>({})
@@ -151,19 +155,21 @@ export default function ReviewScreen() {
             record={item}
             editedFill={edit?.fillPercent}
             editedName={edit?.bottleName ?? (manualName ? edit?.bottle?.name : undefined)}
-            onEdit={() => setSearchTarget(item.id)}
-            missingBottle={missingBottle}
+            onEdit={isViewMode ? undefined : () => setSearchTarget(item.id)}
+            missingBottle={!isViewMode && missingBottle}
           />
-          <Pressable
-            onPress={() => setFillEditTarget(fillEditTarget === item.id ? null : item.id)}
-            style={styles.fillEditButton}
-            accessibilityRole="button"
-          >
-            <Text style={[styles.fillEditText, { color: theme.primary }]}>
-              Adjust fill
-            </Text>
-          </Pressable>
-          {fillEditTarget === item.id && fillRecord ? (
+          {isViewMode ? null : (
+            <Pressable
+              onPress={() => setFillEditTarget(fillEditTarget === item.id ? null : item.id)}
+              style={styles.fillEditButton}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.fillEditText, { color: theme.primary }]}>
+                Adjust fill
+              </Text>
+            </Pressable>
+          )}
+          {!isViewMode && fillEditTarget === item.id && fillRecord ? (
             <View style={[styles.fillEditor, { backgroundColor: theme.surfaceContainer }]}>
               <FillLevelSlider
                 value={fillRecord.fill}
@@ -173,7 +179,7 @@ export default function ReviewScreen() {
               />
             </View>
           ) : null}
-          {!hasCatalogBottle ? (
+          {!isViewMode && !hasCatalogBottle ? (
             <View style={[styles.manualEditor, { backgroundColor: theme.surfaceContainer }]}>
               <Text style={[styles.manualLabel, { color: theme.primary }]}>
                 Manual Bottle
@@ -239,7 +245,7 @@ export default function ReviewScreen() {
         </View>
       )
     },
-    [edits, fillEditTarget, fillRecord, handleFillChange, handleManualBottleChange, theme],
+    [edits, fillEditTarget, fillRecord, handleFillChange, handleManualBottleChange, isViewMode, theme],
   )
 
   return (
@@ -249,7 +255,9 @@ export default function ReviewScreen() {
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <MaterialCommunityIcons name="arrow-left" size={24} color={theme.primary} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: theme.primary }]}>Review</Text>
+        <Text style={[styles.headerTitle, { color: theme.primary }]}>
+          {isViewMode ? 'Report' : 'Review'}
+        </Text>
       </View>
 
       {/* Progress */}
@@ -303,7 +311,7 @@ export default function ReviewScreen() {
       ) : null}
 
       {/* Bottom action */}
-      {isReady ? (
+      {isReady && !isViewMode ? (
         <View style={[styles.bottomAction, { backgroundColor: theme.surfaceContainerLow }]}>
           <Pressable
             style={({ pressed }) => [

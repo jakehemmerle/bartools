@@ -3,7 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
-  SectionList,
+  FlatList,
   Pressable,
   ActivityIndicator,
   RefreshControl,
@@ -23,6 +23,9 @@ import type { ReportListItem } from '@bartools/types'
 // ---------------------------------------------------------------------------
 
 type DateSection = { title: string; data: ReportListItem[] }
+type ReportListRow =
+  | { type: 'section'; title: string }
+  | { type: 'report'; item: ReportListItem }
 
 function shortId(id: string): string {
   return `#RPT-${id.slice(-4).toUpperCase()}`
@@ -62,6 +65,17 @@ function groupByDate(reports: ReportListItem[]): DateSection[] {
     map.set(key, list)
   }
   return Array.from(map, ([title, data]) => ({ title, data }))
+}
+
+function flattenDateSections(sections: DateSection[]): ReportListRow[] {
+  const rows: ReportListRow[] = []
+  for (const section of sections) {
+    rows.push({ type: 'section', title: section.title })
+    for (const item of section.data) {
+      rows.push({ type: 'report', item })
+    }
+  }
+  return rows
 }
 
 // ---------------------------------------------------------------------------
@@ -138,9 +152,9 @@ function ReportCard({ item }: { item: ReportListItem }) {
   return (
     <Pressable
       onPress={() => {
-        if (isUnreviewed || isProcessing) {
-          router.push({ pathname: '/review', params: { reportId: item.id } })
-        }
+        const params: { reportId: string; mode?: 'view' } = { reportId: item.id }
+        if (isReviewed) params.mode = 'view'
+        router.push({ pathname: '/review', params })
       }}
       style={({ pressed }) => [
         styles.card,
@@ -274,6 +288,7 @@ export default function ReportsScreen() {
   ).length
 
   const sections = groupByDate(reports)
+  const rows = flattenDateSections(sections)
 
   if (loading) {
     return (
@@ -312,9 +327,11 @@ export default function ReportsScreen() {
     >
       <AppHeader />
 
-      <SectionList
-        sections={sections}
-        keyExtractor={(item) => item.id}
+      <FlatList
+        data={rows}
+        keyExtractor={(row) =>
+          row.type === 'section' ? `section-${row.title}` : row.item.id
+        }
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -343,12 +360,15 @@ export default function ReportsScreen() {
             </View>
           ) : null
         }
-        renderSectionHeader={({ section }) => (
-          <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
-            {section.title}
-          </Text>
-        )}
-        renderItem={({ item }) => <ReportCard item={item} />}
+        renderItem={({ item }) =>
+          item.type === 'section' ? (
+            <Text style={[styles.sectionHeader, { color: theme.onSurfaceVariant }]}>
+              {item.title}
+            </Text>
+          ) : (
+            <ReportCard item={item.item} />
+          )
+        }
         ListFooterComponent={
           <View style={styles.footer}>
             <MaterialCommunityIcons

@@ -264,7 +264,11 @@ export function useReportStream(reportId: string | null) {
           setState((prev) => ({ ...prev, records: mergeRecord(prev.records, record) }))
         },
         onProgress: (progress) => {
-          setState((prev) => ({ ...prev, progress }))
+          setState((prev) => ({
+            ...prev,
+            status: prev.status === 'connecting' ? 'streaming' : prev.status,
+            progress,
+          }))
         },
         onReady: (progress) => {
           setState((prev) => ({
@@ -310,6 +314,8 @@ export function useReportStream(reportId: string | null) {
       isTerminal: () =>
         statusRef.current === 'ready_for_review' || statusRef.current === 'closed',
     })
+
+    startPolling()
 
     return () => {
       detach()

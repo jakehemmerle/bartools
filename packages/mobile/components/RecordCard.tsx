@@ -7,7 +7,7 @@ import { FillLevelBar } from './FillLevelBar'
 
 interface RecordCardProps {
   record: ReportBottleRecord
-  onEdit: () => void
+  onEdit?: () => void
   editedFill?: number
   editedName?: string
   missingBottle?: boolean
@@ -94,15 +94,17 @@ export function RecordCard({
               color={statusStyle.fg}
             />
           </View>
-          <Pressable
-            onPress={onEdit}
-            hitSlop={8}
-            accessible
-            accessibilityRole="button"
-            accessibilityLabel={`Edit ${bottleName}`}
-          >
-            <MaterialCommunityIcons name="pencil-outline" size={18} color={theme.primary} />
-          </Pressable>
+          {onEdit ? (
+            <Pressable
+              onPress={onEdit}
+              hitSlop={8}
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={`Edit ${bottleName}`}
+            >
+              <MaterialCommunityIcons name="pencil-outline" size={18} color={theme.primary} />
+            </Pressable>
+          ) : null}
         </View>
       </View>
 
