@@ -6,6 +6,7 @@ import type {
   BottleSearchResult,
   LocationListItem,
   InventoryListItem,
+  ManualBottleInput,
 } from '@bartools/types'
 
 // ---------------------------------------------------------------------------
@@ -251,7 +252,8 @@ export function listReports(): Promise<{ reports: ReportListItem[] }> {
 
 type ReviewRecord = {
   id: string
-  bottleId: string
+  bottleId?: string
+  bottle?: ManualBottleInput
   fillPercent: number // 0-100 in the UI
 }
 
@@ -271,7 +273,7 @@ export function reviewReport(
       userId,
       records: records.map((r) => ({
         id: r.id,
-        bottleId: r.bottleId,
+        ...(r.bottleId ? { bottleId: r.bottleId } : { bottle: r.bottle }),
         fillTenths: Math.round(r.fillPercent / 10),
       })),
     }),
@@ -316,15 +318,17 @@ export function getLocationInventory(
 
 export function addInventoryItem(input: {
   locationId: string
-  bottleId: string
+  bottleId?: string
+  bottle?: ManualBottleInput
   fillPercent: number
   notes?: string
 }): Promise<InventoryListItem> {
   const body: Record<string, unknown> = {
     locationId: input.locationId,
-    bottleId: input.bottleId,
     fillPercent: input.fillPercent,
   }
+  if (input.bottleId !== undefined) body.bottleId = input.bottleId
+  if (input.bottle !== undefined) body.bottle = input.bottle
   if (input.notes !== undefined) body.notes = input.notes
   return fetchJson('/inventory', {
     method: 'POST',
@@ -347,10 +351,18 @@ export function getReportStreamUrl(reportId: string): string {
 
 export function resolveImageUrl(path: string): string {
   if (path.startsWith('http')) {
-    const url = new URL(path)
-    const apiHost = new URL(API_BASE_URL).host
-    if (url.host !== apiHost) return '' // reject URLs outside our API domain
-    return path
+    try {
+      const url = new URL(path)
+      const apiHost = new URL(API_BASE_URL).host
+      const isGcsSignedUrl =
+        url.protocol === 'https:' &&
+        (url.host === 'storage.googleapis.com' ||
+          url.host.endsWith('.storage.googleapis.com'))
+      if (url.host === apiHost || isGcsSignedUrl) return path
+      return '' // reject URLs outside our API domain or trusted object storage
+    } catch {
+      return ''
+    }
   }
   return `${API_BASE_URL}${path}`
 }

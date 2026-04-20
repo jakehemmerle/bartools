@@ -1,6 +1,7 @@
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { View, Text, TextInput, ScrollView, FlatList, Pressable, StyleSheet, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useFocusEffect } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { AppHeader } from '../../../components/AppHeader'
@@ -33,10 +34,11 @@ export default function InventoryScreen() {
       .catch(() => setLoadState({ status: 'error' }))
   }, [])
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data load on mount
-    fetchInventory()
-  }, [fetchInventory])
+  useFocusEffect(
+    useCallback(() => {
+      fetchInventory()
+    }, [fetchInventory]),
+  )
 
   const filtered = useMemo(() => {
     const items = loadState.status === 'ready' ? loadState.items : []

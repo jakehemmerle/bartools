@@ -214,6 +214,31 @@ describe('api client', () => {
     expect(body.notes).toBeUndefined()
   })
 
+  it('addInventoryItem can POST manual bottle details instead of bottleId', async () => {
+    queueResponse({ id: 'inv-3' })
+
+    await addInventoryItem({
+      locationId: 'loc-1',
+      bottle: {
+        name: 'Manual Amaro',
+        category: 'amaro',
+        sizeMl: 750,
+      },
+      fillPercent: 40,
+    })
+
+    const body = JSON.parse(lastCall().init?.body as string)
+    expect(body).toEqual({
+      locationId: 'loc-1',
+      bottle: {
+        name: 'Manual Amaro',
+        category: 'amaro',
+        sizeMl: 750,
+      },
+      fillPercent: 40,
+    })
+  })
+
   it('addInventoryItem propagates ApiError on 400 invalid_inventory_payload', async () => {
     queueErrorResponse(400, '{"error":"invalid_inventory_payload"}')
 
@@ -322,6 +347,33 @@ describe('api client', () => {
     ])
   })
 
+  it('reviewReport can send manual bottle details for unrecognized records', async () => {
+    queueResponse({ id: 'r-1', bottleRecords: [] })
+
+    await reviewReport('r-1', 'user-1', [
+      {
+        id: 'rec-1',
+        bottle: {
+          name: 'Manual Mezcal',
+          category: 'mezcal',
+          sizeMl: 750,
+        },
+        fillPercent: 60,
+      },
+    ])
+
+    const body = JSON.parse(lastCall().init?.body as string)
+    expect(body.records[0]).toEqual({
+      id: 'rec-1',
+      bottle: {
+        name: 'Manual Mezcal',
+        category: 'mezcal',
+        sizeMl: 750,
+      },
+      fillTenths: 6,
+    })
+  })
+
   it('throws ApiError on non-ok response', async () => {
     queueErrorResponse(404, '{"error":"report_not_found"}')
 
@@ -343,6 +395,11 @@ describe('api client', () => {
   it('resolveImageUrl prepends base URL for relative paths', () => {
     expect(resolveImageUrl('/uploads/photo.jpg')).toContain('/uploads/photo.jpg')
     expect(resolveImageUrl('/uploads/photo.jpg')).toMatch(/^http/)
+  })
+
+  it('resolveImageUrl allows signed GCS URLs returned by the backend', () => {
+    const url = 'https://storage.googleapis.com/bartools-test/reports/r-1/photo.jpg?sig=abc'
+    expect(resolveImageUrl(url)).toBe(url)
   })
 
   it('resolveImageUrl rejects URLs from unknown domains', () => {

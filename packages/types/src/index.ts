@@ -33,6 +33,7 @@ export type {
   ReportProgress,
   ReportStreamState,
   BottleSearchResult,
+  ManualBottleInput,
   LocationListItem,
   InventoryListItem,
 } from './api';

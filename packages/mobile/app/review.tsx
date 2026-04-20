@@ -1,9 +1,9 @@
 import { useState, useCallback, useMemo } from 'react'
-import { View, Text, FlatList, Pressable, Alert, ActivityIndicator, StyleSheet } from 'react-native'
+import { View, Text, TextInput, ScrollView, FlatList, Pressable, Alert, ActivityIndicator, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import type { BottleSearchResult, ReportBottleRecord } from '@bartools/types'
+import { ITEM_CATEGORIES, type BottleSearchResult, type ItemCategory, type ReportBottleRecord } from '@bartools/types'
 import { useReportStream } from '../lib/use-report-stream'
 import { reviewReport, isValidUuid } from '../lib/api'
 import { DEFAULT_USER_ID } from '../lib/config'
@@ -16,6 +16,19 @@ import { useTheme } from '../theme/useTheme'
 import { RecordCard } from '../components/RecordCard'
 import { BottleSearchModal } from '../components/BottleSearchModal'
 import { FillLevelSlider } from '../components/FillLevelSlider'
+
+const MANUAL_CATEGORY_CHOICES = [
+  'whiskey',
+  'bourbon',
+  'vodka',
+  'gin',
+  'rum',
+  'tequila',
+  'liqueur',
+  'wine',
+  'beer',
+  'other',
+] as const satisfies readonly ItemCategory[]
 
 export default function ReviewScreen() {
   const theme = useTheme()
@@ -45,10 +58,46 @@ export default function ReviewScreen() {
         ...prev[searchTarget],
         bottleId: bottle.id,
         bottleName: bottle.name,
+        bottle: undefined,
       },
     }))
     setSearchTarget(null)
   }, [searchTarget])
+
+  const handleManualBottleChange = useCallback((
+    recordId: string,
+    patch: { name?: string; category?: ItemCategory; sizeMlText?: string },
+  ) => {
+    setEdits((prev) => {
+      const current = prev[recordId]?.bottle ?? { name: '', category: 'other' as ItemCategory }
+      const sizeMl =
+        patch.sizeMlText !== undefined
+          ? patch.sizeMlText.trim().length > 0
+            ? Number.parseInt(patch.sizeMlText, 10)
+            : undefined
+          : current.sizeMl
+      return {
+        ...prev,
+        [recordId]: {
+          ...prev[recordId],
+          bottleId: undefined,
+          bottleName: undefined,
+          bottle: {
+            ...current,
+            ...(patch.name !== undefined ? { name: patch.name } : {}),
+            ...(patch.category !== undefined
+              ? {
+                  category: ITEM_CATEGORIES.includes(patch.category)
+                    ? patch.category
+                    : ('other' as ItemCategory),
+                }
+              : {}),
+            ...(sizeMl !== undefined ? { sizeMl } : { sizeMl: undefined }),
+          },
+        },
+      }
+    })
+  }, [])
 
   const handleFillChange = useCallback((recordId: string, fillPercent: number) => {
     setEdits((prev) => ({
@@ -63,15 +112,16 @@ export default function ReviewScreen() {
       setSubmitting(true)
       const reviewRecords = records.map((r) => {
         const edit = edits[r.id]
+        const bottleId = edit?.bottleId ?? r.bottleId
         return {
           id: r.id,
-          bottleId: edit?.bottleId ?? r.bottleId ?? '',
+          ...(bottleId ? { bottleId } : { bottle: edit?.bottle }),
           fillPercent: edit?.fillPercent ?? r.fillPercent,
         }
       })
       await reviewReport(reportId, DEFAULT_USER_ID, reviewRecords)
       Alert.alert('Review Complete', 'Inventory has been updated.', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)') },
+        { text: 'OK', onPress: () => router.replace('/(tabs)/inventory') },
       ])
     } catch {
       Alert.alert('Review Failed', 'Could not submit review. Please try again.')
@@ -93,20 +143,26 @@ export default function ReviewScreen() {
     ({ item }: { item: ReportBottleRecord }) => {
       const edit = edits[item.id]
       const missingBottle = isRecordMissingBottle(item, edit)
+      const hasCatalogBottle = Boolean(edit?.bottleId ?? item.bottleId)
+      const manualName = edit?.bottle?.name.trim()
       return (
         <View style={styles.cardWrapper}>
           <RecordCard
             record={item}
             editedFill={edit?.fillPercent}
-            editedName={edit?.bottleName}
+            editedName={edit?.bottleName ?? (manualName ? edit?.bottle?.name : undefined)}
             onEdit={() => setSearchTarget(item.id)}
             missingBottle={missingBottle}
           />
-          {/* Inline fill edit — tap the fill bar area */}
           <Pressable
             onPress={() => setFillEditTarget(fillEditTarget === item.id ? null : item.id)}
-            style={styles.fillTapTarget}
-          />
+            style={styles.fillEditButton}
+            accessibilityRole="button"
+          >
+            <Text style={[styles.fillEditText, { color: theme.primary }]}>
+              Adjust fill
+            </Text>
+          </Pressable>
           {fillEditTarget === item.id && fillRecord ? (
             <View style={[styles.fillEditor, { backgroundColor: theme.surfaceContainer }]}>
               <FillLevelSlider
@@ -117,10 +173,73 @@ export default function ReviewScreen() {
               />
             </View>
           ) : null}
+          {!hasCatalogBottle ? (
+            <View style={[styles.manualEditor, { backgroundColor: theme.surfaceContainer }]}>
+              <Text style={[styles.manualLabel, { color: theme.primary }]}>
+                Manual Bottle
+              </Text>
+              <TextInput
+                style={[styles.manualInput, { color: theme.onSurface, borderBottomColor: theme.outline }]}
+                placeholder="Bottle name"
+                placeholderTextColor={`${theme.outline}CC`}
+                value={edit?.bottle?.name ?? ''}
+                onChangeText={(text) => handleManualBottleChange(item.id, { name: text })}
+                autoCapitalize="words"
+                autoCorrect={false}
+              />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.manualCategoryContent}
+              >
+                {MANUAL_CATEGORY_CHOICES.map((category) => {
+                  const active = (edit?.bottle?.category ?? 'other') === category
+                  return (
+                    <Pressable
+                      key={category}
+                      onPress={() => handleManualBottleChange(item.id, { category })}
+                      style={[
+                        styles.manualCategoryChip,
+                        {
+                          backgroundColor: active
+                            ? theme.primary
+                            : theme.surfaceContainerHigh,
+                          borderColor: active ? theme.primary : theme.outlineVariant,
+                        },
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: active }}
+                    >
+                      <Text
+                        style={[
+                          styles.manualCategoryText,
+                          { color: active ? theme.onPrimary : theme.onSurfaceVariant },
+                        ]}
+                      >
+                        {category}
+                      </Text>
+                    </Pressable>
+                  )
+                })}
+              </ScrollView>
+              <TextInput
+                style={[styles.manualInput, { color: theme.onSurface, borderBottomColor: theme.outline }]}
+                placeholder="Size ml"
+                placeholderTextColor={`${theme.outline}CC`}
+                value={edit?.bottle?.sizeMl ? String(edit.bottle.sizeMl) : ''}
+                onChangeText={(text) =>
+                  handleManualBottleChange(item.id, {
+                    sizeMlText: text.replace(/[^0-9]/g, ''),
+                  })
+                }
+                keyboardType="number-pad"
+              />
+            </View>
+          ) : null}
         </View>
       )
     },
-    [edits, fillEditTarget, fillRecord, handleFillChange, theme],
+    [edits, fillEditTarget, fillRecord, handleFillChange, handleManualBottleChange, theme],
   )
 
   return (
@@ -286,17 +405,57 @@ const styles = StyleSheet.create({
   cardWrapper: {
     position: 'relative',
   },
-  fillTapTarget: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 24,
+  fillEditButton: {
+    alignSelf: 'flex-end',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  fillEditText: {
+    fontFamily: 'SpaceGrotesk',
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   fillEditor: {
     padding: 12,
     borderRadius: 8,
     marginTop: 4,
+  },
+  manualEditor: {
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 4,
+    gap: 10,
+  },
+  manualLabel: {
+    fontFamily: 'SpaceGrotesk',
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+  },
+  manualInput: {
+    fontFamily: 'Manrope',
+    fontSize: 15,
+    borderBottomWidth: 1,
+    paddingVertical: 6,
+  },
+  manualCategoryContent: {
+    gap: 8,
+  },
+  manualCategoryChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  manualCategoryText: {
+    fontFamily: 'SpaceGrotesk',
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   bottomAction: {
     position: 'absolute',

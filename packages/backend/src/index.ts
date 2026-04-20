@@ -20,8 +20,10 @@ import {
   listInventoryForVenue,
   upsertInventoryItem,
 } from './inventory-queries';
+import { manualBottleSchema } from './bottle-queries';
 import { enqueueReportInference } from './queue';
-import { getBucketName, getTtlSeconds, presignPut } from './storage';
+import { getBucketName, getTtlSeconds, presignGet, presignPut } from './storage';
+import { uuid } from './validators';
 
 const app = new Hono();
 
@@ -204,21 +206,35 @@ app.get('/reports/:reportId', async (c) => {
 
 app.get('/reports/:reportId/stream', async (c) => {
   const reportId = c.req.param('reportId');
-  const initial = await getReportStreamState(reportId);
+  const initial = await getReportStreamState(reportId, async () => '');
   if (!initial) {
     throw jsonError(404, 'report_not_found');
   }
 
   return streamSSE(c, async (stream) => {
     const seen = new Map<string, string>();
+    const imageUrls = new Map<string, { url: string; expiresAtMs: number }>();
+    const imageTtlSeconds = getTtlSeconds();
     let lastReportStatus = '';
+
+    const imageUrlForObject = async (object: string | null) => {
+      if (!object) return '';
+      const cached = imageUrls.get(object);
+      if (cached && cached.expiresAtMs - Date.now() > 30_000) {
+        return cached.url;
+      }
+      const { getUrl, expiresAt } = await presignGet(object, imageTtlSeconds);
+      imageUrls.set(object, { url: getUrl, expiresAtMs: expiresAt.getTime() });
+      return getUrl;
+    };
 
     stream.onAbort(() => {
       seen.clear();
+      imageUrls.clear();
     });
 
     while (true) {
-      const state = await getReportStreamState(reportId);
+      const state = await getReportStreamState(reportId, imageUrlForObject);
       if (!state) {
         await stream.writeSSE({
           event: 'report.error',
@@ -324,10 +340,13 @@ app.get('/locations/:locationId/inventory', async (c) => {
 });
 
 const upsertInventorySchema = z.object({
-  locationId: z.string().uuid(),
-  bottleId: z.string().uuid(),
+  locationId: uuid(),
+  bottleId: uuid().optional(),
+  bottle: manualBottleSchema.optional(),
   fillPercent: z.number().min(0).max(100),
   notes: z.string().optional(),
+}).refine((input) => Boolean(input.bottleId) !== Boolean(input.bottle), {
+  message: 'Provide exactly one of bottleId or bottle',
 });
 
 app.post('/inventory', async (c) => {
@@ -347,6 +366,7 @@ app.post('/inventory', async (c) => {
     const item = await upsertInventoryItem({
       locationId: parsed.data.locationId,
       bottleId: parsed.data.bottleId,
+      bottle: parsed.data.bottle,
       fillLevelTenths,
       notes: parsed.data.notes,
     });
@@ -355,6 +375,9 @@ app.post('/inventory', async (c) => {
     if (error instanceof Error) {
       if (['location_not_found', 'bottle_not_found'].includes(error.message)) {
         throw jsonError(404, error.message);
+      }
+      if (error.message === 'bottle_required') {
+        throw jsonError(400, error.message);
       }
     }
     throw error;

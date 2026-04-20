@@ -59,6 +59,7 @@ async function seedBottle(values: {
   category: typeof bottles.$inferInsert.category;
   subcategory?: string;
   sizeMl?: number;
+  upc?: string;
 }) {
   const [row] = await db
     .insert(bottles)
@@ -67,6 +68,7 @@ async function seedBottle(values: {
       category: values.category,
       subcategory: values.subcategory,
       sizeMl: values.sizeMl,
+      upc: values.upc,
     })
     .returning();
   return row;
@@ -252,6 +254,80 @@ describe('upsertInventoryItem', () => {
       .from(inventory)
       .where(eq(inventory.locationId, fx.locationIds[0]));
     expect(all).toHaveLength(1);
+  });
+
+  test('creates a catalog bottle from manual details before upserting inventory', async () => {
+    const fx = await seedVenue(['Main Bar']);
+
+    const result = await upsertInventoryItem({
+      locationId: fx.locationIds[0],
+      bottle: {
+        name: 'Manual Amaro',
+        category: 'amaro',
+        sizeMl: 750,
+      },
+      fillLevelTenths: 4,
+    });
+
+    expect(result.name).toBe('Manual Amaro');
+    expect(result.category).toBe('amaro');
+    expect(result.sizeMl).toBe(750);
+    expect(result.fillPercent).toBe(40);
+
+    const bottleRows = await db
+      .select()
+      .from(bottles)
+      .where(eq(bottles.id, result.bottleId));
+    expect(bottleRows).toHaveLength(1);
+  });
+
+  test('manual details reuse an existing catalog bottle with the same name and size', async () => {
+    const fx = await seedVenue(['Main Bar']);
+    const existing = await seedBottle({
+      name: 'Known Manual Bottle',
+      category: 'gin',
+      sizeMl: 750,
+    });
+
+    const result = await upsertInventoryItem({
+      locationId: fx.locationIds[0],
+      bottle: {
+        name: 'Known Manual Bottle',
+        category: 'other',
+        sizeMl: 750,
+      },
+      fillLevelTenths: 8,
+    });
+
+    expect(result.bottleId).toBe(existing.id);
+    expect(result.category).toBe('gin');
+    expect(result.fillPercent).toBe(80);
+  });
+
+  test('manual details reuse an existing catalog bottle with the same UPC', async () => {
+    const fx = await seedVenue(['Main Bar']);
+    const existing = await seedBottle({
+      name: 'Catalog UPC Bottle',
+      category: 'tequila',
+      sizeMl: 750,
+      upc: `upc-${crypto.randomUUID()}`,
+    });
+
+    const result = await upsertInventoryItem({
+      locationId: fx.locationIds[0],
+      bottle: {
+        name: 'Different Label Same UPC',
+        category: 'other',
+        sizeMl: 1000,
+        upc: existing.upc!,
+      },
+      fillLevelTenths: 5,
+    });
+
+    expect(result.bottleId).toBe(existing.id);
+    expect(result.name).toBe('Catalog UPC Bottle');
+    expect(result.category).toBe('tequila');
+    expect(result.fillPercent).toBe(50);
   });
 
   test('throws when location is missing', async () => {

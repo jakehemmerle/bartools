@@ -6,6 +6,7 @@ import {
   bottles,
   inferenceAttempts,
   inferenceJobs,
+  inventory,
   locations,
   reportRecords,
   reports,
@@ -124,6 +125,16 @@ export type DemoIds = {
 };
 
 export async function seedDemoTenant(): Promise<{ ids: DemoIds; created: number }> {
+  const [existingUsers, existingVenues] = await Promise.all([
+    db.select({ id: users.id }).from(users).where(eq(users.email, DEMO_EMAIL)),
+    db.select({ id: venues.id }).from(venues).where(eq(venues.name, DEMO_VENUE)),
+  ]);
+  const hasMismatchedDemoUser = existingUsers.some((user) => user.id !== DEMO_USER_ID);
+  const hasMismatchedDemoVenue = existingVenues.some((venue) => venue.id !== DEMO_VENUE_ID);
+  if (hasMismatchedDemoUser || hasMismatchedDemoVenue) {
+    await resetDemoTenant();
+  }
+
   let created = 0;
 
   const [userRow] = await db
@@ -183,8 +194,23 @@ export async function resetDemoTenant(): Promise<{ deleted: number }> {
 
   // scans → reports FK has no cascade, so delete scans before reports.
   // report_records + inference_jobs cascade off scans; inference_attempts
-  // cascade off inference_jobs; inventory cascades off locations.
+  // cascade off inference_jobs. inventory.last_scan_id has no cascade, so
+  // inventory must be removed before scans.
   if (venueIds.length > 0) {
+    const demoLocations = await db
+      .select({ id: locations.id })
+      .from(locations)
+      .where(inArray(locations.venueId, venueIds));
+    const locationIds = demoLocations.map((location) => location.id);
+
+    if (locationIds.length > 0) {
+      const inventoryDel = await db
+        .delete(inventory)
+        .where(inArray(inventory.locationId, locationIds))
+        .returning({ id: inventory.id });
+      deleted += inventoryDel.length;
+    }
+
     const scanDel = await db
       .delete(scans)
       .where(inArray(scans.venueId, venueIds))

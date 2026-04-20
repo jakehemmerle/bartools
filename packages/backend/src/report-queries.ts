@@ -1,5 +1,5 @@
 import { count, desc, eq, sql } from 'drizzle-orm';
-import type { ReportDetail, ReportListItem } from '@bartools/types';
+import type { ReportBottleRecord, ReportDetail, ReportListItem } from '@bartools/types';
 import { db } from './db';
 import { locations, reportRecords, reports, scans, users } from './schema';
 import {
@@ -64,11 +64,29 @@ export async function getReportDetail(reportId: string) {
     return null;
   }
 
-  const rows = await db
+  const rows = await listReportRecordRows(reportId);
+
+  const ttl = getTtlSeconds();
+  const bottleRecords = await rowsToBottleRecords(rows, async (object) =>
+    object ? (await presignGet(object, ttl)).getUrl : ''
+  );
+
+  return {
+    id: header.id,
+    startedAt: toIso(header.startedAt),
+    completedAt: toIso(header.completedAt),
+    userId: header.userId ?? undefined,
+    userDisplayName: header.userDisplayName ?? undefined,
+    status: header.status,
+    bottleRecords,
+  } satisfies ReportDetail;
+}
+
+async function listReportRecordRows(reportId: string) {
+  return db
     .select({
       id: reportRecords.id,
       status: reportRecords.status,
-      photoGcsBucket: scans.photoGcsBucket,
       photoGcsObject: scans.photoGcsObject,
       sortOrder: scans.sortOrder,
       originalBottleId: reportRecords.originalBottleId,
@@ -90,9 +108,15 @@ export async function getReportDetail(reportId: string) {
     .leftJoin(scans, eq(scans.id, reportRecords.scanId))
     .where(eq(reportRecords.reportId, reportId))
     .orderBy(scans.sortOrder, scans.scannedAt);
+}
 
-  const ttl = getTtlSeconds();
-  const bottleRecords = await Promise.all(
+type ReportRecordRow = Awaited<ReturnType<typeof listReportRecordRows>>[number];
+
+async function rowsToBottleRecords(
+  rows: ReportRecordRow[],
+  imageUrlForObject: (object: string | null) => Promise<string>
+): Promise<ReportBottleRecord[]> {
+  return Promise.all(
     rows.map(async (row) => {
       const finalBottleName =
         row.correctedBottleName ?? row.originalBottleName ?? 'Unknown bottle';
@@ -101,9 +125,7 @@ export async function getReportDetail(reportId: string) {
       const finalVolumeMl = row.correctedVolumeMl ?? row.originalVolumeMl ?? undefined;
       const finalFillTenths = row.correctedFillTenths ?? row.originalFillTenths ?? 0;
 
-      const imageUrl = row.photoGcsObject
-        ? (await presignGet(row.photoGcsObject, ttl)).getUrl
-        : '';
+      const imageUrl = await imageUrlForObject(row.photoGcsObject);
 
       return {
         id: row.id,
@@ -123,20 +145,13 @@ export async function getReportDetail(reportId: string) {
       };
     })
   );
-
-  return {
-    id: header.id,
-    startedAt: toIso(header.startedAt),
-    completedAt: toIso(header.completedAt),
-    userId: header.userId ?? undefined,
-    userDisplayName: header.userDisplayName ?? undefined,
-    status: header.status,
-    bottleRecords,
-  } satisfies ReportDetail;
 }
 
-export async function getReportStreamState(reportId: string) {
-  const [[report], detail] = await Promise.all([
+export async function getReportStreamState(
+  reportId: string,
+  imageUrlForObject?: (object: string | null) => Promise<string>
+) {
+  const [[report], rows] = await Promise.all([
     db
       .select({
         status: reports.status,
@@ -146,20 +161,27 @@ export async function getReportStreamState(reportId: string) {
       .from(reports)
       .where(eq(reports.id, reportId))
       .limit(1),
-    getReportDetail(reportId),
+    listReportRecordRows(reportId),
   ]);
 
-  if (!detail || !report) {
+  if (!report) {
     return null;
   }
+
+  const ttl = getTtlSeconds();
+  const bottleRecords = await rowsToBottleRecords(
+    rows,
+    imageUrlForObject ??
+      (async (object) => (object ? (await presignGet(object, ttl)).getUrl : ''))
+  );
 
   return {
     report: {
       id: reportId,
       status: report.status,
-      photoCount: report.photoCount ?? detail.bottleRecords.length,
+      photoCount: report.photoCount ?? bottleRecords.length,
       processedCount: report.processedCount ?? 0,
     },
-    records: detail.bottleRecords,
+    records: bottleRecords,
   };
 }

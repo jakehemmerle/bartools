@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
-import { View, Text, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, TextInput, ScrollView, Pressable, StyleSheet, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { useTheme } from '../../../theme/useTheme'
 import { FillLevelSlider } from '../../../components/FillLevelSlider'
 import { BottleSearchModal } from '../../../components/BottleSearchModal'
-import type { BottleSearchResult, LocationListItem } from '@bartools/types'
+import { ITEM_CATEGORIES, type BottleSearchResult, type ItemCategory, type LocationListItem } from '@bartools/types'
 import { ApiError, addInventoryItem, getLocations } from '../../../lib/api'
 import { validateAddInventoryForm } from '../../../lib/add-inventory-validation'
 import { DEFAULT_VENUE_ID } from '../../../lib/config'
@@ -18,11 +18,27 @@ type LocationsState =
 
 type SelectedBottle = Pick<BottleSearchResult, 'id' | 'name' | 'category' | 'volumeMl'>
 
+const MANUAL_CATEGORY_CHOICES = [
+  'whiskey',
+  'bourbon',
+  'vodka',
+  'gin',
+  'rum',
+  'tequila',
+  'liqueur',
+  'wine',
+  'beer',
+  'other',
+] as const satisfies readonly ItemCategory[]
+
 export default function AddManuallyScreen() {
   const theme = useTheme()
   const router = useRouter()
 
   const [selectedBottle, setSelectedBottle] = useState<SelectedBottle | null>(null)
+  const [manualName, setManualName] = useState('')
+  const [manualCategory, setManualCategory] = useState<ItemCategory>('other')
+  const [manualSizeMl, setManualSizeMl] = useState('750')
   const [fillLevel, setFillLevel] = useState(100)
   const [locationsState, setLocationsState] = useState<LocationsState>({ status: 'loading' })
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null)
@@ -57,18 +73,33 @@ export default function AddManuallyScreen() {
       category: bottle.category,
       volumeMl: bottle.volumeMl,
     })
+    setManualName('')
     setShowBottleSearch(false)
   }, [])
 
   const locationsReady = locationsState.status === 'ready'
   const submitDisabled =
-    submitting || !locationsReady || !selectedLocationId || !selectedBottle
+    submitting ||
+    !locationsReady ||
+    !selectedLocationId ||
+    (!selectedBottle && manualName.trim().length === 0)
+
+  const buildManualBottle = useCallback(() => {
+    const size = manualSizeMl.trim()
+    return {
+      name: manualName.trim(),
+      category: ITEM_CATEGORIES.includes(manualCategory) ? manualCategory : 'other',
+      ...(size ? { sizeMl: Number.parseInt(size, 10) } : {}),
+    }
+  }, [manualCategory, manualName, manualSizeMl])
 
   const handleSubmit = useCallback(async () => {
     if (submitting) return
     setSubmitError(null)
+    const manualBottle = selectedBottle ? undefined : buildManualBottle()
     const validationErrors = validateAddInventoryForm({
       bottleId: selectedBottle?.id,
+      bottle: manualBottle,
       locationId: selectedLocationId ?? undefined,
       fillPercent: fillLevel,
     })
@@ -81,7 +112,7 @@ export default function AddManuallyScreen() {
     try {
       await addInventoryItem({
         locationId: selectedLocationId!,
-        bottleId: selectedBottle!.id,
+        ...(selectedBottle ? { bottleId: selectedBottle.id } : { bottle: manualBottle }),
         fillPercent: fillLevel,
       })
       router.back()
@@ -94,7 +125,7 @@ export default function AddManuallyScreen() {
     } finally {
       setSubmitting(false)
     }
-  }, [submitting, selectedBottle, selectedLocationId, fillLevel, router])
+  }, [submitting, selectedBottle, buildManualBottle, selectedLocationId, fillLevel, router])
 
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>
@@ -133,12 +164,83 @@ export default function AddManuallyScreen() {
               <MaterialCommunityIcons name="chevron-down" size={16} color={theme.outline} />
             </Pressable>
             {selectedBottle ? (
-              <Text style={[styles.hint, { color: theme.outline }]}>
-                {selectedBottle.category}
-                {selectedBottle.volumeMl ? ` · ${selectedBottle.volumeMl}ml` : ''}
-              </Text>
+              <View style={styles.selectedBottleRow}>
+                <Text style={[styles.hint, { color: theme.outline }]}>
+                  {selectedBottle.category}
+                  {selectedBottle.volumeMl ? ` · ${selectedBottle.volumeMl}ml` : ''}
+                </Text>
+                <Pressable onPress={() => setSelectedBottle(null)} accessibilityRole="button">
+                  <Text style={[styles.clearText, { color: theme.primary }]}>Clear</Text>
+                </Pressable>
+              </View>
             ) : null}
           </View>
+        </View>
+
+        {/* Manual bottle details */}
+        <View style={styles.manualSection}>
+          <Text style={[styles.label, { color: theme.primary }]}>Manual Details</Text>
+          <TextInput
+            style={[styles.textInput, { color: theme.onSurface, borderBottomColor: theme.outline }]}
+            placeholder="Bottle name"
+            placeholderTextColor={`${theme.outline}CC`}
+            value={manualName}
+            onChangeText={(text) => {
+              setSelectedBottle(null)
+              setManualName(text)
+            }}
+            autoCapitalize="words"
+            autoCorrect={false}
+          />
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryChoices}
+          >
+            {MANUAL_CATEGORY_CHOICES.map((category) => {
+              const active = manualCategory === category
+              return (
+                <Pressable
+                  key={category}
+                  onPress={() => {
+                    setSelectedBottle(null)
+                    setManualCategory(category)
+                  }}
+                  style={[
+                    styles.categoryChip,
+                    {
+                      backgroundColor: active ? theme.primary : theme.surfaceContainerHigh,
+                      borderColor: active ? theme.primary : theme.outlineVariant,
+                    },
+                  ]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text
+                    style={[
+                      styles.categoryChipText,
+                      { color: active ? theme.onPrimary : theme.onSurfaceVariant },
+                    ]}
+                  >
+                    {category}
+                  </Text>
+                </Pressable>
+              )
+            })}
+          </ScrollView>
+
+          <TextInput
+            style={[styles.textInput, { color: theme.onSurface, borderBottomColor: theme.outline }]}
+            placeholder="Size ml"
+            placeholderTextColor={`${theme.outline}CC`}
+            value={manualSizeMl}
+            onChangeText={(text) => {
+              setSelectedBottle(null)
+              setManualSizeMl(text.replace(/[^0-9]/g, ''))
+            }}
+            keyboardType="number-pad"
+          />
         </View>
 
         {/* Fill Level */}
@@ -298,6 +400,20 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 4,
   },
+  selectedBottleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  clearText: {
+    fontFamily: 'SpaceGrotesk',
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: 4,
+  },
   selectField: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -310,6 +426,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     flex: 1,
     marginRight: 8,
+  },
+  manualSection: {
+    marginBottom: 48,
+    gap: 16,
+  },
+  textInput: {
+    fontFamily: 'Manrope',
+    fontSize: 18,
+    borderBottomWidth: 1,
+    paddingVertical: 8,
+  },
+  categoryChoices: {
+    gap: 8,
+    paddingVertical: 2,
+  },
+  categoryChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  categoryChipText: {
+    fontFamily: 'SpaceGrotesk',
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   fillSection: { marginBottom: 48 },
   locationField: { marginBottom: 32 },

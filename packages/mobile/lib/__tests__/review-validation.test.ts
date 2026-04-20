@@ -43,12 +43,32 @@ describe('canSubmitReview', () => {
     expect(canSubmitReview(records, edits)).toBe(true)
   })
 
+  it('returns true when a record missing server bottleId has manual bottle details', () => {
+    const records: ReportBottleRecord[] = [
+      makeRecord({ id: 'r1', bottleId: undefined }),
+    ]
+    const edits: Record<string, RecordEdit> = {
+      r1: { bottle: { name: 'Manual Vermouth', category: 'vermouth', sizeMl: 750 } },
+    }
+    expect(canSubmitReview(records, edits)).toBe(true)
+  })
+
   it('returns false when a record is missing bottleId and has no edit', () => {
     const records: ReportBottleRecord[] = [
       makeRecord({ id: 'r1', bottleId: 'b-1' }),
       makeRecord({ id: 'r2', bottleId: undefined }),
     ]
     expect(canSubmitReview(records, {})).toBe(false)
+  })
+
+  it('returns false when manual bottle details are incomplete', () => {
+    const records: ReportBottleRecord[] = [
+      makeRecord({ id: 'r1', bottleId: undefined }),
+    ]
+    const edits: Record<string, RecordEdit> = {
+      r1: { bottle: { name: '   ', category: 'other' } },
+    }
+    expect(canSubmitReview(records, edits)).toBe(false)
   })
 
   it('treats an empty-string bottleId in an edit as missing', () => {
@@ -90,6 +110,14 @@ describe('isRecordMissingBottle', () => {
   it('returns false when the record lacks bottleId but the edit supplies one', () => {
     const record = makeRecord({ bottleId: undefined })
     const edit: RecordEdit = { bottleId: 'b-2' }
+    expect(isRecordMissingBottle(record, edit)).toBe(false)
+  })
+
+  it('returns false when the record lacks bottleId but manual bottle details are complete', () => {
+    const record = makeRecord({ bottleId: undefined })
+    const edit: RecordEdit = {
+      bottle: { name: 'Manual Gin', category: 'gin', sizeMl: 750 },
+    }
     expect(isRecordMissingBottle(record, edit)).toBe(false)
   })
 

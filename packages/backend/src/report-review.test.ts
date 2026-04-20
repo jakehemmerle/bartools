@@ -151,6 +151,47 @@ describe('reviewReport → inventory upsert', () => {
     }
   });
 
+  test('creates a catalog bottle from manual review details for unrecognized records', async () => {
+    const fx = await seedFixture({ locationIncluded: true, photos: 1 });
+
+    await reviewReport(fx.reportId, {
+      userId: fx.userId,
+      records: [
+        {
+          id: fx.recordIds[0],
+          bottle: {
+            name: 'Unlisted Mezcal',
+            category: 'mezcal',
+            sizeMl: 750,
+          },
+          fillTenths: 6,
+        },
+      ],
+    });
+
+    const [createdBottle] = await db
+      .select()
+      .from(bottles)
+      .where(eq(bottles.name, 'Unlisted Mezcal'));
+    expect(createdBottle).toBeDefined();
+    expect(createdBottle.category).toBe('mezcal');
+
+    const [record] = await db
+      .select()
+      .from(reportRecords)
+      .where(eq(reportRecords.id, fx.recordIds[0]));
+    expect(record.correctedBottleId).toBe(createdBottle.id);
+    expect(record.correctedBottleName).toBe('Unlisted Mezcal');
+    expect(record.correctedFillTenths).toBe(6);
+
+    const inventoryRows = await db
+      .select()
+      .from(inventory)
+      .where(eq(inventory.bottleId, createdBottle.id));
+    expect(inventoryRows).toHaveLength(1);
+    expect(inventoryRows[0].fillLevelTenths).toBe(6);
+  });
+
   test('re-reviewing updates the existing inventory row (no duplicates)', async () => {
     const fx = await seedFixture({ locationIncluded: true, photos: 1 });
 

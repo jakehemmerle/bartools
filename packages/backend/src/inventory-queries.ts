@@ -3,6 +3,7 @@ import type { InventoryListItem } from '@bartools/types';
 import { db } from './db';
 import { bottles, inventory, locations } from './schema';
 import { toIso } from './report-record-helpers';
+import { findOrCreateBottle, type ManualBottleInput } from './bottle-queries';
 
 // Columns returned by our venue/location queries. Keep a single column object so
 // the join shape stays consistent across helpers.
@@ -83,7 +84,8 @@ export async function listInventoryForLocation(
 
 export type UpsertInventoryInput = {
   locationId: string;
-  bottleId: string;
+  bottleId?: string;
+  bottle?: ManualBottleInput;
   fillLevelTenths: number;
   notes?: string;
 };
@@ -96,48 +98,58 @@ export async function upsertInventoryItem(
 ): Promise<InventoryListItem> {
   const clamped = Math.max(0, Math.min(10, Math.trunc(input.fillLevelTenths)));
 
-  const [location] = await db
-    .select({ id: locations.id })
-    .from(locations)
-    .where(eq(locations.id, input.locationId))
-    .limit(1);
-  if (!location) {
-    throw new Error('location_not_found');
-  }
+  return db.transaction(async (tx) => {
+    const [location] = await tx
+      .select({ id: locations.id })
+      .from(locations)
+      .where(eq(locations.id, input.locationId))
+      .limit(1);
+    if (!location) {
+      throw new Error('location_not_found');
+    }
 
-  const [bottle] = await db
-    .select({ id: bottles.id })
-    .from(bottles)
-    .where(eq(bottles.id, input.bottleId))
-    .limit(1);
-  if (!bottle) {
-    throw new Error('bottle_not_found');
-  }
+    let bottleId = input.bottleId;
+    if (bottleId) {
+      const [existingBottle] = await tx
+        .select({ id: bottles.id })
+        .from(bottles)
+        .where(eq(bottles.id, bottleId))
+        .limit(1);
+      if (!existingBottle) {
+        throw new Error('bottle_not_found');
+      }
+    } else if (input.bottle) {
+      const created = await findOrCreateBottle(input.bottle, tx);
+      bottleId = created.id;
+    } else {
+      throw new Error('bottle_required');
+    }
 
-  const [upserted] = await db
-    .insert(inventory)
-    .values({
-      locationId: input.locationId,
-      bottleId: input.bottleId,
-      fillLevelTenths: clamped,
-      notes: input.notes,
-    })
-    .onConflictDoUpdate({
-      target: [inventory.locationId, inventory.bottleId],
-      set: {
+    const [upserted] = await tx
+      .insert(inventory)
+      .values({
+        locationId: input.locationId,
+        bottleId,
         fillLevelTenths: clamped,
-        notes: input.notes ?? null,
-      },
-    })
-    .returning({ id: inventory.id });
+        notes: input.notes,
+      })
+      .onConflictDoUpdate({
+        target: [inventory.locationId, inventory.bottleId],
+        set: {
+          fillLevelTenths: clamped,
+          notes: input.notes ?? null,
+        },
+      })
+      .returning({ id: inventory.id });
 
-  const [row] = await db
-    .select(selectCols)
-    .from(inventory)
-    .innerJoin(locations, eq(locations.id, inventory.locationId))
-    .innerJoin(bottles, eq(bottles.id, inventory.bottleId))
-    .where(eq(inventory.id, upserted.id))
-    .limit(1);
+    const [row] = await tx
+      .select(selectCols)
+      .from(inventory)
+      .innerJoin(locations, eq(locations.id, inventory.locationId))
+      .innerJoin(bottles, eq(bottles.id, inventory.bottleId))
+      .where(eq(inventory.id, upserted.id))
+      .limit(1);
 
-  return toListItem(row);
+    return toListItem(row);
+  });
 }

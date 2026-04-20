@@ -68,6 +68,14 @@ export type BottleSearchResult = {
   volumeMl?: number;
 };
 
+export type ManualBottleInput = {
+  name: string;
+  category: ItemCategory;
+  subcategory?: string;
+  sizeMl?: number;
+  upc?: string;
+};
+
 export type LocationListItem = {
   id: string;
   name: string;

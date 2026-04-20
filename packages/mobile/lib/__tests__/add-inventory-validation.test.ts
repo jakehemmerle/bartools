@@ -24,6 +24,32 @@ describe('validateAddInventoryForm', () => {
     expect(errors).toEqual([])
   })
 
+  it('returns no errors for manual bottle details instead of bottleId', () => {
+    const errors = validateAddInventoryForm({
+      bottle: {
+        name: 'Manual Mezcal',
+        category: 'mezcal',
+        sizeMl: 750,
+      },
+      locationId: UUID_B,
+      fillPercent: 50,
+    })
+    expect(errors).toEqual([])
+  })
+
+  it('rejects providing both bottleId and manual bottle details', () => {
+    const errors = validateAddInventoryForm({
+      bottleId: UUID_A,
+      bottle: {
+        name: 'Manual Mezcal',
+        category: 'mezcal',
+      },
+      locationId: UUID_B,
+      fillPercent: 50,
+    })
+    expect(errors.some((e) => e.toLowerCase().includes('catalog'))).toBe(true)
+  })
+
   it('rejects missing bottleId', () => {
     const errors = validateAddInventoryForm({
       locationId: UUID_B,
@@ -40,6 +66,18 @@ describe('validateAddInventoryForm', () => {
       fillPercent: 50,
     })
     expect(errors.some((e) => e.toLowerCase().includes('bottle'))).toBe(true)
+  })
+
+  it('rejects manual bottle details without a name', () => {
+    const errors = validateAddInventoryForm({
+      bottle: {
+        name: '   ',
+        category: 'other',
+      },
+      locationId: UUID_B,
+      fillPercent: 50,
+    })
+    expect(errors.some((e) => e.toLowerCase().includes('name'))).toBe(true)
   })
 
   it('rejects missing locationId', () => {

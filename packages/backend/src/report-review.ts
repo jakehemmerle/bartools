@@ -2,15 +2,20 @@ import { eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from './db';
 import { bottles, inventory, reportRecords, reports } from './schema';
+import { findOrCreateBottle, manualBottleSchema } from './bottle-queries';
+import { uuid } from './validators';
 
 export const reviewRecordSchema = z.object({
-  id: z.string().uuid(),
-  bottleId: z.string().uuid(),
+  id: uuid(),
   fillTenths: z.number().int().min(0).max(10),
+  bottleId: uuid().optional(),
+  bottle: manualBottleSchema.optional(),
+}).refine((record) => Boolean(record.bottleId) !== Boolean(record.bottle), {
+  message: 'Provide exactly one of bottleId or bottle',
 });
 
 export const reviewReportSchema = z.object({
-  userId: z.string().uuid(),
+  userId: uuid(),
   records: z.array(reviewRecordSchema).min(1),
 });
 
@@ -63,17 +68,26 @@ export async function reviewReport(
       }
     }
 
-    const bottleIds = [...new Set(input.records.map((record) => record.bottleId))];
-    const resolvedBottles = await tx
-      .select({
-        id: bottles.id,
-        name: bottles.name,
-        category: bottles.category,
-        upc: bottles.upc,
-        sizeMl: bottles.sizeMl,
-      })
-      .from(bottles)
-      .where(inArray(bottles.id, bottleIds));
+    const bottleIds = [
+      ...new Set(
+        input.records
+          .map((record) => record.bottleId)
+          .filter((id): id is string => typeof id === 'string')
+      ),
+    ];
+    const resolvedBottles =
+      bottleIds.length > 0
+        ? await tx
+            .select({
+              id: bottles.id,
+              name: bottles.name,
+              category: bottles.category,
+              upc: bottles.upc,
+              sizeMl: bottles.sizeMl,
+            })
+            .from(bottles)
+            .where(inArray(bottles.id, bottleIds))
+        : [];
 
     const bottleMap = new Map(
       resolvedBottles.map((bottle) => [bottle.id, bottle])
@@ -86,7 +100,11 @@ export async function reviewReport(
         continue;
       }
 
-      const bottle = bottleMap.get(reviewed.bottleId);
+      const bottle = reviewed.bottleId
+        ? bottleMap.get(reviewed.bottleId)
+        : reviewed.bottle
+          ? await findOrCreateBottle(reviewed.bottle, tx)
+          : undefined;
       if (!bottle) {
         throw new Error('review_bottle_not_found');
       }
