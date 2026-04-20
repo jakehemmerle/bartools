@@ -14,6 +14,10 @@
   height: 150px;
 }
 
+.bt-comparison-card:not(.bt-comparison-card--hero) .bt-comparison-card__media .bt-record-media img {
+  object-fit: cover;
+}
+
 .bt-comparison-card__hero-header {
   align-items: center;
 }
