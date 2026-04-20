@@ -43,6 +43,25 @@ describe('backend reports client', () => {
     expect(detail?.bottleRecords[0]?.imageUrl).toBe('/api/reports/report-1002/records/record-1/image')
   })
 
+  it('keeps absolute image urls absolute when the dashboard api base is relative', async () => {
+    const imageUrl =
+      'https://storage.googleapis.com/bartools-uploads-staging/reports/report-1002/record-1.jpg?sig=demo'
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse(
+        buildReportDetailResponse({
+          imageUrl,
+        }),
+      ),
+    )
+
+    vi.stubGlobal('fetch', fetchMock)
+
+    const client = createBackendReportsClient({ baseUrl: '/api' })
+    const detail = await client.getReport('report-1002')
+
+    expect(detail?.bottleRecords[0]?.imageUrl).toBe(imageUrl)
+  })
+
   it('returns null for unknown reports and clears gs:// image urls for detail payloads', async () => {
     const fetchMock = vi
       .fn()

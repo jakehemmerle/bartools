@@ -7,17 +7,19 @@ import type {
   BackstockCreateLoadResult,
   BackstockCreateRouteData,
 } from '../../../lib/reports/route-loaders'
+import { useReportsClient } from '../../../lib/reports/provider'
 import { BackstockReportCreateScreen } from '../components/backstock-report-create-screen'
 import { useBackstockReportCreateState } from './use-backstock-report-create-state'
 
 export function BackstockReportCreateRoute() {
   const { loadResult } = useLoaderData() as BackstockCreateRouteData
+  const client = useReportsClient()
 
   return (
     <Suspense
       fallback={
         <DelayedFallback>
-          <BackstockRouteLoadingScreen />
+          <BackstockRouteLoadingScreen photoStartDisabled={client.readiness.backendEnabled} />
         </DelayedFallback>
       }
     >
@@ -54,15 +56,20 @@ function ResolvedBackstockReportCreateRoute({
   return <BackstockReportCreateScreen {...backstockState} locationOptions={loadResult.locations} />
 }
 
-function BackstockRouteLoadingScreen() {
+function BackstockRouteLoadingScreen({
+  photoStartDisabled,
+}: {
+  photoStartDisabled: boolean
+}) {
   return (
     <div className="bt-backstock-screen">
       <section className="bt-backstock-header">
         <p className="bt-backstock-header__eyebrow">Reports</p>
         <h1 className="bt-page-title">New Backstock Report</h1>
         <p className="bt-reports-header__support">
-          Count sealed bottles in one backstock location. Start from photos or enter line
-          items directly.
+          {photoStartDisabled
+            ? 'Count sealed bottles in one backstock location. Enter line items directly for now.'
+            : 'Count sealed bottles in one backstock location. Start from photos or enter line items directly.'}
         </p>
       </section>
 

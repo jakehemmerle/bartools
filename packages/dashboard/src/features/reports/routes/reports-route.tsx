@@ -14,6 +14,7 @@ export function ReportsRoute() {
   const { loadResult } = useLoaderData() as ReportsListRouteData
   const client = useReportsClient()
   const revalidator = useRevalidator()
+  const showBackstockAction = !client.readiness.backendEnabled
 
   useEffect(() => {
     if (!client.readiness.backendEnabled) {
@@ -39,12 +40,17 @@ export function ReportsRoute() {
     <Suspense
       fallback={
         <DelayedFallback>
-          <ReportsListScreen reports={null} />
+          <ReportsListScreen reports={null} showBackstockAction={showBackstockAction} />
         </DelayedFallback>
       }
     >
       <Await resolve={loadResult}>
-        {(result: ReportsListLoadResult) => <ResolvedReportsRoute loadResult={result} />}
+        {(result: ReportsListLoadResult) => (
+          <ResolvedReportsRoute
+            loadResult={result}
+            showBackstockAction={showBackstockAction}
+          />
+        )}
       </Await>
     </Suspense>
   )
@@ -52,8 +58,10 @@ export function ReportsRoute() {
 
 function ResolvedReportsRoute({
   loadResult,
+  showBackstockAction,
 }: {
   loadResult: ReportsListLoadResult
+  showBackstockAction: boolean
 }) {
   const revalidator = useRevalidator()
 
@@ -67,9 +75,15 @@ function ResolvedReportsRoute({
           })
         }}
         reports={null}
+        showBackstockAction={showBackstockAction}
       />
     )
   }
 
-  return <ReportsListScreen reports={loadResult.reports} />
+  return (
+    <ReportsListScreen
+      reports={loadResult.reports}
+      showBackstockAction={showBackstockAction}
+    />
+  )
 }

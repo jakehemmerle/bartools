@@ -338,6 +338,10 @@ function extractApiError(payload: unknown, status: number) {
 }
 
 function resolveApiUrl(baseUrl: string, path: string) {
+  if (isAbsoluteUrl(path)) {
+    return path
+  }
+
   if (isAbsoluteUrl(baseUrl)) {
     return new URL(path, `${baseUrl}/`).toString()
   }

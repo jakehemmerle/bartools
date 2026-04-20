@@ -1,10 +1,15 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createFixtureReportsClient } from '../../../lib/reports/client'
 import { renderAppRoutes } from '../../../test/test-utils'
 
+beforeEach(() => {
+  vi.useRealTimers()
+})
+
 afterEach(() => {
+  vi.useRealTimers()
   window.sessionStorage.clear()
   vi.unstubAllEnvs()
 })
@@ -245,16 +250,19 @@ describe('Live backstock route guards', () => {
     })
 
     expect(await screen.findByRole('combobox', { name: 'Backstock Location' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Enter Manually' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(screen.getByRole('button', { name: 'Photo-Assisted' })).toBeDisabled()
+    expect(screen.queryByLabelText('Choose Photos')).not.toBeInTheDocument()
     expect(
       screen.getByText(
         'Live backstock creation is still waiting on backend support. Photo-generated drafts and final submission are not connected yet.',
       ),
     ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Generation Pending' })).toBeDisabled()
     expect(
-      screen.getByText(
-        'Photo-generated drafts need backend uploads and grouping before they can run here.',
-      ),
+      screen.getByText('Photo-assisted draft generation is not available yet in live mode.'),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Submission Pending' })).toBeDisabled()
     expect(

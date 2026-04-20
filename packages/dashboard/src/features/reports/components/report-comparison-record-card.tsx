@@ -22,22 +22,17 @@ export function ComparisonRecordCard({
       className={`bt-comparison-card${variant === 'hero' ? ' bt-comparison-card--hero' : ''}`}
       tone="low"
     >
-      {variant === 'hero' ? (
-        <div className="bt-comparison-card__hero-header">
-          <div className="bt-comparison-card__hero-media">
-            <RecordMedia record={record} />
-          </div>
-          <div className="bt-comparison-card__record-title">
-            <h2>{record.bottleName}</h2>
-            <p>{record.category ?? 'Uncategorized'}</p>
-          </div>
+      <div
+        className={`bt-comparison-card__header${variant === 'hero' ? ' bt-comparison-card__hero-header' : ''}`}
+      >
+        <div className="bt-comparison-card__media">
+          <RecordMedia record={record} />
         </div>
-      ) : (
         <div className="bt-comparison-card__record-title">
           <h2>{record.bottleName}</h2>
           <p>{record.category ?? 'Uncategorized'}</p>
         </div>
-      )}
+      </div>
       <div className="bt-comparison-grid">
         <ComparisonPanel
           fields={comparisonFields}

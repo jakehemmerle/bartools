@@ -86,6 +86,7 @@ export function BackstockReportCreateScreen({
   const selectedLocation =
     locationOptions.find((location) => location.id === locationId) ?? null
   const hasValidDraft = draftSummary.skuCount > 0
+  const photoStartDisabled = !!photoGenerationBlockedMessage
   const workflowStage = buildBackstockWorkflowStage({
     hasValidDraft,
     locationId,
@@ -106,7 +107,11 @@ export function BackstockReportCreateScreen({
   return (
     <div className="bt-backstock-screen">
       <BackstockReportHeader
-        support="Count sealed bottles in one backstock location. Start from photos or enter line items directly."
+        support={
+          photoStartDisabled
+            ? 'Count sealed bottles in one backstock location. Enter line items directly for now.'
+            : 'Count sealed bottles in one backstock location. Start from photos or enter line items directly.'
+        }
         title="New Backstock Report"
       />
       <BackstockWorkflowRail
@@ -132,6 +137,7 @@ export function BackstockReportCreateScreen({
         locationOptions={locationOptions}
         onLocationChange={onLocationChange}
         onStartModeChange={onStartModeChange}
+        photoStartDisabled={photoStartDisabled}
         startMode={startMode}
       />
       {startMode === 'photo' ? (
@@ -189,10 +195,10 @@ function BackstockWorkflowRail({
     {
       label: 'Stage Photos',
       support:
-        startMode === 'photo'
-          ? photoGenerationBlocked
-            ? 'Queue shelf photos while draft generation is pending backend work.'
-            : 'Queue shelf photos for the first draft.'
+        photoGenerationBlocked
+          ? 'Photo-assisted draft generation is not available yet in live mode.'
+          : startMode === 'photo'
+          ? 'Queue shelf photos for the first draft.'
           : 'Optional when you want to start manually.',
     },
     { label: 'Review Draft', support: 'Fix grouped counts and product matches.' },
@@ -296,12 +302,14 @@ function BackstockSetupCard({
   locationOptions,
   onLocationChange,
   onStartModeChange,
+  photoStartDisabled,
   startMode,
 }: {
   locationId: string
   locationOptions: ReadonlyArray<BackstockLocationOption>
   onLocationChange: (locationId: string) => void
   onStartModeChange: (mode: BackstockStartMode) => void
+  photoStartDisabled: boolean
   startMode: BackstockStartMode
 }) {
   return (
@@ -310,7 +318,9 @@ function BackstockSetupCard({
         <div>
           <h2 className="bt-backstock-card__title">Report Setup</h2>
           <p className="bt-backstock-card__support">
-            Choose one location and the fastest starting point for this count.
+            {photoStartDisabled
+              ? 'Choose one location. Manual entry is available now.'
+              : 'Choose one location and the fastest starting point for this count.'}
           </p>
         </div>
       </div>
@@ -335,10 +345,11 @@ function BackstockSetupCard({
             <button
               aria-pressed={startMode === 'photo'}
               className={`bt-backstock-mode-toggle__option${startMode === 'photo' ? ' is-active' : ''}`}
+              disabled={photoStartDisabled}
               onClick={() => onStartModeChange('photo')}
               type="button"
             >
-              Use Photos
+              Photo-Assisted
             </button>
             <button
               aria-pressed={startMode === 'manual'}

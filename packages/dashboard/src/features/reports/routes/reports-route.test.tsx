@@ -30,6 +30,7 @@ describe('Reports workbench routes: baseline states', () => {
     expect(await screen.findByRole('heading', { name: 'Campari' })).toBeInTheDocument()
     expect(await screen.findByText('Original Model Output')).toBeInTheDocument()
     expect(screen.getByText('Final Corrected Values')).toBeInTheDocument()
+    expect(screen.getByText('Image unavailable')).toBeInTheDocument()
   })
 
   it('shows corrected comparison labels on reviewed reports', async () => {
@@ -37,6 +38,7 @@ describe('Reports workbench routes: baseline states', () => {
       initialEntries: ['/reports/report-1003'],
     })
 
+    expect(await screen.findByRole('img', { name: /Tito's Handmade Vodka/i })).toBeInTheDocument()
     expect((await screen.findAllByText('Original Model Output')).length).toBeGreaterThan(0)
     expect(screen.getAllByText('Final Corrected Values').length).toBeGreaterThan(0)
   })
@@ -139,6 +141,47 @@ describe('Reports workbench routes: resilience', () => {
     })
 
     expect(listReports).toHaveBeenCalledTimes(2)
+  })
+
+  it('hides the backstock shortcut on the live reports list', async () => {
+    const baseClient = createFixtureReportsClient()
+
+    renderAppRoutes({
+      initialEntries: ['/reports'],
+      reportsClient: {
+        ...baseClient,
+        readiness: {
+          backendEnabled: true,
+          blockedReason: 'none' as const,
+          message: 'Live reports are connected.',
+        },
+      },
+    })
+
+    expect(await screen.findByText('created')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'New Backstock Report' })).not.toBeInTheDocument()
+  })
+
+  it('hides the backstock shortcut on the live empty state', async () => {
+    const baseClient = createFixtureReportsClient()
+
+    renderAppRoutes({
+      initialEntries: ['/reports'],
+      reportsClient: {
+        ...baseClient,
+        async listReports() {
+          return []
+        },
+        readiness: {
+          backendEnabled: true,
+          blockedReason: 'none' as const,
+          message: 'Live reports are connected.',
+        },
+      },
+    })
+
+    expect(await screen.findByText('No reports found. Recent reports will appear here once they are available.')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'New Backstock Report' })).not.toBeInTheDocument()
   })
 
   it('shows a calm report unavailable state when report detail fails to load', async () => {
