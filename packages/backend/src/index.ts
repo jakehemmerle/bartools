@@ -28,6 +28,27 @@ import { uuid } from './validators';
 
 const app = new Hono();
 
+function isClientDisconnectError(error: unknown) {
+  if (!(error instanceof Error) || !('code' in error || 'errno' in error)) {
+    return false;
+  }
+
+  const coded = error as { code?: unknown; errno?: unknown };
+  return coded.code === 'EPIPE' || coded.code === 'ERR_STREAM_DESTROYED' || coded.errno === -32;
+}
+
+process.on('uncaughtException', (error) => {
+  if (isClientDisconnectError(error)) {
+    console.warn('Ignored client disconnect after stream write', {
+      code: (error as { code?: unknown }).code,
+      errno: (error as { errno?: unknown }).errno,
+    });
+    return;
+  }
+
+  throw error;
+});
+
 function jsonError(status: 400 | 404 | 409 | 500, message: string) {
   return new HTTPException(status, {
     message,
@@ -220,13 +241,6 @@ app.get('/reports/:reportId/stream', async (c) => {
     let aborted = false;
     let lastStaleSweepAt = 0;
 
-    const isClientDisconnect = (error: unknown) =>
-      error instanceof Error &&
-      ('code' in error || 'errno' in error) &&
-      ((error as { code?: unknown }).code === 'EPIPE' ||
-        (error as { code?: unknown }).code === 'ERR_STREAM_DESTROYED' ||
-        (error as { errno?: unknown }).errno === -32);
-
     const writeSSE = async (event: {
       event: string;
       data: string;
@@ -236,7 +250,7 @@ app.get('/reports/:reportId/stream', async (c) => {
         await stream.writeSSE(event);
         return true;
       } catch (error) {
-        if (isClientDisconnect(error)) {
+        if (isClientDisconnectError(error)) {
           aborted = true;
           return false;
         }
@@ -289,6 +303,10 @@ app.get('/reports/:reportId/stream', async (c) => {
       }
 
       for (const record of state.records) {
+        if (record.status === 'pending') {
+          continue;
+        }
+
         const signature = JSON.stringify({
           status: record.status,
           bottleName: record.bottleName,
