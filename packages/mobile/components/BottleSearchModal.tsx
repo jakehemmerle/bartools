@@ -9,9 +9,10 @@ interface BottleSearchModalProps {
   visible: boolean
   onDismiss: () => void
   onSelect: (bottle: BottleSearchResult) => void
+  onAddAsNew?: (name: string) => void
 }
 
-export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<BottleSearchModalProps>) {
+export function BottleSearchModal({ visible, onDismiss, onSelect, onAddAsNew }: Readonly<BottleSearchModalProps>) {
   const theme = useTheme()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<BottleSearchResult[]>([])
@@ -140,6 +141,24 @@ export function BottleSearchModal({ visible, onDismiss, onSelect }: Readonly<Bot
               }
             />
 
+            {/* Add as new — only when caller opted in and user has typed a name */}
+            {onAddAsNew && query.trim().length > 0 ? (
+              <Pressable
+                style={({ pressed }) => [
+                  styles.addAsNewRow,
+                  { borderColor: theme.tertiary, opacity: pressed ? 0.7 : 1 },
+                ]}
+                onPress={() => onAddAsNew(query.trim())}
+                accessibilityRole="button"
+                accessibilityLabel={`Add ${query.trim()} as new bottle`}
+              >
+                <MaterialCommunityIcons name="plus-circle-outline" size={18} color={theme.tertiary} />
+                <Text style={[styles.addAsNewText, { color: theme.tertiary }]} numberOfLines={1}>
+                  Add &ldquo;{query.trim()}&rdquo; as new bottle
+                </Text>
+              </Pressable>
+            ) : null}
+
             {/* Dismiss */}
             <Pressable onPress={onDismiss} style={styles.dismissButton}>
               <Text style={[styles.dismissText, { color: theme.outline }]}>Cancel</Text>
@@ -185,4 +204,20 @@ const styles = StyleSheet.create({
   emptyText: { fontFamily: 'Manrope', fontSize: 13, textAlign: 'center', paddingVertical: 24 },
   dismissButton: { paddingVertical: 12, alignItems: 'center' },
   dismissText: { fontFamily: 'SpaceGrotesk', fontSize: 12, fontWeight: '500', textTransform: 'uppercase', letterSpacing: 3 },
+  addAsNewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderStyle: 'dashed',
+  },
+  addAsNewText: {
+    fontFamily: 'Manrope',
+    fontSize: 14,
+    fontWeight: '600',
+    flex: 1,
+  },
 })
