@@ -32,8 +32,14 @@ export async function enqueueReportInference(input: {
   }
 
   queueMicrotask(() => {
-    void processQueuedInferenceJob(payload);
+    void processQueuedInferenceJob(payload).catch((error) => {
+      console.error('Unhandled local inference queue failure', {
+        jobId: payload.jobId,
+        reportId: payload.reportId,
+        scanId: payload.scanId,
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
+    });
   });
   return { mode: 'local' as const };
 }
-

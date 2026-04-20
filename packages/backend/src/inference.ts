@@ -1,4 +1,4 @@
-import { and, count, eq } from 'drizzle-orm';
+import { and, count, eq, inArray, isNull, lt, or } from 'drizzle-orm';
 import {
   client as langsmithClient,
   DEFAULT_MODEL,
@@ -37,6 +37,14 @@ type PromptCache = {
 
 let promptCache: PromptCache | null = null;
 const promptCacheTtlMs = 30_000;
+const DEFAULT_STALE_INFERENCE_JOB_MS = 10 * 60_000;
+
+function getStaleInferenceJobMs(): number {
+  const raw = process.env.INFERENCE_JOB_STALE_AFTER_MS;
+  if (!raw) return DEFAULT_STALE_INFERENCE_JOB_MS;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_STALE_INFERENCE_JOB_MS;
+}
 
 async function resolvePrompt() {
   const promptName = process.env.BACKEND_LANGSMITH_PROMPT_NAME ?? PROMPT_NAME;
@@ -117,11 +125,128 @@ async function failJob(args: {
   await syncReportProgress(args.reportId);
 }
 
+export async function failStaleInferenceJobs(opts: {
+  reportId?: string;
+  now?: Date;
+  staleAfterMs?: number;
+  limit?: number;
+} = {}) {
+  const now = opts.now ?? new Date();
+  const staleAfterMs = opts.staleAfterMs ?? getStaleInferenceJobMs();
+  const cutoff = new Date(now.getTime() - staleAfterMs);
+  const limit = opts.limit ?? 10;
+
+  const staleJobs = await db
+    .select({
+      id: inferenceJobs.id,
+      reportId: inferenceJobs.reportId,
+      scanId: inferenceJobs.scanId,
+      status: inferenceJobs.status,
+    })
+    .from(inferenceJobs)
+    .where(
+      and(
+        opts.reportId ? eq(inferenceJobs.reportId, opts.reportId) : undefined,
+        or(
+          and(eq(inferenceJobs.status, 'running'), lt(inferenceJobs.startedAt, cutoff)),
+          and(eq(inferenceJobs.status, 'queued'), lt(inferenceJobs.queuedAt, cutoff))
+        )
+      )
+    )
+    .limit(limit);
+
+  const failed: Array<{ jobId: string; reportId: string; scanId: string }> = [];
+
+  for (const job of staleJobs) {
+    const errorMessage = `Inference job timed out after ${staleAfterMs}ms without completing.`;
+    const failedAt = now;
+
+    const transitioned = await db.transaction(async (tx) => {
+      const [updated] = await tx
+        .update(inferenceJobs)
+        .set({
+          status: 'failed',
+          lastErrorCode: 'worker_timeout',
+          lastErrorMessage: errorMessage,
+          finishedAt: failedAt,
+          updatedAt: failedAt,
+        })
+        .where(and(eq(inferenceJobs.id, job.id), inArray(inferenceJobs.status, ['queued', 'running'])))
+        .returning({ id: inferenceJobs.id });
+
+      if (!updated) {
+        return false;
+      }
+
+      await tx
+        .update(inferenceAttempts)
+        .set({
+          errorCode: 'worker_timeout',
+          errorMessage,
+          finishedAt: failedAt,
+        })
+        .where(and(eq(inferenceAttempts.jobId, job.id), isNull(inferenceAttempts.finishedAt)));
+
+      await tx
+        .update(reportRecords)
+        .set({
+          status: 'failed',
+          errorCode: 'worker_timeout',
+          errorMessage,
+          updatedAt: failedAt,
+        })
+        .where(eq(reportRecords.scanId, job.scanId));
+
+      return true;
+    });
+
+    if (transitioned) {
+      failed.push({ jobId: job.id, reportId: job.reportId, scanId: job.scanId });
+      await syncReportProgress(job.reportId);
+    }
+  }
+
+  return failed;
+}
+
 export async function processQueuedInferenceJob(
   payloadInput: z.input<typeof reportScanInferencePayloadSchema>
 ) {
   const payload = reportScanInferencePayloadSchema.parse(payloadInput);
 
+  try {
+    await processQueuedInferenceJobUnchecked(payload);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Unhandled report inference failure', {
+      jobId: payload.jobId,
+      reportId: payload.reportId,
+      scanId: payload.scanId,
+      errorMessage,
+    });
+
+    try {
+      await failJob({
+        jobId: payload.jobId,
+        reportId: payload.reportId,
+        scanId: payload.scanId,
+        errorCode: 'worker_error',
+        errorMessage,
+      });
+    } catch (failError) {
+      console.error('Failed to persist report inference failure', {
+        jobId: payload.jobId,
+        reportId: payload.reportId,
+        scanId: payload.scanId,
+        errorMessage: failError instanceof Error ? failError.message : String(failError),
+      });
+    }
+  }
+}
+
+async function processQueuedInferenceJobUnchecked(
+  payload: z.infer<typeof reportScanInferencePayloadSchema>
+) {
   const [job] = await db
     .select({
       id: inferenceJobs.id,
@@ -251,6 +376,7 @@ export async function processQueuedInferenceJob(
     imageBytes,
     systemPrompt: rendered.systemPrompt,
     userPrompt: rendered.userPrompt,
+    validNames: possibleBottleNames,
   });
   const latencyMs = Date.now() - inferenceStartedAt;
 

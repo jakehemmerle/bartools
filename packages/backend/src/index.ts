@@ -21,6 +21,7 @@ import {
   upsertInventoryItem,
 } from './inventory-queries';
 import { manualBottleSchema } from './bottle-queries';
+import { failStaleInferenceJobs } from './inference';
 import { enqueueReportInference } from './queue';
 import { getBucketName, getTtlSeconds, presignGet, presignPut } from './storage';
 import { uuid } from './validators';
@@ -216,6 +217,32 @@ app.get('/reports/:reportId/stream', async (c) => {
     const imageUrls = new Map<string, { url: string; expiresAtMs: number }>();
     const imageTtlSeconds = getTtlSeconds();
     let lastReportStatus = '';
+    let aborted = false;
+    let lastStaleSweepAt = 0;
+
+    const isClientDisconnect = (error: unknown) =>
+      error instanceof Error &&
+      ('code' in error || 'errno' in error) &&
+      ((error as { code?: unknown }).code === 'EPIPE' ||
+        (error as { code?: unknown }).code === 'ERR_STREAM_DESTROYED' ||
+        (error as { errno?: unknown }).errno === -32);
+
+    const writeSSE = async (event: {
+      event: string;
+      data: string;
+    }): Promise<boolean> => {
+      if (aborted) return false;
+      try {
+        await stream.writeSSE(event);
+        return true;
+      } catch (error) {
+        if (isClientDisconnect(error)) {
+          aborted = true;
+          return false;
+        }
+        throw error;
+      }
+    };
 
     const imageUrlForObject = async (object: string | null) => {
       if (!object) return '';
@@ -229,14 +256,22 @@ app.get('/reports/:reportId/stream', async (c) => {
     };
 
     stream.onAbort(() => {
+      aborted = true;
       seen.clear();
       imageUrls.clear();
     });
 
     while (true) {
+      if (aborted) break;
+
+      if (Date.now() - lastStaleSweepAt > 15_000) {
+        await failStaleInferenceJobs({ reportId, limit: 25 });
+        lastStaleSweepAt = Date.now();
+      }
+
       const state = await getReportStreamState(reportId, imageUrlForObject);
       if (!state) {
-        await stream.writeSSE({
+        await writeSSE({
           event: 'report.error',
           data: JSON.stringify({ reportId, error: 'report_not_found' }),
         });
@@ -245,10 +280,11 @@ app.get('/reports/:reportId/stream', async (c) => {
 
       const reportSignature = `${state.report.status}:${state.report.processedCount}:${state.report.photoCount}`;
       if (reportSignature !== lastReportStatus) {
-        await stream.writeSSE({
+        const sent = await writeSSE({
           event: 'report.progress',
           data: JSON.stringify(state.report),
         });
+        if (!sent) break;
         lastReportStatus = reportSignature;
       }
 
@@ -263,7 +299,7 @@ app.get('/reports/:reportId/stream', async (c) => {
           continue;
         }
 
-        await stream.writeSSE({
+        const sent = await writeSSE({
           event:
             record.status === 'failed'
               ? 'record.failed'
@@ -272,11 +308,13 @@ app.get('/reports/:reportId/stream', async (c) => {
                 : 'record.inferred',
           data: JSON.stringify(record),
         });
+        if (!sent) break;
         seen.set(record.id, signature);
       }
+      if (aborted) break;
 
       if (state.report.status === 'unreviewed' || state.report.status === 'reviewed') {
-        await stream.writeSSE({
+        await writeSSE({
           event: 'report.ready_for_review',
           data: JSON.stringify(state.report),
         });

@@ -4,13 +4,19 @@ import { mock } from 'bun:test';
 // stack instead of the in-test mock. Requires CLAUDE_CODE_OAUTH_TOKEN (or
 // ANTHROPIC_API_KEY) and LANGSMITH_API_KEY to be set in the environment.
 const LIVE = process.env.TESTING_E2E_CALLS_REAL_VLM_API === 'true';
+let lastRunBottleInferenceInput: { validNames?: readonly string[] } | null = null;
+let nextInferenceError: Error | null = null;
 
 // Mock must be set up before any import that loads @bartools/inference.
 if (!LIVE) {
   mock.module('@bartools/inference', () => ({
     DEFAULT_MODEL: 'claude-sonnet-4-6',
     PROMPT_NAME: 'verbena-simple-eval',
-    runBottleInference: async () => ({ name: 'Hakushu 12Y', volume: 0.7 }),
+    runBottleInference: async (input: { validNames?: readonly string[] }) => {
+      lastRunBottleInferenceInput = input;
+      if (nextInferenceError) throw nextInferenceError;
+      return { name: 'Hakushu 12Y', volume: 0.7 };
+    },
     pullPromptTemplate: async () => ({ invoke: async () => ({}) }),
     renderPromptTemplate: async () => ({
       systemPrompt: 'test-system-prompt',
@@ -27,7 +33,7 @@ import { copyFile, mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { eq } from 'drizzle-orm';
 import { db } from './db';
-import { processQueuedInferenceJob } from './inference';
+import { failStaleInferenceJobs, processQueuedInferenceJob } from './inference';
 import {
   bottles,
   inferenceAttempts,
@@ -54,6 +60,9 @@ describe('processQueuedInferenceJob', () => {
   });
 
   beforeEach(async () => {
+    lastRunBottleInferenceInput = null;
+    nextInferenceError = null;
+
     // test-setup truncates everything except bottles; reseed the catalog.
     await seedBottles();
 
@@ -100,6 +109,7 @@ describe('processQueuedInferenceJob', () => {
     } else {
       expect(attempt.rawResponse).toEqual({ name: 'Hakushu 12Y', volume: 0.7 });
       expect(attempt.promptResolvedVersion).toBe('test-hash');
+      expect(lastRunBottleInferenceInput?.validNames).toContain('Hakushu 12Y');
     }
 
     const [scan] = await db
@@ -168,4 +178,107 @@ describe('processQueuedInferenceJob', () => {
     expect(report.photoCount).toBe(1);
     expect(report.processedCount).toBe(1);
   }, LIVE ? 180_000 : 10_000);
+
+  test('marks the job failed when inference throws unexpectedly', async () => {
+    if (LIVE) return;
+    nextInferenceError = new Error('simulated worker crash');
+
+    await processQueuedInferenceJob({
+      jobId: testIds.jobId,
+      reportId: testIds.reportId,
+      scanId: testIds.scanId,
+    });
+
+    const [job] = await db
+      .select()
+      .from(inferenceJobs)
+      .where(eq(inferenceJobs.id, testIds.jobId));
+    expect(job.status).toBe('failed');
+    expect(job.lastErrorCode).toBe('worker_error');
+    expect(job.lastErrorMessage).toBe('simulated worker crash');
+    expect(job.finishedAt).not.toBeNull();
+
+    const [record] = await db
+      .select()
+      .from(reportRecords)
+      .where(eq(reportRecords.scanId, testIds.scanId));
+    expect(record.status).toBe('failed');
+    expect(record.errorCode).toBe('worker_error');
+    expect(record.errorMessage).toBe('simulated worker crash');
+
+    const [report] = await db
+      .select()
+      .from(reports)
+      .where(eq(reports.id, testIds.reportId));
+    expect(report.status).toBe('unreviewed');
+    expect(report.processedCount).toBe(1);
+  });
+
+  test('marks stale running jobs failed so reports can leave processing', async () => {
+    const now = new Date('2026-04-20T12:00:00.000Z');
+    const oldStartedAt = new Date(now.getTime() - 11 * 60_000);
+    await db
+      .update(inferenceJobs)
+      .set({ status: 'running', startedAt: oldStartedAt, updatedAt: oldStartedAt })
+      .where(eq(inferenceJobs.id, testIds.jobId));
+
+    const failed = await failStaleInferenceJobs({
+      reportId: testIds.reportId,
+      now,
+      staleAfterMs: 10 * 60_000,
+    });
+
+    expect(failed).toEqual([
+      {
+        jobId: testIds.jobId,
+        reportId: testIds.reportId,
+        scanId: testIds.scanId,
+      },
+    ]);
+
+    const [job] = await db
+      .select()
+      .from(inferenceJobs)
+      .where(eq(inferenceJobs.id, testIds.jobId));
+    expect(job.status).toBe('failed');
+    expect(job.lastErrorCode).toBe('worker_timeout');
+    expect(job.finishedAt?.toISOString()).toBe(now.toISOString());
+
+    const [record] = await db
+      .select()
+      .from(reportRecords)
+      .where(eq(reportRecords.scanId, testIds.scanId));
+    expect(record.status).toBe('failed');
+    expect(record.errorCode).toBe('worker_timeout');
+
+    const [report] = await db
+      .select()
+      .from(reports)
+      .where(eq(reports.id, testIds.reportId));
+    expect(report.status).toBe('unreviewed');
+    expect(report.processedCount).toBe(1);
+  });
+
+  test('does not fail fresh running jobs', async () => {
+    const now = new Date('2026-04-20T12:00:00.000Z');
+    const freshStartedAt = new Date(now.getTime() - 30_000);
+    await db
+      .update(inferenceJobs)
+      .set({ status: 'running', startedAt: freshStartedAt, updatedAt: freshStartedAt })
+      .where(eq(inferenceJobs.id, testIds.jobId));
+
+    const failed = await failStaleInferenceJobs({
+      reportId: testIds.reportId,
+      now,
+      staleAfterMs: 10 * 60_000,
+    });
+
+    expect(failed).toEqual([]);
+
+    const [job] = await db
+      .select()
+      .from(inferenceJobs)
+      .where(eq(inferenceJobs.id, testIds.jobId));
+    expect(job.status).toBe('running');
+  });
 });

@@ -18,7 +18,7 @@ import {
 
 const REPO_ROOT = resolve(import.meta.dir, '../../..');
 const ASSETS_DIR = resolve(REPO_ROOT, 'assets');
-const CATALOG_CSV = resolve(ASSETS_DIR, 'verbena_simple.csv');
+const CATALOG_CSV = resolve(REPO_ROOT, 'packages/inference/assets/verbena_simple.csv');
 const SOLUTIONS_JSONL = resolve(ASSETS_DIR, 'verbena_simple_predictions.jsonl');
 
 // Deterministic demo identity — pinned UUIDs so the mobile app's hardcoded
