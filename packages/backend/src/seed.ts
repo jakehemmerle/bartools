@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import { and, eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { parseCsvRows } from '@bartools/inference';
 import { db, pool } from './db';
 import {
@@ -20,7 +20,17 @@ const ASSETS_DIR = resolve(REPO_ROOT, 'assets');
 const CATALOG_CSV = resolve(ASSETS_DIR, 'verbena_simple.csv');
 const SOLUTIONS_JSONL = resolve(ASSETS_DIR, 'verbena_simple_predictions.jsonl');
 
-// Deterministic demo identity — used for idempotent lookup on re-run.
+// Deterministic demo identity — pinned UUIDs so the mobile app's hardcoded
+// DEFAULT_USER_ID / DEFAULT_VENUE_ID in packages/mobile/lib/config.ts resolve
+// to real rows. Keep these two files in sync until mobile picks its tenant
+// from auth context.
+export const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
+export const DEMO_VENUE_ID = '00000000-0000-0000-0000-000000000002';
+export const DEMO_LOCATION_IDS = {
+  'Main Bar': '00000000-0000-0000-0000-000000000011',
+  Backstock: '00000000-0000-0000-0000-000000000012',
+} as const;
+
 const DEMO_EMAIL = 'demo@bartools.test';
 const DEMO_VENUE = 'Demo Bar';
 const DEMO_LOCATIONS = ['Main Bar', 'Backstock'] as const;
@@ -118,62 +128,91 @@ export async function seedDemoTenant(): Promise<{ ids: DemoIds; created: number 
 
   const [userRow] = await db
     .insert(users)
-    .values({ email: DEMO_EMAIL, displayName: 'Demo User' })
-    .onConflictDoNothing({ target: users.email })
+    .values({ id: DEMO_USER_ID, email: DEMO_EMAIL, displayName: 'Demo User' })
+    .onConflictDoNothing({ target: users.id })
     .returning({ id: users.id });
-
-  const userId =
-    userRow?.id ??
-    (
-      await db.select({ id: users.id }).from(users).where(eq(users.email, DEMO_EMAIL))
-    )[0].id;
   if (userRow) created++;
 
-  // Venues have no natural unique key; look up by name, insert if absent.
-  const existingVenue = await db
-    .select({ id: venues.id })
-    .from(venues)
-    .where(eq(venues.name, DEMO_VENUE))
-    .limit(1);
-
-  let venueId: string;
-  if (existingVenue.length > 0) {
-    venueId = existingVenue[0].id;
-  } else {
-    const [venueRow] = await db
-      .insert(venues)
-      .values({ name: DEMO_VENUE })
-      .returning({ id: venues.id });
-    venueId = venueRow.id;
-    created++;
-  }
+  const [venueRow] = await db
+    .insert(venues)
+    .values({ id: DEMO_VENUE_ID, name: DEMO_VENUE })
+    .onConflictDoNothing({ target: venues.id })
+    .returning({ id: venues.id });
+  if (venueRow) created++;
 
   await db
     .insert(venueMembers)
-    .values({ venueId, userId })
+    .values({ venueId: DEMO_VENUE_ID, userId: DEMO_USER_ID })
     .onConflictDoNothing();
 
   const locationIds = {} as DemoIds['locationIds'];
   for (const name of DEMO_LOCATIONS) {
     const [locRow] = await db
       .insert(locations)
-      .values({ venueId, name })
-      .onConflictDoNothing({ target: [locations.venueId, locations.name] })
+      .values({ id: DEMO_LOCATION_IDS[name], venueId: DEMO_VENUE_ID, name })
+      .onConflictDoNothing({ target: locations.id })
       .returning({ id: locations.id });
 
-    if (locRow) {
-      locationIds[name] = locRow.id;
-      created++;
-    } else {
-      const [existing] = await db
-        .select({ id: locations.id })
-        .from(locations)
-        .where(and(eq(locations.venueId, venueId), eq(locations.name, name)));
-      locationIds[name] = existing.id;
-    }
+    if (locRow) created++;
+    locationIds[name] = DEMO_LOCATION_IDS[name];
   }
 
-  return { ids: { userId, venueId, locationIds }, created };
+  return {
+    ids: { userId: DEMO_USER_ID, venueId: DEMO_VENUE_ID, locationIds },
+    created,
+  };
+}
+
+// Wipe the demo tenant's rows (user/venue + all dependent scans/reports/etc.)
+// Scoped by the demo email and venue name so it safely runs on any environment
+// that has the demo tenant, regardless of what UUIDs it happens to hold.
+export async function resetDemoTenant(): Promise<{ deleted: number }> {
+  let deleted = 0;
+
+  const demoUsers = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, DEMO_EMAIL));
+  const demoVenues = await db
+    .select({ id: venues.id })
+    .from(venues)
+    .where(eq(venues.name, DEMO_VENUE));
+
+  const userIds = demoUsers.map((u) => u.id);
+  const venueIds = demoVenues.map((v) => v.id);
+
+  // scans → reports FK has no cascade, so delete scans before reports.
+  // report_records + inference_jobs cascade off scans; inference_attempts
+  // cascade off inference_jobs; inventory cascades off locations.
+  if (venueIds.length > 0) {
+    const scanDel = await db
+      .delete(scans)
+      .where(inArray(scans.venueId, venueIds))
+      .returning({ id: scans.id });
+    deleted += scanDel.length;
+
+    const reportDel = await db
+      .delete(reports)
+      .where(inArray(reports.venueId, venueIds))
+      .returning({ id: reports.id });
+    deleted += reportDel.length;
+
+    const venueDel = await db
+      .delete(venues)
+      .where(inArray(venues.id, venueIds))
+      .returning({ id: venues.id });
+    deleted += venueDel.length;
+  }
+
+  if (userIds.length > 0) {
+    const userDel = await db
+      .delete(users)
+      .where(inArray(users.id, userIds))
+      .returning({ id: users.id });
+    deleted += userDel.length;
+  }
+
+  return { deleted };
 }
 
 // ─── Sample reports ─────────────────────────────────────────────────
@@ -336,6 +375,13 @@ export async function seedSampleReports(
 // ─── CLI ────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
+  const shouldReset = process.argv.includes('--reset');
+
+  if (shouldReset) {
+    const { deleted } = await resetDemoTenant();
+    console.log(`demo tenant reset: -${deleted} rows`);
+  }
+
   const bottleResult = await seedBottles();
   console.log(
     `bottles: +${bottleResult.inserted} inserted (${bottleResult.total - bottleResult.inserted} skipped)`
